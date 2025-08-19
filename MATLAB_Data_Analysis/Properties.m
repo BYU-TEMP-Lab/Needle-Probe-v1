@@ -389,6 +389,63 @@ if strcmp(sample,'Ar')% Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Cond
     alpha_sample = alpha_Argon;
 end
 
+%Helium%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% From NIST (https://wtt-pro.nist.gov/wtt-pro/index.html?cmp=argon#helium;4g;1g;7g;3g;5g;55;Hg;8g;8b;8f;8a;Kf;Ka;Lf;La;Nf;Na;Ea;Fa;Qg;Tg;Re;Rf;Ra;Ye;Mf;Ma;Xf;Wa;eb;ef;ea;eg;mg;ja;jg;jf;nf;na;ng/c;0,0/a;3,5/jaR;4,481/)
+if strcmp(sample,'He')% Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
+    if T >= 273 && T < 1273
+        k_Helium = -5.8075E-8*T^2 + 3.6769E-4*T + 5.1863E-2;
+    end
+
+    k_sample = k_Helium;
+
+        % Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
+        bias_k_sample = 0;
+        uncertainty_k_sample = 1.13136E-08;
+        
+        if MC == 1
+            k_sample = MonteCarloProp(uncertainty_k_sample,bias_k_sample,k_sample);
+        end
+
+    % Heat Capacity- Helium: Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]
+    if T >= 273 && T < 1273
+        cp_Helium = 20.786;
+    end
+
+    cp_sample = cp_Helium;
+
+        % Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
+        bias_cp_sample = 0;
+        uncertainty_cp_sample = 0.001398182;
+        
+        if MC == 1
+            cp_sample = MonteCarloProp(uncertainty_cp_sample,bias_cp_sample,cp_sample);
+        end
+
+    % Density- Helium: Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]
+    if T >= 273 && T < 1273
+        rho_Helium = 4.9229E+01*T^(-9.9974E-01);
+    % elseif T >= 293 && T < 373
+    %     rho_Helium = 1.77;
+    % elseif T >= 373
+    %     rho_Helium = 1.77; %because I don't know what it would be. placeholder for now
+    end
+
+    rho_sample = rho_Helium;
+
+        %Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]        
+        bias_rho_sample = 0;
+        uncertainty_rho_sample = 1.67591E-05;
+        
+        if MC == 1
+            rho_sample = MonteCarloProp(uncertainty_rho_sample,bias_rho_sample,rho_sample);
+        end
+
+    % Thermal Diffusivity- Helium
+    alpha_Helium = k_Helium/(rho_Helium*cp_Helium);
+
+    alpha_sample = alpha_Helium;
+end
+
 %Toluene%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %VALID UP TO 360k (87C)
 % Thermal Conductivity- Toluene
@@ -1305,8 +1362,8 @@ if strcmp(sample,'KCl-ZnCl')
 end
 
 %Scatter and Index of Refraction%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-index_of_refraction = 1.00028217; % Argon: T. Larsén. Beitrag zur Dispersion der Edelgase. Z. Physik 88, 389-394 (1934)
-%index_of_refraction = 1.462 - (1.4e-4)*T; %Solar salts (citation needed)
+%index_of_refraction = 1.00028217; % Argon: T. Larsén. Beitrag zur Dispersion der Edelgase. Z. Physik 88, 389-394 (1934)
+index_of_refraction = 1.462 - (1.4e-4)*T; %Solar salts (citation needed)
 scatter = 0;
 
 %Crucible Properties%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1419,6 +1476,52 @@ if strcmp(crucible,'Nickel200')
     % Total Radiative Emissivity- Nickel200
     if T < 473
         emissivity_Nickel200 = 0.35;   
+        bias_emissivity_Nickel200 = 0;
+        uncertainty_emissivity_Nickel200 = 0.05; %CHECK THIS
+    elseif T >=473 && T < 1144
+        %     emissivity_Nickel200 = 0.0007*T + 0.0316; %Why are we not using this
+        %     equation?
+        emissivity_Nickel200 = 0.86; %max emissivity of Nickel Oxide found in literature
+        bias_emissivity_Nickel200 = 0;
+        uncertainty_emissivity_Nickel200 = 0.05; %CHECK THIS
+    elseif T >= 1144
+        emissivity_Nickel200 = 0.86;
+        bias_emissivity_Nickel200 = 0;
+        uncertainty_emissivity_Nickel200 = 0.05; %CHECK THIS
+    end
+
+    if MC == 1
+        emissivity_Nickel200 = MonteCarloProp(uncertainty_emissivity_Nickel200,bias_emissivity_Nickel200,emissivity_Nickel200);
+    end
+
+    emissivity_crucible = emissivity_Nickel200;
+
+end
+
+%Boron Nitride %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Low thermal expansion coefficient
+%VALID UP TO 1273K (1000C)
+% Thermal Conductivity- BN
+if strcmp(crucible,'BN')
+    
+    k_crucible = 50;
+    %k_sheath = k_crucible;
+
+    %Density and Heat Capacity aren't need right now, but might be later.
+    % Density- Nickel200
+    rho_BN = 2000; 
+
+    % Heat Capacity- BN
+    cp_BN = 1468; %https://precision-ceramics.com/wp-content/uploads/2018/07/PC-USA-Boron-Nitride-Grade-HP-Revised-7-5-2018.pdf
+
+    % Thermal Diffusivity- BN
+
+    alpha_crucible = k_crucible/(rho_BN*cp_BN);
+    %alpha_sheath = alpha_crucible
+
+    % Total Radiative Emissivity- Nickel200
+    if T < 473
+        emissivity_Nickel200 = 0.35;   emiss
         bias_emissivity_Nickel200 = 0;
         uncertainty_emissivity_Nickel200 = 0.05; %CHECK THIS
     elseif T >=473 && T < 1144
@@ -1574,7 +1677,7 @@ if MC == 1
 end
 
 %Contact Resistance Insulation to Sheath%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-RthInsShth = 0.4;              % 0-30s
+RthInsShth = 0;%0.4;              % 0-30s
 
 
 bias_RthInsShth = 0;
@@ -1609,78 +1712,6 @@ end
 % Fitted CALIBRATRATION Properties %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Flux_decay = 0; % Decay constant
 decay_point = 0; % Decay point
- 
-
-% % % % Really good! 1-9-25
-% % % % % k_eff_wire = 57.62221495;
-% % % % % alpha_eff_wire = 8.89804E-06;
-% % % % % k_insulation = 0.451363089;
-% % % % % RthInsShth = 0.598239264;
-% % % % % k_sheath = 102.9065954;
-% % % % % alpha_sheath = 1.83879E-05;
-% % % % % % emissivity_probe = 1.205136793;
-% % % % % % emissivity_crucible = 1.045841826;
-% % % % % rwires = 0.000475918;
-% % % % % rsheath_inner = 0.000734046;
-% % % % % rsheath = 0.001042299;
-% % % % % rsample = 0.002245927;
-
-% Really good! 1-9-25
-% k_eff_wire = 3.27578E-01*(T-273.15) + -2.87603E+01;
-% alpha_eff_wire = 8.05101E-08*(T-273.15) + -1.31077E-05;
-% k_insulation = 3.12407E-03*(T-273.15) + -2.13745E-01;
-% RthInsShth = -4.90425E-03*(T-273.15) + 2.27267E+00;
-% k_sheath = -2.84612E-02*(T-273.15) + 1.03515E+01;
-% alpha_sheath = -5.10286E-09*(T-273.15) + 1.85309E-06;
-% % emissivity_probe = 1.205136793;
-% % emissivity_crucible = 1.045841826;
-% rwires = 0.000479878;
-% rsheath_inner = 0.000724697;
-% rsheath = 0.001046545;
-% rsample = 0.002282701;
-
-% Calibration values: 1st column is calibrated value, second is bias, third is uncertainty
-% From initial MC
-% cal.k_eff_wire = [4.4495E+01, 0, 3.273366967];
-% cal.alpha_eff_wire = [6.3725E-06, 0, 5.15068E-07];
-% cal.k_insulation = [3.9523E-01, 0, 0.032284057];
-% cal.RthInsShth = [4.8670E-01, 0, 0.053583928];
-% cal.k_sheath = [9.5858E+01, 0, 14.35581911];
-% cal.alpha_sheath = [1.7181E-05, 0, 2.20411E-06];
-% cal.emissivity_probe = [8.9272E-01, 0, 0.081162636];
-% cal.emissivity_crucible = [6.7060E-01, 0, 0.069493736];
-% cal.rwires = [4.8110E-04, 0, 2.02529E-05];
-% cal.rsheath_inner = [7.4063E-04, 0, 3.15338E-05];
-% cal.rsheath = [1.0478E-03, 0, 2.55872E-05];
-% cal.rsample = [2.2241E-03, 0, 0.000103171];
-
-% % From MC of 2 samples of each temp
-% cal.k_eff_wire = [4.4495E+01, 0, 3.937528497];
-% cal.alpha_eff_wire = [6.3725E-06, 0, 4.46645E-06];
-% cal.k_insulation = [3.9523E-01, 0, 0.035712088];
-% cal.RthInsShth = [4.8670E-01, 0, 0.056163815];
-% cal.k_sheath = [9.5858E+01, 0, 9.603553586];
-% cal.alpha_sheath = [1.7181E-05, 0, 4.71508E-06];
-% cal.emissivity_probe = [8.9272E-01, 0, 0.141055869];
-% cal.emissivity_crucible = [6.7060E-01, 0, 0.093548769];
-% cal.rwires = [4.8110E-04, 0, 2.38288E-05];
-% cal.rsheath_inner = [7.4063E-04, 0, 2.78963E-05];
-% cal.rsheath = [1.0478E-03, 0, 2.5857E-05];
-% cal.rsample = [2.2241E-03, 0, 0.000126113];
-
-% % From MC of all Argon data
-% cal.k_eff_wire = [44.83184871, 0, 4.364430452];
-% cal.alpha_eff_wire = [6.56217E-06, 0, 4.44449E-06];
-% cal.k_insulation = [0.3833085, 0, 0.069164132];
-% cal.RthInsShth = [0.500066305, 0, 0.062775729];
-% cal.k_sheath = [96.36535545, 0, 15.38185151];
-% cal.alpha_sheath = [1.74369E-05, 0, 4.88921E-06];
-% cal.emissivity_probe = [0.865944386, 0, 0.197333771];
-% cal.emissivity_crucible = [0.671821998, 0, 0.126807432];
-% cal.rwires = [0.000486525, 0, 3.23568E-05];
-% cal.rsheath_inner = [0.000736535, 0, 3.58085E-05];
-% cal.rsheath = [0.001050344, 0, 3.4313E-05];
-% cal.rsample = [0.002201326, 0, 0.000410645];
 
 % From MC-approx.formula of all Argon data
 cal.k_eff_wire = [44.83184871, 0, 6.372063996];
@@ -1691,11 +1722,10 @@ cal.k_sheath = [96.36535545, 0, 21.56055776];
 cal.alpha_sheath = [1.74369E-05, 0, 6.15064E-06];
 cal.emissivity_probe = [0.865944386, 0, 0.26058421];
 cal.emissivity_crucible = [0.671821998, 0, 0.186969856];
-cal.rwires = [0.000486525, 0, 7.36942E-05];         % Radius up to outside of heating wires
+cal.rwires = [0.000486525, 0, 7.36942E-05];
 cal.rsheath_inner = [0.000736535, 0, 0.000106993];
 cal.rsheath = [0.001050344, 0, 7.96631E-05];
 cal.rsample = [0.002201326, 0, 0.000586233];
-
 
 % Get the list of field names
 calpars = fieldnames(cal);
@@ -1707,8 +1737,7 @@ if MC == 1
     end    
 end
 
-
-
+% Calibration values used
 par_vector(1) = cal.k_eff_wire(1); 
 par_vector(2) = cal.alpha_eff_wire(1); 
 par_vector(3) = cal.k_insulation(1);   %k_probe; 0.200935; %
@@ -1741,6 +1770,38 @@ par_vector(29) = Current;
 par_vector(30) = Flux_decay;
 par_vector(31) = decay_point;
 
+% No calibration values
+% par_vector(1) = k_eff_wire; 
+% par_vector(2) = alpha_eff_wire; 
+% par_vector(3) = k_insulation;   %k_probe; 0.200935; %
+% par_vector(4) = alpha_insulation;   %k_probe; 2.44524E-8; %
+% par_vector(5) = RthInsShth; %6.9944; %
+% par_vector(6) = k_sheath; %26.6127; %
+% par_vector(7) = alpha_sheath; %1.0028E-4; %
+% par_vector(8) = k_sample;
+% par_vector(9) = alpha_sample;
+% par_vector(10) = k_crucible;
+% par_vector(11) = alpha_crucible;
+% par_vector(12) = emissivity_probe;
+% par_vector(13) = emissivity_crucible;
+% par_vector(14) = index_of_refraction;
+% par_vector(15) = scatter;
+% par_vector(16) = Temp;
+% par_vector(17) = Voltage;
+% par_vector(18) = Resistance;
+% par_vector(19) = rwires;
+% par_vector(20) = rsheath_inner;
+% par_vector(21) = rsheath;
+% par_vector(22) = rsample;
+% par_vector(23) = rcrucible;
+% par_vector(24) = L;
+% par_vector(25) = h_convection;
+% par_vector(26) = rho_sample;
+% par_vector(27) = cp_sample;
+% par_vector(28) = rho_sample*cp_sample;
+% par_vector(29) = Current;
+% par_vector(30) = Flux_decay;
+% par_vector(31) = decay_point;
 
 par_names(1,1) = "K Eff. Wires";          
 par_names(2,1) = "Alpha Eff. Wires";          

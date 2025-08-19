@@ -8,7 +8,7 @@ off = 0;
 
 global_fitting = off; % Uses fminsearch when off
 
-Full_Analysis = off; %Makes the code do an entire analysis with Monte Carlo and chi2 error analyses and plots the results.
+Full_Analysis = on; %Makes the code do an entire analysis with Monte Carlo and chi2 error analyses and plots the results.
 
 MC = off; %Turns on Monte Carlo error analysis.
 
@@ -52,24 +52,24 @@ currentFOLDER = pwd;
 today = sprintf('%02d%02d%02d', month(datetime), day(datetime), mod(year(datetime), 100));
 % today = char(todaysdate);
 
-%crucible = 'Nickel200';
+crucible = 'Nickel200';
 
-m=menu('Crucible Material:',...
-    'Steel316',...
-    'Nickel 200',...
-    'Inconel 625',...
-    'end');
-
-if m == 1
-    crucible = 'Steel316';
-elseif m == 2
-    crucible = 'Nickel200';
-elseif m == 3
-    crucible = 'Inconel625';
-else
-    disp('No crucible selected, program terminated')
-    return
-end
+% % m=menu('Crucible Material:',...
+% %     'Steel316',...
+% %     'Nickel 200',...
+% %     'Inconel 625',...
+% %     'end');
+% % 
+% % if m == 1
+% %     crucible = 'Steel316';
+% % elseif m == 2
+% %     crucible = 'Nickel200';
+% % elseif m == 3
+% %     crucible = 'Inconel625';
+% % else
+% %     disp('No crucible selected, program terminated')
+% %     return
+% % end
 
 % sample = 'Ar';
 
@@ -125,34 +125,58 @@ elseif m == 15
 elseif m == 16
     sample = 'Ar';
 else
-    disp('Cannot run data without a sample. Program terminated.')
+    disp('Yeah, we cant run data without a sample. At least GUESS what the sample is. Program terminated.')
     return
 end
 
 choices = {
-    "1 - K Eff. Wires",           
-    "2 - Alpha Eff. Wires",           
-    "3 - K Insulation",           
-    "4 - Alpha Insulation",  
-    "5 - Rth Insulation-Sheath",  
-    "6 - K Sheath",           
-    "7 - Alpha Sheath", 
-    "8 - K Sample",
-    "9 - Alpha Sample",
-    "10 - K Crucible",
-    "11 - Alpha Crucible",
-    "12 - Emissivity Probe",
-    "13 - Emissivity Crucible",
-    "19 - Rwires",
-    "20 - Rsheath Inner",
-    "21 - Rsheath",
-    "22 - Rsample",
-    "23 - Rcrucible",
-    "26 - Rho Sample",
-    "27 - Cp Sample",
-    "28 - Rhosample * Cp Sample",
-    "29 - Current",
-    "30 - Flux Decay Factor"
+    "1", ... % k_eff_wire
+    "2", ... % alpha_eff_wire
+    "3", ... % k_insulation
+    "4", ... % alpha_insulation
+    "5", ... % RthInsShth
+    "6", ... % k_sheath
+    "7", ... % alpha_sheath
+    "8", ... % k_sample
+    "9", ... % alpha_sample
+    "10", ... % k_crucible
+    "11", ... % alpha_crucible
+    "12", ... % emissivity_probe
+    "13", ... % emissivity_crucible
+    "19", ... % rwires
+    "20", ... % rsheath_inner
+    "21", ... % rsheath
+    "22", ... % rsample
+    "23", ... % rcrucible
+    "26", ... % rho_sample
+    "27", ... % cp_sample
+    "28", ... % rho_sample*cp_sample
+    "29", ... % Current
+    "30", % Flux_decay
+    % "kew", ...
+    % "aew", ...
+    % "kIns", ...
+    % "AlphIns", ...
+    % "RInsShth", ...
+    % "kShth", ...
+    % "AlphShth", ...
+    % "kSamp", ...
+    % "alphSamp", ...
+    % "kCruc", ...
+    % "aCruc",...
+    % "eProbe", ...
+    % "eCruc", ...
+    % "rw", ...
+    % "rShIn", ...
+    % "rshth", ...
+    % "rSamp", ...
+    % "rCruc", ...
+    % "rhoSamp", ...
+    % "cpSamp", ...
+    % "RhoCpSamp", ...
+    % "Decay", ...
+
+
 };
 
 % Display the dialog to select multiple values
@@ -237,6 +261,66 @@ if ok
             case 23
                 SolveListNames = [SolveListNames, "30"];
                 SolveList = [SolveList, 30];
+            % case 1
+            %     SolveListNames = [SolveListNames, "kIns"];
+            %     SolveList = [SolveList, 3];
+            % case 2
+            %     SolveListNames = [SolveListNames, "AlphIns"];
+            %     SolveList = [SolveList, 4];
+            % case 3
+            %     SolveListNames = [SolveListNames, "RInsShth"];
+            %     SolveList = [SolveList, 5];
+            % case 4
+            %     SolveListNames = [SolveListNames, "kSamp"];
+            %     SolveList = [SolveList, 8];
+            % case 5
+            %     SolveListNames = [SolveListNames, "cpSamp"];
+            %     SolveList = [SolveList, 27];
+            % case 6
+            %     SolveListNames = [SolveListNames, "alphSamp"];
+            %     SolveList = [SolveList, 9];
+            % case 7
+            %     SolveListNames = [SolveListNames, "RhoCpSamp"];
+            %     SolveList = [SolveList, 28];
+            % case 8
+            %     SolveListNames = [SolveListNames, "kShth"];
+            %     SolveList = [SolveList, 6];
+            % case 9
+            %     SolveListNames = [SolveListNames, "AlphShth"];
+            %     SolveList = [SolveList, 7];
+            % case 10
+            %     SolveListNames = [SolveListNames, "Decay"];
+            %     SolveList = [SolveList, 30];
+            % case 11
+            %     SolveListNames = [SolveListNames, "DecayPoint"];
+            %     SolveList = [SolveList, 31];
+            % case 12
+            %     SolveListNames = [SolveListNames, "eProbe"];
+            %     SolveList = [SolveList, 12];
+            % case 13
+            %     SolveListNames = [SolveListNames, "eCruc"];
+            %     SolveList = [SolveList, 13];
+            % case 14
+            %     SolveListNames = [SolveListNames, "rShIn"];
+            %     SolveList = [SolveList, 20];
+            % case 15
+            %     SolveListNames = [SolveListNames, "rSamp"];
+            %     SolveList = [SolveList, 22];
+            % case 16
+            %     SolveListNames = [SolveListNames, "kCruc"];
+            %     SolveList = [SolveList, 10];
+            % case 17
+            %     SolveListNames = [SolveListNames, "rw"];
+            %     SolveList = [SolveList, 19];
+            % case 18
+            %     SolveListNames = [SolveListNames, "rshth"];
+            %     SolveList = [SolveList, 21];
+            % case 19
+            %     SolveListNames = [SolveListNames, "kew"];
+            %     SolveList = [SolveList, 1];
+            % case 20
+            %     SolveListNames = [SolveListNames, "aew"];
+            %     SolveList = [SolveList, 2];
         end
     end
 end
@@ -265,7 +349,7 @@ cd(currentFOLDER);
 
 ExcelFile = [run_name '.xlsx'];
 
-Results = zeros(numel(names)-2, 9);
+Results = zeros(numel(names)-2, 7); %Results = zeros(numel(names)-2, 7);
 
 for n = 3:numel(names)
     [~, fn] = fileparts(names(n).name);
@@ -286,7 +370,7 @@ for n = 3:numel(names)
     % not present will assume voltage to wire is 85% of voltage from power
     % supply
     if M(2) >= 3
-        Voltage=median(signal(:,3));    %Changed to median from mean to avoid influence of outliers
+        Voltage=median(signal(:,3));    %NOT Changed to median from mean to avoid influence of outliers
         VoltageSTD=std(signal(:,3));
     else
         Voltage = .85*str2double(fn(end));%.921*str2double(fn(end));
@@ -302,7 +386,7 @@ for n = 3:numel(names)
             end
         end
         % corrects mA to A
-        Current = median(signal(:,4),'omitnan')/1000;   %Changed to median from mean to avoid influence of outliers
+        Current = median(signal(:,4),'omitnan')/1000;   %NOT Changed to median from mean to avoid influence of outliers
         CurrentSTD = std(signal(:,4),'omitnan')/1000;
         IV = on;
         if isnan(Current)
@@ -319,9 +403,9 @@ for n = 3:numel(names)
     fprintf('number of data points: %i \n',ndata);
     aveTemp = aveTemp_vector(n-2);
 
-    for run = 1:MC_iteration_limit
+    for brian = 1:MC_iteration_limit
         if Full_Analysis == on
-            if run == 1
+            if brian == 1
                 MC = 0;
             else
                 MC = 1;
@@ -356,7 +440,7 @@ for n = 3:numel(names)
             parlabel(b) = par_names(Ifitpar(b),1) + ' [' + par_names(Ifitpar(b),2) + ']';
         end
 
-          fitresult_run = zeros(MC_iteration_limit,npar);
+          fitresult_brian = zeros(MC_iteration_limit,npar);
 
 %         Para1start = par_vector(Ifitpar(1));
 %         Para2start = par_vector(Ifitpar(2));
@@ -515,12 +599,12 @@ for n = 3:numel(names)
         end
         fprintf('\n');
 
-        fitresult_run(run,:) = fitresult;
+        fitresult_brian(brian,:) = fitresult;
 
         cd(runfolder)
 
         MCruninfo = fopen([run_name, ' MC_runinfo.txt'],'at');
-        fprintf(MCruninfo, '%s', num2str(run));
+        fprintf(MCruninfo, '%s', num2str(brian));
         fprintf(MCruninfo,'\t');
         fprintf(MCruninfo, '%s', [num2str(aveTemp), '°C ', num2str(Voltage),'V ']);
         fprintf(MCruninfo,'\t');
@@ -667,17 +751,17 @@ for n = 3:numel(names)
         end
 
         for h=1:npar
-            one_std(h) = std(fitresult_run(:,h));
+            one_std(h) = std(fitresult_brian(:,h));
             two_std(h) = 2*one_std(h);
-            meanfit(h) = mean(fitresult_run(:,h));
+            meanfit(h) = mean(fitresult_brian(:,h));
 
             cd(mcplotsfolder)
 
             figure
-            histogram(fitresult_run(:,1),'FaceColor',[0, 0.5, 0]);
+            histogram(fitresult_brian(:,1),'FaceColor',[0, 0.5, 0]);
             xlabel(parlabel(h));
             ylabel('Quantity');
-            title("Monte Carlo Simulation" + " (" + num2str(run) + " Iterations) " + par_names(Ifitpar(h),1)+ " " + sample + " " + num2str(aveTemp) + "°C");
+            title("Monte Carlo Simulation" + " (" + num2str(brian) + " Iterations) " + par_names(Ifitpar(h),1)+ " " + sample + " " + num2str(aveTemp) + "°C");
 
             xline(meanfit(h)+one_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%one standard deviation above
             text(meanfit(h)+one_std(h)+.001,145,'1\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
@@ -695,8 +779,8 @@ for n = 3:numel(names)
 
             Points = 1:1:MC_iteration_limit;
             standard_deviationk = zeros(MC_iteration_limit,1);
-            for N = 1:1:length(fitresult_run(:,1)) %number of points used in standard deviation
-                standard_deviation(N,h) = 2*std(fitresult_run(1:N,1));
+            for N = 1:1:length(fitresult_brian(:,1)) %number of points used in standard deviation
+                standard_deviation(N,h) = 2*std(fitresult_brian(1:N,1));
             end
 
             figure
@@ -810,10 +894,26 @@ for n = 3:numel(names)
         end
         cd(currentFOLDER)
     end
+    
+%     if Full_Analysis == 1
+%         totalerror = sqrt(Chi2_error^2 + two_std(1).^2);
+%         Results(n-2,:) = [aveTemp Voltage fitresult(1) mean(1) Chi2_error two_std(1) totalerror fitresult(2) two_std(2)];
+%     end
 
     if Full_Analysis == 1
         totalerror = sqrt(Chi2_error^2 + two_std(1).^2);
-        Results(n-2,:) = [aveTemp Voltage fitresult(1) mean(1) Chi2_error two_std(1) totalerror fitresult(2) two_std(2)];
+        
+        % Build the result row
+        base_data = [aveTemp, Voltage, fitresult(1), mean(1), Chi2_error, two_std(1), totalerror];
+        
+        % Add additional fitresult/two_std pairs if they exist
+        extra_data = [];
+        for i = 2:length(fitresult)
+            extra_data = [extra_data, fitresult(i), two_std(i)];
+        end
+    
+       % Store the full row in Results
+        Results(n-2,:) = [base_data, extra_data];
     end
 end
 
@@ -836,24 +936,24 @@ if Full_Analysis == 1
                 k(j) = Results(n,3);
                 kMC(j) = Results(n,4);
                 u_k(j) = Results(n,7);
-                par2(j) = Results(n,8);
-                u_par2(j) = Results(n,9);
+                %par2(j) = Results(n,8);
+                %u_par2(j) = Results(n,9);
                 j = j+1;
             end
         end
         ave_temp(m) = mean(Temp);
         ave_k(m) = mean(k);
         ave_kMC(m) = mean(kMC);
-        ave_par2(m) = mean(par2);
+        %ave_par2(m) = mean(par2);
         Uncertaintyk(m) = sqrt(sum(u_k.^2)/length(u_k));
-        Uncertainty2(m) = sqrt(sum(u_par2.^2)/length(u_par2));
+        %Uncertainty2(m) = sqrt(sum(u_par2.^2)/length(u_par2));
         m = m+1;
         Temp = [];
         k = [];
-        par2 = [];
+        %par2 = [];
         kMC = [];
         u_k = [];
-        u_par2 = [];
+        %u_par2 = [];
         x = 0;
         while x == 0
             if an(ii) ~= 0
@@ -935,22 +1035,22 @@ if Full_Analysis == 1
     %    saveas(gcf,[sample, ' KMC Results.png'])
     %    hold off
 
-    figure
-    hold on
-    errorbar(ave_temp,ave_par2,Uncertainty2,'s')
-    title('Specific Heat')
-    if strcmp(sample,'Water') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
-        plot(ave_temp, cp_Water)
-    elseif strcmp(sample,'FliNaK') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
-        plot(ave_temp, cp_Water)
-    elseif strcmp(sample,'KNO3') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
-        plot(ave_temp, cp_Water)
-    end
-    xlabel('Temperature [°C]')
-    ylabel('Specific Heat [J/(Kg*K)]')
-    saveas(gcf,[sample, 'Cp Results.fig'])
-    saveas(gcf,[sample, 'Cp Results.png']) %saveas(gcf,[sample, Para2 , 'Results.png'])
-    hold off
+%     figure
+%     hold on
+%     errorbar(ave_temp,ave_par2,Uncertainty2,'s')
+%     title('Specific Heat')
+%     if strcmp(sample,'Water') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
+%         plot(ave_temp, cp_Water)
+%     elseif strcmp(sample,'FliNaK') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
+%         plot(ave_temp, cp_Water)
+%     elseif strcmp(sample,'KNO3') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
+%         plot(ave_temp, cp_Water)
+%     end
+%     xlabel('Temperature [°C]')
+%     ylabel('Specific Heat [J/(Kg*K)]')
+%     saveas(gcf,[sample, 'Cp Results.fig'])
+%     saveas(gcf,[sample, 'Cp Results.png']) %saveas(gcf,[sample, Para2 , 'Results.png'])
+%     hold off
 
     ResultsText = fopen([run_name, ' Final Results.txt'],'at');
     for q = 1:length(ave_temp)
@@ -962,17 +1062,17 @@ if Full_Analysis == 1
         fprintf(ResultsText,'\t');
         fprintf(ResultsText, '%f%%', 100*Uncertaintyk(q)/ave_k(q));
         fprintf(ResultsText,'\t');
-        if cp == 0
-            fprintf(ResultsText, '%e', ave_par2(q));
-            fprintf(ResultsText,'\t');
-            fprintf(ResultsText, '%e', Uncertainty2(q));
-        else
-            fprintf(ResultsText, '%f', ave_par2(q));
-            fprintf(ResultsText,'\t');
-            fprintf(ResultsText, '%f', Uncertainty2(q));
-        end
-        fprintf(ResultsText,'\t');
-        fprintf(ResultsText, '%f%% \n', 100*Uncertainty2(q)/ave_par2(q));
+%         if cp == 0
+%             fprintf(ResultsText, '%e', ave_par2(q));
+%             fprintf(ResultsText,'\t');
+%             fprintf(ResultsText, '%e', Uncertainty2(q));
+%         else
+%             fprintf(ResultsText, '%f', ave_par2(q));
+%             fprintf(ResultsText,'\t');
+%             fprintf(ResultsText, '%f', Uncertainty2(q));
+%         end
+%         fprintf(ResultsText,'\t');
+%         fprintf(ResultsText, '%f%% \n', 100*Uncertainty2(q)/ave_par2(q));
     end
     fclose(ResultsText);
     cd(currentFOLDER)

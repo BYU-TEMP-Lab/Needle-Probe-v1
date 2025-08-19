@@ -213,7 +213,7 @@ f = f((original_start_index):end);
         %Area_sample = 2*pi*rsample*L;
         Boltzmann = 5.670374419e-8;
 
-        R_dimensional = ((1/emissivity1)+((1/emissivity2)-1)*(rsheath/rsample)+scatter*(rsample-rsheath)*(rsheath/rsample))/(4*(index^2)*Boltzmann*(T0^3)*Area_sheath); %multiply scatter by rsheath/rsample?
+        R_dimensional = 0;%((1/emissivity1)+((1/emissivity2)-1)*(rsheath/rsample)+scatter*(rsample-rsheath)*(rsheath/rsample))/(4*(index^2)*Boltzmann*(T0^3)*Area_sheath); %multiply scatter by rsheath/rsample?
 
 
         q1=rwires.*sqrt(s/alpha_eff_wire);          %alpha1 for effective wire layer (material 1)
@@ -260,10 +260,10 @@ f = f((original_start_index):end);
         C4_c=2.*pi.*ksample.*L.*q41.*q42.*((besseli(1,q42).*besselk(1,q41))-(besseli(1,q41).*besselk(1,q42)));
         D4_c=q41.*((besseli(0,q42).*besselk(1,q41))+(besseli(1,q41).*besselk(0,q42)));
         %non-symmetric, so A4 (planar) becomes D4 (cylindrical)
-        A4 = (B4_c + R_dimensional.*A4_c)./(B4_c + R_dimensional);
-        B4 = (B4_c.*R_dimensional)./(B4_c + R_dimensional);
-        C4 = (A4_c + D4_c + R_dimensional.*C4_c - 2)./(B4_c + R_dimensional);
-        D4 = (B4_c + R_dimensional.*D4_c)./(B4_c + R_dimensional); 
+        A4 = A4_c;%(B4_c + R_dimensional.*A4_c)./(B4_c + R_dimensional);
+        B4 = B4_c;%(B4_c.*R_dimensional)./(B4_c + R_dimensional);
+        C4 = C4_c;%(A4_c + D4_c + R_dimensional.*C4_c - 2)./(B4_c + R_dimensional);
+        D4 = D4_c;%(B4_c + R_dimensional.*D4_c)./(B4_c + R_dimensional); 
         
         % Crucible
         A5=q51.*((besseli(0,q51).*besselk(1,q52))+(besseli(1,q52).*besselk(0,q51)));

@@ -2,7 +2,7 @@ function [plotfolder, datafolderUSE, aveTemp_vector] = ExtractData(run_name,raw_
 
 currentfolder = pwd;
 starttime = timewindow(1);%set to 0 to start at the beginning. Make sure values are a multiple of the sampling period. 
-timesend = timewindow(2); % Comment
+timesend = timewindow(2);
 
 % PUT RAW DATA INTO USABLE FORMAT
 prompt = 'Select a raw data folder ';
