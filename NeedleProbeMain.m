@@ -143,6 +143,10 @@ for i = 1:length(files)
         'SwarmSize', 50, ...   % This is analogous to 'PopulationSize' in genetic algorithms
         'PlotFcn', @pswplotbestf);
 
+    lsqoptions = optimoptions('lsqnonlin', ...
+    'Algorithm','levenberg-marquardt', ...
+    'Display','iter')
+
     % Define the number of variables
     nvars = length(SolvVal);
     
