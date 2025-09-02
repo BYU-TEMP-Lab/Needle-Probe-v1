@@ -1,3 +1,4 @@
+from GUI import SimulationOptions
 import os
 import glob
 import numpy as np
@@ -8,84 +9,57 @@ from datetime import datetime
 from multiprocessing import Pool, cpu_count
 import subprocess
 import time
+import materials, probes, optim
+import warnings
 
 # ------------------- User Inputs ------------------- #
-testfolder = input("Enter experimental data folder path: ")
-crucible = "Nickel200"
-sample = "Argon"
-SolvNam = ["Thermal Contact Resistance Sheath-Insulation", "cp Insulation"]
-SolvVal = np.array([0.0052, 780], dtype=float)
-SolvConstraintsLower = np.array([0.0001, 300])
-SolvConstraintsUpper = np.array([2, 1400])
-cross_section = "radial"
-timewindow = (0, 4)
-MC = 0
-Chi2_tolerance = 1e-4
+def main():
+    crucibles_dict = {
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "4": 4
+    }
+    sample_dict = {name: obj for name, obj in vars(materials).items() if isinstance(obj, materials.Material)}
+    probe_dict = {name: obj for  name, obj in vars(probes).items() if isinstance(obj, probes.Probe)}
+    decision_var_dict = optim.decision_var_options
+    cross_section_options = ["Axial", "Radial"]
+    user_input = SimulationOptions(crucibles_dict, probe_dict, sample_dict, decision_var_dict, cross_section_options, test_duration_override=None, plotfrequency=5, Chi2_tolerance=1e-4)
+    user_input.mainloop()   # waits here until window closes
 
-output_folder = os.path.join(testfolder, 'Output')
-os.makedirs(output_folder, exist_ok=True)
+    if getattr(user_input, "user_cancelled", True):
+        print("User closed the window without proceeding. Exiting program.")
+    else:
+        selections = user_input.get_selections()
+        print(selections)  # or use selections in your simulation
 
-# % Thermal Contact Resistance - Alumina-Sheath - initial value
-# thcr_AlNi = 0.0052;
+# testfolder = input("Enter experimental data folder path: ")
+# crucible = "Nickel200"
+# sample = "Argon"
+# SolvNam = ["Thermal Contact Resistance Sheath-Insulation", "cp Insulation"]
+# SolvVal = np.array([0.0052, 780], dtype=float)
+# SolvConstraintsLower = np.array([0.0001, 300])
+# SolvConstraintsUpper = np.array([2, 1400])
+# cross_section = "radial"
+# timewindow = (0, 4)
+# MC = 0
+# Chi2_tolerance = 1e-4
 
-# % Thermal Contact Resistance - Sheath-Sample - initial value
-# thcr_NiSample = 0.001;
+# output_folder = os.path.join(testfolder, 'Output')
+# os.makedirs(output_folder, exist_ok=True)
 
 # %Scatter and Index of Refraction%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # index_of_refraction = 1.462 - (1.4e-4)*T; %Solar salts (citation needed)
 # scatter = 0;
+# % Convection coefficient
+# h_convection = 10; %just an assumption
+
+# TCR_sheath_sample = thermal_contact_resistance(Sheath.name, "Generic Sample", ignore_warnings=True)
+
 
 # ------------------- Helper Functions ------------------- #
 
-def extract_data(filename, timewindow):
-    """
-    Reads experimental data CSV and returns filtered temperature-time array,
-    average power applied, and ambient temperature in Kelvin.
-    """
-    start_time, end_time = timewindow
 
-    # Read CSV or txt file (assuming comma-separated)
-    df = pd.read_csv(filename, header=None)  # Adjust header if needed
-    data = df.values
-    N_rows, N_cols = data.shape
-
-    time = data[:, 0]
-    temp = data[:, 1]
-
-    Voltage = data[:, 2] if N_cols >= 3 else np.zeros_like(time)
-    Current = data[:, 3] if N_cols >= 4 else np.zeros_like(time)
-
-    # Find first applied voltage > 0.8 to establish t=0
-    Vcheck = np.argmax(Voltage > 0.8)
-
-    # Ambient temperature
-    avgT_amb = np.mean(temp[:Vcheck-1])
-    temp = temp[Vcheck:] - avgT_amb
-    avgT_amb = avgT_amb + 273.15  # Convert to Kelvin
-
-    # Adjust time
-    time = time[Vcheck:] - time[Vcheck]
-
-    # Align Voltage and Current with temp data
-    Voltage = Voltage[Vcheck-1:len(temp)+Vcheck-1]
-    if N_cols >= 4:
-        Current = Current[Vcheck-1:len(temp)+Vcheck-1]
-        avgCurrent = np.nanmean(Current) / 1000  # Convert mA to A
-    else:
-        avgCurrent = 0
-
-    # Average power
-    avgVoltage = np.mean(Voltage)
-    avgQ = avgVoltage * avgCurrent
-
-    # Construct experimental temp vs time array
-    expTvt = np.column_stack((time, temp))
-
-    # Apply time window filter
-    mask = (expTvt[:, 0] >= start_time) & (expTvt[:, 0] <= end_time)
-    expTvt = expTvt[mask, :]
-
-    return expTvt, avgQ, avgT_amb
 
 def properties(crucible, sample, T_amb, MC):
     par_names = ["Thermal Contact Resistance Sheath-Insulation", "cp Insulation"]
@@ -254,18 +228,25 @@ def process_file(filepath):
     print(f"Solved parameters: {SolvedParam}, Chi2: {Chi2_val}")
     return avgT_amb, Chi2_val, SolvedParam
 
-# ------------------- Main Parallel Loop ------------------- #
-files = [f for f in glob.glob(os.path.join(testfolder, '*')) if os.path.isfile(f)]
-with Pool(processes=min(cpu_count(), len(files))) as pool:
-    results = pool.map(process_file, files)
+# # ------------------- Main Parallel Loop ------------------- #
+# files = [f for f in glob.glob(os.path.join(testfolder, '*')) if os.path.isfile(f)]
+# with Pool(processes=min(cpu_count(), len(files))) as pool:
+#     results = pool.map(process_file, files)
 
-# Store results in DataFrame
-ParamTemp = pd.DataFrame(columns=['T_amb_K', 'Chi_Squared'] + SolvNam)
-for res in results:
-    avgT_amb, Chi2_val, SolvedParam = res
-    row = [avgT_amb, Chi2_val] + list(SolvedParam)
-    ParamTemp.loc[len(ParamTemp)] = row
+# # Store results in DataFrame
+# ParamTemp = pd.DataFrame(columns=['T_amb_K', 'Chi_Squared'] + SolvNam)
+# for res in results:
+#     avgT_amb, Chi2_val, SolvedParam = res
+#     row = [avgT_amb, Chi2_val] + list(SolvedParam)
+#     ParamTemp.loc[len(ParamTemp)] = row
 
-# Save CSV
-date_str = datetime.now().strftime("%Y%m%d")
-ParamTemp.to_csv(os.path.join(output_folder, f'Parameters_{date_str}.csv'), index=False)
+# # Save CSV
+# date_str = datetime.now().strftime("%Y%m%d")
+# ParamTemp.to_csv(os.path.join(output_folder, f'Parameters_{date_str}.csv'), index=False)
+
+if __name__ == "__main__":
+    app = SimulationOptions()
+    app.mainloop()
+
+    selections = app.get_selections()
+    print(selections)

@@ -1,6 +1,8 @@
 Analysis_Results/
 SA_Plots/
 Sample_Data/
+__pycache__/
+MATLAB_ONLY/
 Interface_FlexPDE-MATLAB/Raw Data/
 Interface_FlexPDE-MATLAB/Raw Data/**
 Interface_FlexPDE-MATLAB/SA_Plots/
