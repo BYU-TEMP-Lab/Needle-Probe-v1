@@ -176,19 +176,28 @@ class SimulationOptions(tk.Tk):
         print(f"### Cross-section: {self.cross_section_var.get()}")
         print(f"### Decision Variables: {[list(self.decision_vars.keys())[i] for i in self.decision_vars_indx]}")
         print(f"### Folder: {self.test_folder_path}")
+
+        # "override test duration": self.test_duration_override.get(),
+        #     "plot frequency": self.plot_frequency.get(),
+        #     "Chi2 tolerance": self.chi2_tolerance.get()
+        
         print("### Advanced Settings:", self.advanced_settings_values)
 
         self.user_cancelled = False
         self.destroy()  # close the GUI
 
     def get_selections(self):
-        return {
+        selections_dict = {
             "probe": self.probe_var.get(),
             "crucible": self.crucible_var.get(),
             "sample": self.sample_var.get(),
+            "cross-section": self.cross_section_var.get(),
             "decision variables indices": self.decision_vars_indx,
-            "folder": self.test_folder_path
+            "folder": self.test_folder_path, 
         }
+        selections_dict.update(self.advanced_settings_values)
+        
+        return selections_dict
 
 # -------------------------
 # Example usage

@@ -1,5 +1,6 @@
 import probes
 
+
 decision_var_options = {
         "k Thermocouple": 1, # W/(m*k)
         "rho Thermocouple": 1, # kg/m^3

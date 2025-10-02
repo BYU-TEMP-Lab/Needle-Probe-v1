@@ -104,7 +104,7 @@ fprintf(fileID, 'cp\n');
 fprintf(fileID, 'q_gen  = 0\n\n');
 
 fprintf(fileID, 'temp_r2 = EVAL(temp,%8.4f,%8.4f)\n', r_Ni, TC_loc);
-fprintf(fileID, 'temp_r3 = EVAL(temp,%8.4f,%8.4f)\n', r  _samp,TC_loc);
+fprintf(fileID, 'temp_r3 = EVAL(temp,%8.4f,%8.4f)\n', r_samp,TC_loc);
 %CHECK THIS LINE WITH JAKE
 fprintf(fileID, 'q_rad = (5.67e-8*((temp)^4 - temp_r3^4)/(1/%8.4f + (1-%8.4f)/%8.4f * %8.4f/%8.4f))\n\n', e_Ni, e_Crucible, e_Crucible, r_Ni, r_samp);
 

@@ -24,14 +24,28 @@ def main():
     probe_dict = {name: obj for  name, obj in vars(probes).items() if isinstance(obj, probes.Probe)}
     decision_var_dict = optim.decision_var_options
     cross_section_options = ["Axial", "Radial"]
+
     user_input = SimulationOptions(crucibles_dict, probe_dict, sample_dict, decision_var_dict, cross_section_options, test_duration_override=None, plotfrequency=5, Chi2_tolerance=1e-4)
     user_input.mainloop()   # waits here until window closes
 
     if getattr(user_input, "user_cancelled", True):
         print("User closed the window without proceeding. Exiting program.")
+        exit(0)
     else:
         selections = user_input.get_selections()
-        print(selections)  # or use selections in your simulation
+        print(selections)
+
+    # Extract Data
+    # Build Initial Model (Get estimated properties/initial values)
+    # Choose which vars to optimize based on GUI selections
+    # Set bounds
+    # Optimize
+    ## Run model (FlexPDE)
+    ## Compare Model to each Data file (one at a time? all at once?)
+    ## Adjust Parameters
+    ## Repeat
+    # Return Comparison 
+
 
 # testfolder = input("Enter experimental data folder path: ")
 # crucible = "Nickel200"

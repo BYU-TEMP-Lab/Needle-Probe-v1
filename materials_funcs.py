@@ -115,7 +115,7 @@ def thermal_contact_resistance(mat1: str, mat2: str, ignore_warnings=False) -> f
     elif (mat2, mat1) in TCR_values:  # allow reverse order
         return TCR_values[(mat2, mat1)]
     else:
-        msg = f"No TCR value defined for {mat1}-{mat2}"
+        msg = f"No TCR value defined for {mat1}-{mat2}. Default to 0."
         if ignore_warnings:
             warnings.warn(msg)
             return 0.0  # Default to 0 if not found

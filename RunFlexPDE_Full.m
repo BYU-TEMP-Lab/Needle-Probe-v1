@@ -15,7 +15,7 @@ r_Al = 0.8293e-3; 					% Alumina Layer (in meters)
 r_Ni = 1.388E-3; 					% Nickel Sheath (in meters) 
 Ni_curve = 0.001;					% Depth of Ni Sheath curved tip
 samp_probe = -0.001;				% Distance between Sample and Probe tip (negative due to it being BELOW probe tip)
-%r_samp = 0.00207;					% Sample Radius (in meters)
+% r_samp = 0.00207;					% Sample Radius (in meters)
 r_cruc = 0.0127;					% Radius of Crucible (in meters)
 h_max = 0.1;						% Height of Probe (m)
 h_base = -0.01 + samp_probe;        % Total area below the probe (Bottom Crucible + sample/probe separation)
@@ -75,7 +75,7 @@ r_samp = par_vector(29);                     % Sample Radius (in meters)
 k_Heating_wires = ((2.0595e-10 + L*4.0826e-8)*k_Alumina + (3.4381e-11 + L*5.5889e-9)*k_wire) / (4.119e-10 + L*8.1652e-8);
 rho_Heating_wires = ((2.0595e-10 + L*4.0826e-8)*rho_Alumina + (3.4381e-11 + L*5.5889e-9)*rho_wire) / (4.119e-10 + L*8.1652e-8);
 cp_Heating_wires = ((2.0595e-10 + L*4.0826e-8)*cp_Alumina + (3.4381e-11 + L*5.5889e-9)*cp_wire) / (4.119e-10 + L*8.1652e-8);
-  = ((3.4381e-11 + L*5.5889e-9)*q_gen_wire) / (4.119e-10 + L*8.1652e-8);
+qgen_Heating_wires = ((3.4381e-11 + L*5.5889e-9)*q_gen_wire) / (4.119e-10 + L*8.1652e-8);
 
 
 %%%%%%%% Write FlexPDE file %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
