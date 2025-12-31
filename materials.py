@@ -274,7 +274,7 @@ def emissivity_Inconel625(T):
         return 0.35 # placeholder
 
 Inconel625 = Material(
-    "Inconel625",
+    "Inconel 625",
     k_func=k_Inconel625,
     cp_func=cp_Inconel625,
     rho_func=rho_Inconel625,
@@ -586,7 +586,8 @@ def alpha_Ni(T):
         return 1.087891E-5+2.600264E-9*T^1-2.279477E-13*T^2 # placeholder
             
 
-Nickel200 = Material("Nickel200", 
+Nickel200 = Material(
+                "Nickel 200", 
                 T_points=[473, 1144],
                 emissivity_points=[0.35, 0.86], # 0.86 is maximum emissivity of Nickel Oxide found in literature
                 k_func=k_Ni, 
@@ -638,7 +639,7 @@ def rho_PropyleneGlycol(T):
     return 1352.128 - 1.775134*T + 0.003661077*T**2 - 4.338143e-6*T**3
 
 PropyleneGlycol = Material(
-    "PropyleneGlycol",
+    "Propylene Glycol",
     k_func=k_PropyleneGlycol,
     cp_func=cp_PropyleneGlycol,
     rho_func=rho_PropyleneGlycol,
@@ -692,7 +693,7 @@ def emissivity_Steel316(T):
         return 0.6
 
 Steel316 = Material(
-    "Steel316",
+    "Steel 316",
     k_func=k_Steel316,
     cp_func=cp_Steel316,
     rho_func=rho_Steel316,

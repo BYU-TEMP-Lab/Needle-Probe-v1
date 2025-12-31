@@ -24,6 +24,3 @@ def setup_logging():
 
     # Ensure the filter allows your warnings to be seen during testing
     warnings.filterwarnings('always')
-
-    # Test
-    warnings.warn("This is a clean, relative-path warning.")

@@ -49,7 +49,7 @@ def generate_INL_probe():
     )  # Length of wires (Total length - spacing)
 
     # MATERIALS/THERMAL PROPERTIES ============================
-    sheath = materials_dict["Nickel200"]
+    sheath = materials_dict["Nickel 200"]
     insulation = apply_porosity(materials_dict["Alumina"], porosity_percent=7.38)  # 7.38% porosity
     heating_wires = materials_dict["Chromel"]
 
@@ -129,7 +129,7 @@ def generate_BYU_probe_2C_2():
     )  # Length of wires (Total length - spacing)
 
     # MATERIALS/THERMAL PROPERTIES ============================
-    sheath = materials_dict["Nickel200"]
+    sheath = materials_dict["Nickel 200"]
     insulation = apply_porosity(materials_dict["Alumina"], porosity_percent=7.38)  # 7.38% porosity
     heating_wires = materials_dict["Chromel"]
 

@@ -1,9 +1,15 @@
+import json, os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
+from materials import options as samples
+from probes import options as probes
+from crucibles import options as crucibles
+from optim import decision_var_options as decision_vars
 
 
 class AdvancedSettings(tk.Toplevel):
     def __init__(self, parent, settings):
+        self.parent = parent
         super().__init__(parent)
         self.title("Advanced Settings")
         self.resizable(False, False)
@@ -26,7 +32,25 @@ class AdvancedSettings(tk.Toplevel):
         ttk.Label(form, text="Chi² Tolerance:").grid(row=2, column=0, sticky="e", padx=5, pady=5)
         ttk.Entry(form, textvariable=self.chi2_tolerance).grid(row=2, column=1, padx=5, pady=5)
 
-        ttk.Button(form, text="Save and Close", command=self.save_and_close).grid(row=3, column=0, columnspan=2, pady=10)
+        # --- Defaul Setting Selection ---
+        ttk.Label(form, text="Default Settings File:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        self.default_file_label = ttk.Label(form, text=parent.default_filename, wraplength=250, justify="left")
+        self.default_file_label.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+        ttk.Button(form, text="Load Defaults", command=self.get_defaults).grid(row=4, column=1, padx=5, pady=5, sticky="w")
+
+        self.save_and_close_button = ttk.Button(form, text="Save and Close", command=self.save_and_close)
+        self.save_and_close_button.grid(row=5, column=0, columnspan=2, pady=10)
+
+    def get_defaults(self):
+        selected_file = filedialog.askopenfilename(
+            title="Select Default Settings JSON File",
+            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")],
+            initialdir="."
+        )
+        if selected_file:
+            self.parent.load_defaults(selected_file)
+            self.default_file_label.config(text=selected_file)
+            self.save_and_close_button.config(state="normal")
 
     def save_and_close(self):
         self.master.advanced_settings_values = self.get_settings()
@@ -42,22 +66,33 @@ class AdvancedSettings(tk.Toplevel):
     
 
 class SimulationOptions(tk.Tk):
-    def __init__(self, crucibles, probes, samples, decision_vars, cross_sections, test_duration_override=None, plotfrequency=5, Chi2_tolerance=1e-4):
-        super().__init__()
-        self.title("Simulation Options")
-        self.resizable(False, False)
+    def __init__(self):
+        
+        self.default_filename = 'default_options.json'
+        # self.defaults = None      
+
+        # Load the defaultsettings from the JSON file
+        self.load_defaults()
 
         # Store option dictionaries
         self.crucibles = crucibles
         self.probes = probes
         self.samples = samples
-        self.cross_sections = cross_sections
+        self.cross_sections = ["Axial", "Radial"]
         self.decision_vars = decision_vars
         self.advanced_settings_values = {
-            "override test duration": test_duration_override,
-            "plot frequency": plotfrequency,
-            "Chi2 tolerance": Chi2_tolerance
+            "override test duration": self.defaults.get("test_duration_override"),
+            "plot frequency": self.defaults.get("plotfrequency", 5),
+            "Chi2 tolerance": self.defaults.get("Chi2_tolerance", 1e-4)
         }
+
+        super().__init__()
+        self._build_ui()
+        
+
+    def _build_ui(self):
+        self.title("Simulation Options")
+        self.resizable(False, False)
 
         # --- Container for centering ---
         form_frame = ttk.Frame(self)
@@ -90,7 +125,7 @@ class SimulationOptions(tk.Tk):
         ttk.Label(form_frame, text="Simulation Cross-section:").grid(row=4, column=0, padx=10, pady=5, sticky="e")
         self.cross_section_var = tk.StringVar(self)
         self.cross_section_var.set(self.cross_sections[0]) # default to radial
-        self.cross_section_combobox = ttk.Combobox(form_frame, textvariable=self.cross_section_var, values=cross_sections, state="readonly")
+        self.cross_section_combobox = ttk.Combobox(form_frame, textvariable=self.cross_section_var, values=self.cross_sections, state="readonly")
         self.cross_section_combobox.grid(row=4, column=1, padx=10, pady=5, sticky="w")
 
         # --- Decision Variables ---
@@ -120,6 +155,23 @@ class SimulationOptions(tk.Tk):
         self.proceed_button.grid(row=9, column=0, columnspan=2, pady=15)
         self.test_folder_path = None
 
+    def load_defaults(self, filepath=None):
+        """The core logic to read the file and update the UI/Data"""
+        if filepath is None:
+            filepath = self.default_filename
+
+        if os.path.exists(filepath):
+            try:
+                with open(filepath, 'r') as f:
+                    self.defaults = json.load(f)
+                print(f"Settings applied from {filepath}")
+                
+            except Exception as e:
+                print(f"Error reading JSON: {e}")
+        else:
+            print(f"Warning: {filepath} not found.")
+
+            
     def select_folder(self):
         self.test_folder_path = filedialog.askdirectory(title="Select an experimental data folder", initialdir=".")
         if self.test_folder_path:
@@ -175,7 +227,7 @@ class SimulationOptions(tk.Tk):
         print(f"### Sample: {self.sample_var.get()}")
         print(f"### Cross-section: {self.cross_section_var.get()}")
         print(f"### Decision Variables: {[list(self.decision_vars.keys())[i] for i in self.decision_vars_indx]}")
-        print(f"### Folder: {self.test_folder_path}")
+        print(f"### Data Folder: {self.test_folder_path}")
 
         # "override test duration": self.test_duration_override.get(),
         #     "plot frequency": self.plot_frequency.get(),
@@ -199,69 +251,69 @@ class SimulationOptions(tk.Tk):
         
         return selections_dict
 
-# -------------------------
-# Example usage
-# -------------------------
-if __name__ == "__main__":
-    crucibles = {"Steel316": {}, "Nickel200": {}, "Inconel625": {}}
-    probes = {"ProbeA": {}, "ProbeB": {}}
-    samples ={
-    "Sample A": {"property1": 1.0, "property2": 2.0},
-    "Sample B": {"property1": 1.1, "property2": 2.1},
-    "Sample C": {"property1": 1.2, "property2": 2.2},
-    "Sample D": {"property1": 1.3, "property2": 2.3},
-    "Sample E": {"property1": 1.4, "property2": 2.4},
-    "Sample F": {"property1": 1.5, "property2": 2.5},
-    "Sample G": {"property1": 1.6, "property2": 2.6},
-    "Sample H": {"property1": 1.7, "property2": 2.7},
-    "Sample I": {"property1": 1.8, "property2": 2.8},
-    "Sample J": {"property1": 1.9, "property2": 2.9},
-    "Sample K": {"property1": 2.0, "property2": 3.0},
-    "Sample L": {"property1": 2.1, "property2": 3.1},
-    "Sample M": {"property1": 2.2, "property2": 3.2},
-    "Sample N": {"property1": 2.3, "property2": 3.3},
-    "Sample O": {"property1": 2.4, "property2": 3.4},
-    "Sample P": {"property1": 2.5, "property2": 3.5},
-    "Sample Q": {"property1": 2.6, "property2": 3.6},
-    "Sample R": {"property1": 2.7, "property2": 3.7},
-    "Sample S": {"property1": 2.8, "property2": 3.8},
-    "Sample T": {"property1": 2.9, "property2": 3.9},
-    }
-    decision_variables = [
-    "Thermal Conductivity",
-    "Specific Heat",
-    "Density",
-    "Emissivity",
-    "Porosity",
-    "Heat Capacity",
-    "Thermal Diffusivity",
-    "Wire Radius",
-    "Probe Length",
-    "Crucible Radius",
-    "Sample Thickness",
-    "Contact Resistance",
-    "Ni Sheath Thickness",
-    "Alumina Layer Thickness",
-    "Wire Spacing",
-    "Probe Tip Offset",
-    "Heating Power",
-    "Measurement Interval",
-    "Data Smoothing Factor",
-    "Calibration Coefficient",
-    "Ambient Temperature",
-    "Sample Composition",
-    "Nickel Oxide Fraction",
-    "Alumina Purity",
-    "Probe Material Factor"
-    ]
+# # -------------------------
+# # Example usage
+# # -------------------------
+# if __name__ == "__main__":
+#     crucibles = {"Steel316": {}, "Nickel200": {}, "Inconel625": {}}
+#     probes = {"ProbeA": {}, "ProbeB": {}}
+#     samples ={
+#     "Sample A": {"property1": 1.0, "property2": 2.0},
+#     "Sample B": {"property1": 1.1, "property2": 2.1},
+#     "Sample C": {"property1": 1.2, "property2": 2.2},
+#     "Sample D": {"property1": 1.3, "property2": 2.3},
+#     "Sample E": {"property1": 1.4, "property2": 2.4},
+#     "Sample F": {"property1": 1.5, "property2": 2.5},
+#     "Sample G": {"property1": 1.6, "property2": 2.6},
+#     "Sample H": {"property1": 1.7, "property2": 2.7},
+#     "Sample I": {"property1": 1.8, "property2": 2.8},
+#     "Sample J": {"property1": 1.9, "property2": 2.9},
+#     "Sample K": {"property1": 2.0, "property2": 3.0},
+#     "Sample L": {"property1": 2.1, "property2": 3.1},
+#     "Sample M": {"property1": 2.2, "property2": 3.2},
+#     "Sample N": {"property1": 2.3, "property2": 3.3},
+#     "Sample O": {"property1": 2.4, "property2": 3.4},
+#     "Sample P": {"property1": 2.5, "property2": 3.5},
+#     "Sample Q": {"property1": 2.6, "property2": 3.6},
+#     "Sample R": {"property1": 2.7, "property2": 3.7},
+#     "Sample S": {"property1": 2.8, "property2": 3.8},
+#     "Sample T": {"property1": 2.9, "property2": 3.9},
+#     }
+#     decision_variables = [
+#     "Thermal Conductivity",
+#     "Specific Heat",
+#     "Density",
+#     "Emissivity",
+#     "Porosity",
+#     "Heat Capacity",
+#     "Thermal Diffusivity",
+#     "Wire Radius",
+#     "Probe Length",
+#     "Crucible Radius",
+#     "Sample Thickness",
+#     "Contact Resistance",
+#     "Ni Sheath Thickness",
+#     "Alumina Layer Thickness",
+#     "Wire Spacing",
+#     "Probe Tip Offset",
+#     "Heating Power",
+#     "Measurement Interval",
+#     "Data Smoothing Factor",
+#     "Calibration Coefficient",
+#     "Ambient Temperature",
+#     "Sample Composition",
+#     "Nickel Oxide Fraction",
+#     "Alumina Purity",
+#     "Probe Material Factor"
+#     ]
 
-    cross_sections = ["radial", "axial"]
+#     cross_sections = ["radial", "axial"]
 
-    options = SimulationOptions(crucibles, probes, samples, probes, cross_sections)
-    options.mainloop()   # waits here until window closes
+#     options = SimulationOptions(crucibles, probes, samples, probes, cross_sections)
+#     options.mainloop()   # waits here until window closes
 
-    if getattr(options, "user_cancelled", True):
-        print("User closed the window without proceeding. Exiting program.")
-    else:
-        selections = options.get_selections()
-        print(selections)  # or use selections in your simulation
+#     if getattr(options, "user_cancelled", True):
+#         print("User closed the window without proceeding. Exiting program.")
+#     else:
+#         selections = options.get_selections()
+#         print(selections)  # or use selections in your simulation

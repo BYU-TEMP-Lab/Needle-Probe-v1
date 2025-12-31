@@ -1,0 +1,6 @@
+{
+        "test_duration_override": null, 
+        "plotfrequency": 5, 
+        "Chi2_tolerance": 1e-4,
+        "cross_section_options": ["Axial", "Radial"]
+}

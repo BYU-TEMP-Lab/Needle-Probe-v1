@@ -1,4 +1,4 @@
-import glob, subprocess, time, os, sys, warnings, numpy as np, pandas as pd
+import glob, subprocess, time, os, sys, warnings, json, numpy as np, pandas as pd
 
 import bootstrap
 bootstrap.setup_logging()  # Apply custom warning format
@@ -23,7 +23,16 @@ def main():
     decision_var_dict = optim.decision_var_options
     cross_section_options = ["Axial", "Radial"]
 
-    user_input = SimulationOptions(crucibles_dict, probe_dict, sample_dict, decision_var_dict, cross_section_options, test_duration_override=None, plotfrequency=5, Chi2_tolerance=1e-4)
+    user_input = SimulationOptions(
+        # crucibles_options, 
+        # probe_options, 
+        # material_options, 
+        # decision_var_dict, 
+        # cross_section_options, 
+        # test_duration_override=None, 
+        # plotfrequency=5, 
+        # Chi2_tolerance=1e-4
+        )
     user_input.mainloop()   # waits here until window closes
 
     if getattr(user_input, "user_cancelled", True):

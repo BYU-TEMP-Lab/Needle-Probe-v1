@@ -82,7 +82,7 @@ class Material:
         k = float(self.k_func(T)) if self.k_source == 'func' else float(self.k_interp(T))
         cp = float(self.cp_func(T)) if self.cp_source == 'func' else float(self.cp_interp(T))
         rho = float(self.rho_func(T)) if self.rho_source == 'func' else float(self.rho_interp(T))
-        emissivity = float(self.emissivity_func(T)) if self.emissivity_source == 'func' else (float(self.emissivity_interp(T)) if hasattr(self, 'emissivity_interp') else None)
+        emissivity = float(self.emissivity_func(T)) if self.emissivity_source == 'func' else (float(self.emissivity_interp(T)) if hasattr(self, 'emissivity_interp') else 0.5)
 
         # Compute alpha automatically if not provided
         if self.alpha_source == 'func':
@@ -104,8 +104,9 @@ def thermal_contact_resistance(mat1: str, mat2: str, ignore_warnings=False) -> f
     - Generic Sample-Generic Crucible: 1e-8 (no source, needs verification)
     """
     TCR_values = {
-        ("Alumina", "Nickel200"): 0.0052, # these numbers don't currently appear to have sources
-        ("Nickel200", "Generic Sample"): 0.001,
+        ("Alumina", "Nickel 200"): 0.0052, # these numbers don't currently appear to have sources
+        ("Porous Alumina", "Nickel 200"): 0.0052,
+        ("Nickel 200", "Generic Sample"): 0.001,
         ("Generic Sample", "Generic Crucible"): 1e-8
     }
     
@@ -144,7 +145,7 @@ def apply_porosity(material: Material, porosity_percent: float, model="Zivcoca")
     if hasattr(material, "k_points") and material.k_points is not None:
         k_new = material.k_points * np.exp(-1.5 * phi / (1 - phi))
         return Material(
-            name=f"Porous{material.name}",
+            name=f"Porous {material.name}",
             T_points=material.T_points,
             k_points=k_new,
             cp_points=material.cp_points,

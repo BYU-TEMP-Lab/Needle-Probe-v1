@@ -14,7 +14,7 @@ class Crucible:
         self.material = material  # Material object
 
         if self.material.emissivity_func is None:
-            msg = f"Emissivity function not defined for crucible material {self.material.name}. Radiative heat transfer calculations may be inaccurate."
+            msg = f"Emissivity function not defined for crucible material {self.material.name}. Default to 0.5. Radiative heat transfer calculations may be inaccurate."
             warnings.warn(msg)
 
 # ========================================
