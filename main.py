@@ -1,27 +1,25 @@
+import glob, subprocess, time, os, sys, warnings, numpy as np, pandas as pd
+
+import bootstrap
+bootstrap.setup_logging()  # Apply custom warning format
+
 from GUI import SimulationOptions
-import os
-import glob
-import numpy as np
-import pandas as pd
 from scipy.interpolate import interp1d
 from scipy.optimize import least_squares
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
-import subprocess
-import time
 import materials, probes, optim
-import warnings
+from materials import options as material_options
+from probes import options as probe_options
+from crucibles import options as crucibles_options
+
 
 # ------------------- User Inputs ------------------- #
 def main():
-    crucibles_dict = {
-        "1": 1,
-        "2": 2,
-        "3": 3,
-        "4": 4
-    }
-    sample_dict = {name: obj for name, obj in vars(materials).items() if isinstance(obj, materials.Material)}
-    probe_dict = {name: obj for  name, obj in vars(probes).items() if isinstance(obj, probes.Probe)}
+    
+    crucibles_dict = crucibles_options
+    sample_dict = material_options
+    probe_dict = probe_options
     decision_var_dict = optim.decision_var_options
     cross_section_options = ["Axial", "Radial"]
 

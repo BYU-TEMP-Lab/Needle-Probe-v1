@@ -1,34 +1,31 @@
-import probes
-
-
 decision_var_options = {
-        "k Thermocouple": 1, # W/(m*k)
-        "rho Thermocouple": 1, # kg/m^3
-        "cp Thermocouple": 1, #j/(kg*K)
+        "Thermocouple k": 1, # W/(m*k)
+        "Thermocouple rho": 1, # kg/m^3
+        "Thermocouple cp": 1, #j/(kg*K)
 
-        "k Wire": 1, 
-        "rho Wire": 1,
-        "cp Wire": 1,
+        "Wire k": 1, 
+        "Wire rho": 1,
+        "Wire cp": 1,
 
-        "k Insulation": 1,
-        "rho Insulation": 1,
-        "cp Insulation": 1,
+        "Insulation k": 1,
+        "Insulation rho": 1,
+        "Insulation cp": 1,
         "Porosity Insulation": 1, # unitless (ratio)
 
-        "k Sheath": 1,
-        "rho Sheath": 1,
-        "cp Sheath": 1,
+        "Sheath k": 1,
+        "Sheath rho": 1,
+        "Sheath cp": 1,
         "Emissivity Sheath": 1, # unitless
 
-        "k Crucible": 1,
-        "rho Crucible": 1,
-        "cp Crucible": 1,
+        "Crucible k": 1,
+        "Crucible rho": 1,
+        "Crucible cp": 1,
         "Emissivity Crucible": 1,
 
-        "k Sample": 1,
-        "rho Sample": 1,
-        "cp Sample": 1,
-        "radius Sample": 1, # m
+        "Sample k": 1,
+        "Sample rho": 1,
+        "Sample cp": 1,
+        "Sample radius": 1, # m
 
         "Thermal Contact Resistance Sheath-Insulation": 1, # K/W
         "Thermal Contact Resistance Sheath-Sample": 1,

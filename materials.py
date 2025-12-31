@@ -1,4 +1,4 @@
-from materials_funcs import Material, thermal_contact_resistance, apply_porosity
+from materials_utils import Material, thermal_contact_resistance, apply_porosity
 
 # List of materials available for use in simulations
 # SORTED ALPHABETICALLY BY MATERIAL NAME
@@ -759,3 +759,10 @@ def rho_Water(T):
         return 0.000010335053319*T**3 - 0.013395065634452*T**2 + 4.96928883265516*T + 432.257114008512  # Placeholder
 
 Water = Material("Water", k_func=k_Water, cp_func=cp_Water, rho_func=rho_Water, valid_range=(273, 373), ignore_out_of_range=True)
+
+
+# ========================================
+# Generate material options dictionary
+# ========================================
+
+options = {obj.name: obj for name, obj in vars().items() if isinstance(obj, Material)}
