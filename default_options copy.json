@@ -1,0 +1,7 @@
+{
+        "test duration override": null, 
+        "plot frequency": 100, 
+        "chi2 tolerance": 1929e-4,
+        "simulation cross section": "Axial",
+        "decision variables": ["Insulation k"]
+}

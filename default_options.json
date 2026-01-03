@@ -1,6 +1,11 @@
 {
-        "test_duration_override": null, 
-        "plotfrequency": 5, 
-        "Chi2_tolerance": 1e-4,
-        "cross_section_options": ["Axial", "Radial"]
+        "probe": "BYU Probe 2C.2",
+        "crucible": "3 (???)",
+        "sample": "Select...",
+        "simulation": "FlexPDE",
+        "simulation cross section": "Radial",
+        "decision variables": ["Wire rho", "Insulation k"],
+        "test duration override": null, 
+        "plot frequency": 5, 
+        "chi2 tolerance": 1e-4
 }

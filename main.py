@@ -3,7 +3,7 @@ import glob, subprocess, time, os, sys, warnings, json, numpy as np, pandas as p
 import bootstrap
 bootstrap.setup_logging()  # Apply custom warning format
 
-from GUI import SimulationOptions
+from GUI_main import SimulationOptions
 from scipy.interpolate import interp1d
 from scipy.optimize import least_squares
 from datetime import datetime
@@ -23,16 +23,12 @@ def main():
     decision_var_dict = optim.decision_var_options
     cross_section_options = ["Axial", "Radial"]
 
-    user_input = SimulationOptions(
-        # crucibles_options, 
-        # probe_options, 
-        # material_options, 
-        # decision_var_dict, 
-        # cross_section_options, 
-        # test_duration_override=None, 
-        # plotfrequency=5, 
-        # Chi2_tolerance=1e-4
-        )
+    simulation_options_dict = {"FlexPDE": None,
+                                   "Thermal Quadrupoles": None}
+    cross_section_options_dict = {"Axial": None, 
+                               "Radial": None}
+
+    user_input = SimulationOptions(simulation_options_dict, cross_section_options_dict)
     user_input.mainloop()   # waits here until window closes
 
     if getattr(user_input, "user_cancelled", True):

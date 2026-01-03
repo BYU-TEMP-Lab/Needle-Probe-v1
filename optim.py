@@ -10,17 +10,17 @@ decision_var_options = {
         "Insulation k": 1,
         "Insulation rho": 1,
         "Insulation cp": 1,
-        "Porosity Insulation": 1, # unitless (ratio)
+        "Insulation Porosity ": 1, # unitless (ratio)
 
         "Sheath k": 1,
         "Sheath rho": 1,
         "Sheath cp": 1,
-        "Emissivity Sheath": 1, # unitless
+        "Sheath Emissivity ": 1, # unitless
 
         "Crucible k": 1,
         "Crucible rho": 1,
         "Crucible cp": 1,
-        "Emissivity Crucible": 1,
+        "Crucible Emissivity ": 1,
 
         "Sample k": 1,
         "Sample rho": 1,
