@@ -1,28 +1,23 @@
 import glob, subprocess, time, os, sys, warnings, json, numpy as np, pandas as pd
 
-import bootstrap
+import src.salt_probe_util.bootstrap as bootstrap
 bootstrap.setup_logging()  # Apply custom warning format
 
-from GUI_main import SimulationOptions
 from scipy.interpolate import interp1d
 from scipy.optimize import least_squares
 from datetime import datetime
 from multiprocessing import Pool, cpu_count
-import materials, probes, optim
-from materials import options as material_options
-from probes import options as probe_options
-from crucibles import options as crucibles_options
+
+from .GUI.GUI_main import SimulationOptions
+# import .libraries.materials, .libraries.probes, .optim as optim
+# from .libraries.materials import options as material_options
+# from .libraries.probes import options as probe_options
+# from .libraries.crucibles import options as crucibles_options
 
 
 # ------------------- User Inputs ------------------- #
 def main():
     
-    crucibles_dict = crucibles_options
-    sample_dict = material_options
-    probe_dict = probe_options
-    decision_var_dict = optim.decision_var_options
-    cross_section_options = ["Axial", "Radial"]
-
     simulation_options_dict = {"FlexPDE": None,
                                    "Thermal Quadrupoles": None}
     cross_section_options_dict = {"Axial": None, 
@@ -262,8 +257,9 @@ def process_file(filepath):
 # ParamTemp.to_csv(os.path.join(output_folder, f'Parameters_{date_str}.csv'), index=False)
 
 if __name__ == "__main__":
-    app = SimulationOptions()
-    app.mainloop()
+    # app = SimulationOptions()
+    # app.mainloop()
 
-    selections = app.get_selections()
-    print(selections)
+    # selections = app.get_selections()
+    # print(selections)
+    main()

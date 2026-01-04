@@ -1,5 +1,5 @@
-from materials import options as material_options
-from materials_utils import Material
+from .materials import options as material_options
+from .materials_utils import Material
 import warnings
 
 class Crucible:

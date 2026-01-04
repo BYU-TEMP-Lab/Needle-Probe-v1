@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, filedialog
+from pathlib import Path
 
 class AdvancedSettings(tk.Toplevel):
     def __init__(self, parent):
@@ -7,6 +8,10 @@ class AdvancedSettings(tk.Toplevel):
         super().__init__(parent)
         self.title("Advanced Settings")
         self.resizable(False, False)
+
+        # Make the window modal
+        self.transient(parent)
+        self.grab_set()
 
         # Variables for settings
         self.test_duration_override = tk.StringVar(value=parent.defaults.get("test duration override"))
@@ -28,7 +33,7 @@ class AdvancedSettings(tk.Toplevel):
 
         # --- Default Setting Selection ---
         ttk.Label(form, text="Default Settings File:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
-        self.default_file_label = ttk.Label(form, text=parent.default_filename, wraplength=250, justify="left")
+        self.default_file_label = ttk.Label(form, text="/".join(parent.default_file_path.parts[-2:]), wraplength=250, justify="left")
         self.default_file_label.grid(row=4, column=1, padx=5, pady=5, sticky="w")
         ttk.Button(form, text="Load Defaults", command=self.get_defaults).grid(row=3, column=1, padx=5, pady=5, sticky="w")
 
@@ -42,8 +47,9 @@ class AdvancedSettings(tk.Toplevel):
             initialdir="."
         )
         if selected_file:
-            self.parent.load_defaults_file(selected_file)
-            self.default_file_label.config(text=selected_file)
+            selected_path = Path(selected_file)
+            self.parent.load_defaults_file(selected_path)
+            self.default_file_label.config(text="/".join(selected_path.parts[-2:]))
             self.parent.update_defaults()
             self._update_defaults()
             self.save_and_close_button.config(state="normal")

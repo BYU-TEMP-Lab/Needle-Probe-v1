@@ -1,4 +1,4 @@
-from materials_utils import Material, thermal_contact_resistance, apply_porosity
+from .materials_utils import Material, thermal_contact_resistance, apply_porosity
 
 # List of materials available for use in simulations
 # SORTED ALPHABETICALLY BY MATERIAL NAME

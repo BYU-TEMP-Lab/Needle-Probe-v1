@@ -1,5 +1,5 @@
-from materials_utils import Material, apply_porosity, thermal_contact_resistance
-from materials import options as materials_dict
+from .materials_utils import Material, apply_porosity, thermal_contact_resistance
+from .materials import options as materials_dict
 import math
 
 class Probe:

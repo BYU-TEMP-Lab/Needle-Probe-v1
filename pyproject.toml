@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "salt_probe_util"
+version = "0.1.0"
+description = "Analysis tool for BYU TEMP lab molten salt needle probe data"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # Add your required libraries here, e.g.:
+    # "numpy",
+    # "pandas",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]  # Tells tools the source code is in 'src'
+
+[tool.setuptools]
+package-dir = {"" = "src"} # Maps the root of the package to 'src'

@@ -1,19 +1,20 @@
 import json, os, tkinter as tk, textwrap
 from tkinter import ttk, filedialog, messagebox
+from pathlib import Path
 
-from GUI_advanced_settings import AdvancedSettings
-from GUI_calibration_menu import CalibrationMenu
-from materials import options as samples
-from probes import options as probes
-from crucibles import options as crucibles
-from optim import decision_var_options as decision_vars
+from .GUI_advanced_settings import AdvancedSettings
+from .GUI_calibration_menu import CalibrationMenu
+from ..libraries.materials import options as samples
+from ..libraries.probes import options as probes
+from ..libraries.crucibles import options as crucibles
+from ..libraries.calibrations import options as cal_dict
+from ..optim import decision_var_options as decision_vars
   
 
 class SimulationOptions(tk.Tk):
     def __init__(self, simulation_options_dict, cross_section_options_dict):
+        super().__init__()
         
-        
-
         # Store option dictionaries
         self.probes = probes
         self.crucibles = crucibles
@@ -23,22 +24,15 @@ class SimulationOptions(tk.Tk):
         self.decision_vars = decision_vars
 
         # Load the defaultsettings from the JSON file
-        self.default_filename = 'default_options.json'
+        self.BASE_DIR = Path(__file__).resolve().parent.parent
+        self.default_file_path = self.BASE_DIR / "config" / "default_options.json"
         self.load_defaults_file()
 
         self.override_dur = self.defaults.get("test duration override")
         self.plot_freq = self.defaults.get("plot frequency")
         self.chi2_tol = self.defaults.get("chi2 tolerance")
-        # print(self.override_dur)
-        # print(self.plot_freq)
-        # print(self.chi2_tol)
-        # self.advanced_settings_values = {
-        #     "override test duration": self.defaults.get("test_duration_override"),
-        #     "plot frequency": self.defaults.get("plotfrequency", 5),
-        #     "Chi2 tolerance": self.defaults.get("Chi2_tolerance", 1e-4)
-        # }
 
-        super().__init__()
+        # build UI
         self._build_ui()
         
 
@@ -70,7 +64,7 @@ class SimulationOptions(tk.Tk):
         for x in decision_vars.keys():
             self.decision_vars_box.insert(tk.END, x)
 
-        # Select the default items
+        # Select the default decision variables
         for indx, x in enumerate(self.decision_vars.keys()):
             if x in self.defaults.get("decision variables", []):
                 self.decision_vars_box.selection_set(indx)
@@ -79,7 +73,7 @@ class SimulationOptions(tk.Tk):
         ttk.Label(self.form_frame, text="Experimental Data Folder:").grid(row=7, column=0, padx=10, pady=5, sticky="e")
         self.folder_label = ttk.Label(self.form_frame, text="No folder selected", wraplength=250, justify="left")
         self.folder_label.grid(row=8, column=1, padx=10, pady=5, sticky="w")
-        ttk.Button(self.form_frame, text="Select Folder", command=self.select_folder).grid(row=7, column=1, padx=10, pady=5, sticky="w")
+        ttk.Button(self.form_frame, text="Select Folder", command=self.select_data_folder).grid(row=7, column=1, padx=10, pady=5, sticky="w")
 
         # --- Advanced Settings Button ---
         self.adv_settings = None
@@ -89,6 +83,10 @@ class SimulationOptions(tk.Tk):
         self.proceed_button = ttk.Button(self.form_frame, text="Proceed", state="disabled", command=self.proceed)
         self.proceed_button.grid(row=10, column=0, columnspan=2, pady=15)
         self.test_folder_path = None
+
+        # --- Initialize Calibration Menu ---
+        self.cal_menu = None
+
 
     def generate_dropdown(self, title, vars_dict, pos, default_value = None):
         ttk.Label(self.form_frame, text=title).grid(row=pos[0], column=pos[1], padx=10, pady=5, sticky="e")
@@ -103,6 +101,7 @@ class SimulationOptions(tk.Tk):
         combobox.grid(row=pos[0], column=pos[1]+1, padx=10, pady=5, sticky="w")
         return var, combobox
     
+
     def update_defaults(self):
         self.probe_var.set(self.defaults.get("probe"))
         self.crucible_var.set(self.defaults.get("crucible"))
@@ -119,40 +118,65 @@ class SimulationOptions(tk.Tk):
         self.override_dur = self.defaults.get("test duration override")
         self.plot_freq = self.defaults.get("plot frequency")
         self.chi2_tol = self.defaults.get("chi2 tolerance")
-    
-    def load_defaults_file(self, filepath=None):
-        """The core logic to read the file and update the UI/Data"""
-        if filepath is None:
-            filepath = self.default_filename
 
-        if os.path.exists(filepath):
+
+    def load_defaults_file(self, filepath=None):
+        """Read the JSON config and update UI/Data using pathlib """
+        # 1. Fallback to self.default_file_path if no path provided
+        # 2. Ensure filepath is a Path object even if a string was passed
+        target_path = Path(filepath or self.default_file_path)
+
+        # .is_file() is more specific than .exists() (it ensures it's not a folder)
+        if target_path.is_file():
             try:
-                with open(filepath, 'r') as f:
-                    self.defaults = json.load(f)
-                print(f"Settings applied from {filepath}")
+                data = target_path.read_text(encoding='utf-8')
+                self.defaults = json.loads(data)
+                print(f"Settings applied from: {"/".join(target_path.parts[-2:])}")
                 
+            except json.JSONDecodeError as e:
+                print(f"Error: {target_path.name} is not a valid JSON file. {e}")
             except Exception as e:
-                print(f"Error reading JSON: {e}")
+                print(f"Unexpected error reading file: {e}")
         else:
-            print(f"Warning: {filepath} not found.")
+            # Use .resolve() to show the full absolute path in the warning
+            # This helps you debug exactly where Python is looking
+            print(f"Warning: File not found at {target_path.resolve()}")
 
             
-    def select_folder(self):
+    def select_data_folder(self):
         self.test_folder_path = filedialog.askdirectory(title="Select an experimental data folder", initialdir=".")
         if self.test_folder_path:
-            self.folder_label.config(text=self.test_folder_path)
+            self.test_folder_path = Path(self.test_folder_path)
+            self.folder_label.config(text="/".join(self.test_folder_path.parts[-2:]))
             self.proceed_button.config(state="normal")
         else:
             self.folder_label.config(text="No folder selected")
             self.proceed_button.config(state="disabled")
-        
 
+        
     def open_advanced_settings(self):
         if self.adv_settings is None or not self.adv_settings.winfo_exists():
             self.adv_settings = AdvancedSettings(self)
         else:
             self.adv_settings.lift()  # bring existing window to front
 
+
+    def check_for_calibration(self):
+        # initialize variable to store calibrated values if then exist
+        self.calibration = None
+        self.perf_calibration = 0 
+
+        current_config = [self.probe_var.get(), self.crucible_var.get()]
+
+        # create calibration popup window
+        if self.cal_menu is None or not self.cal_menu.winfo_exists():
+            self.cal_menu = CalibrationMenu(self, current_config)
+            self.wait_window(self.cal_menu)
+        else:
+            self.cal_menu.lift()  # bring existing window to front
+
+        return self.cal_menu.complete
+    
 
     def check_selections(self):
         # Get selected indices
@@ -212,15 +236,9 @@ class SimulationOptions(tk.Tk):
             )
             return True
 
-        # Parse user input 
-        # For the float (override_dur)
-        self.override_dur = self._parse_input(self.override_dur, float, "test duration override")
-
-        # For the int (plot_freq)
-        self.plot_freq = self._parse_input(self.plot_freq, int, "plot frequency")
-
-        # for the float (chi2 tolerance)
-        self.chi2_tol = self._parse_input(self.chi2_tol, float, "chi2 tolerance")
+        # Check for calibrations
+        if not self.check_for_calibration():
+            return True
 
         return False
             
@@ -245,38 +263,7 @@ class SimulationOptions(tk.Tk):
         except (ValueError, TypeError):
             messagebox.showerror("Error", f"Invalid value for {field_name}.")
             return None
-
-    def proceed(self):
-        if self.check_selections():
-            return
         
-        msg = f"""
-            --------------------------------------------------
-            Proceeding with:
-            ### Probe: {self.probe_var.get()}
-            ### Crucible: {self.crucible_var.get()}
-            ### Sample: {self.sample_var.get()}
-            ### Cross-section: {self.cross_section_var.get()}
-            ### Decision Variables: {[list(self.decision_vars.keys())[i] for i in self.decision_vars_indx]}
-            ### Overridden Test Duration: {self.override_dur}
-            ### Plot Frequency (Iterations): {self.plot_freq}
-            ### Chi2 Tolerance: {self.chi2_tol}
-            ### Data Folder: {self.test_folder_path}
-            --------------------------------------------------
-        """
-        print(textwrap.dedent(msg).strip())
-
-        self.open_calibration_menu()
-
-        self.user_cancelled = False
-        self.destroy()  # close the GUI
-
-    def open_calibration_menu(self):
-        if self.cal_menu is None or not self.cal_menu.winfo_exists():
-            self.cal_menu = CalibrationMenu(self)
-            self.adv_settings = AdvancedSettings(self)
-        else:
-            self.adv_settings.lift()  # bring existing window to front
 
     def get_selections(self):
         selections_dict = {
@@ -289,8 +276,50 @@ class SimulationOptions(tk.Tk):
             "test duration override": self.override_dur,
             "plot frequency": self.plot_freq,
             "chi2 tolerance": self.chi2_tol,
-            "data folder": self.test_folder_path
+            "perform new calibration": self.perf_calibration,
+            "calibration data": self.calibration,
+            "test data folder": self.test_folder_path
         }
-        # selections_dict.update(self.advanced_settings_values)
         
         return selections_dict
+
+
+    def proceed(self):
+        if self.check_selections():
+            return
+        
+        # Parse user input 
+        self.override_dur = self._parse_input(self.override_dur, float, "test duration override")
+        self.plot_freq = self._parse_input(self.plot_freq, int, "plot frequency")
+        self.chi2_tol = self._parse_input(self.chi2_tol, float, "chi2 tolerance")
+
+        if self.perf_calibration == 1:
+            disp_perf_cal = "yes"
+            disp_cal = "N/A"
+        else:
+            disp_perf_cal = "no"
+            if self.calibration is None:
+                disp_cal = "Use uncalibrated parameters"
+            else:
+                disp_cal = self.calibration.name
+        
+        msg = f"""
+            --------------------------------------------------
+            Proceeding with:
+            ### Probe: {self.probe_var.get()}
+            ### Crucible: {self.crucible_var.get()}
+            ### Sample: {self.sample_var.get()}
+            ### Cross-section: {self.cross_section_var.get()}
+            ### Decision Variables: {[list(self.decision_vars.keys())[i] for i in self.decision_vars_indx]}
+            ### Overridden Test Duration: {self.override_dur}
+            ### Plot Frequency (Iterations): {self.plot_freq}
+            ### Chi2 Tolerance: {self.chi2_tol}
+            ### Perform New Calibration?: {disp_perf_cal}
+            ### Calibration Parameters: {disp_cal}
+            ### Data Folder: {self.test_folder_path}
+            --------------------------------------------------
+        """
+        print(textwrap.dedent(msg).strip())
+
+        self.user_cancelled = False
+        self.destroy()  # close the GUI

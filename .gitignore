@@ -2,6 +2,7 @@ Analysis_Results/
 SA_Plots/
 Sample_Data/
 __pycache__/
+**/__pycache__/
 MATLAB_ONLY/
 Interface_FlexPDE-MATLAB/Raw Data/
 Interface_FlexPDE-MATLAB/Raw Data/**
@@ -15,3 +16,4 @@ MATLAB_Data_Analysis/From_NonCOMSOL_Computer/Analysis_Results/
 MATLAB_Data_Analysis/From_NonCOMSOL_Computer/Analysis_Results/**
 .DS_Store
 *.swp
+*.egg-info
