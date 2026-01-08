@@ -3,7 +3,7 @@ from .materials_utils import Material
 import warnings
 
 class Crucible:
-    def __init__(self, name, description, inner_radius, outer_radius, hole_depth, height, indent_height, material: Material, ignore_warnings=False):
+    def __init__(self, name, description, inner_radius, outer_radius, hole_depth, height, indent_height, material: Material):
         self.name = name
         self.description = description
         self.inner_radius = inner_radius  # in meters
@@ -13,7 +13,8 @@ class Crucible:
         self.indent_height = indent_height  # in meters
         self.material = material  # Material object
 
-        if self.material.emissivity_func is None and not ignore_warnings:
+    def print_warnings(self):
+        if self.material.emissivity_func is None and self.material.emissivity_interp is None:
             msg = f"\nEmissivity function not defined for material {self.material.name} for crucible {self.name}. \nDefault to 0.5. Radiative heat transfer calculations may be inaccurate."
             warnings.warn(msg)
 

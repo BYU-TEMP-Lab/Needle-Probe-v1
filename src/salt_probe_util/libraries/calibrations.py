@@ -6,7 +6,7 @@ class Calibration:
     def __init__ (self, json_filepath: Path):
         self.json_filepath = json_filepath
         self.read_json()
-        print(self.data)
+        # print(self.data)
         self.probe = self.data["probe"]
         self.crucible = self.data["crucible"]
         self.date = self.data["date"]

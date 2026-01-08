@@ -8,7 +8,7 @@ from ..libraries.materials import options as samples
 from ..libraries.probes import options as probes
 from ..libraries.crucibles import options as crucibles
 from ..libraries.calibrations import options as cal_dict
-from ..optim import decision_var_options as decision_vars
+from ..optimizer import decision_var_options as decision_vars
   
 
 class SimulationOptions(tk.Tk):
@@ -53,8 +53,8 @@ class SimulationOptions(tk.Tk):
         self.probe_var, self.probe_combobox = self.generate_dropdown("Probe", probes, (1, 0), self.defaults.get("probe"))
         self.crucible_var, self.crucible_combobox = self.generate_dropdown("Crucible", crucibles, (2, 0), self.defaults.get("crucible"))
         self.sample_var, self.sample_combobox = self.generate_dropdown("Sample", samples, (3, 0))
-        self.simulation_var, self.simulation_combobox = self.generate_dropdown("Simulation", self.simulation_options, (4, 0), self.defaults.get("simulation"))
-        self.cross_section_var, self.cross_section_combobox = self.generate_dropdown("Simulation Cross-section", self.cross_sections, (5, 0), self.defaults.get("simulation cross section"))
+        self.simulation_var, self.simulation_combobox = self.generate_dropdown("Simulation", self.simulation_options, (4, 0), self.defaults.get("simulation_name"))
+        self.cross_section_var, self.cross_section_combobox = self.generate_dropdown("Simulation Cross-section", self.cross_sections, (5, 0), self.defaults.get("simulation_name cross section"))
 
         # --- Decision Variables ---
         ttk.Label(self.form_frame, text="Decision Variables:").grid(row=6, column=0, padx=10, pady=5, sticky="e")
@@ -106,7 +106,7 @@ class SimulationOptions(tk.Tk):
         self.probe_var.set(self.defaults.get("probe"))
         self.crucible_var.set(self.defaults.get("crucible"))
         self.simulation_var.set(self.defaults.get("simultion"))
-        self.cross_section_var.set(self.defaults.get("simulation cross section"))
+        self.cross_section_var.set(self.defaults.get("simulation_name cross section"))
 
         # Select the default decision variables
         ## Clear current selection first
@@ -265,30 +265,16 @@ class SimulationOptions(tk.Tk):
             return None
         
 
-    def get_selections(self):
-        selections_dict = {
-            "probe": self.probe_var.get(),
-            "crucible": self.crucible_var.get(),
-            "sample": self.sample_var.get(),
-            "simulation": self.simulation_var.get(),
-            "simulation cross section": self.cross_section_var.get(),
-            "decision variables indices": self.decision_vars_indx,
-            "test duration override": self.override_dur,
-            "plot frequency": self.plot_freq,
-            "chi2 tolerance": self.chi2_tol,
-            "perform new calibration": self.perf_calibration,
-            "calibration data": self.calibration,
-            "test data folder": self.test_folder_path
-        }
-        
-        return selections_dict
-
-
     def proceed(self):
         if self.check_selections():
             return
         
-        # Parse user input 
+        # Save user input 
+        self.probe = probes[self.probe_var.get()]
+        self.crucible = crucibles[self.crucible_var.get()]
+        self.sample = samples[self.sample_var.get()]
+        self.simulation_name = self.simulation_var.get()
+        self.cross_section = self.cross_section_var.get()
         self.override_dur = self._parse_input(self.override_dur, float, "test duration override")
         self.plot_freq = self._parse_input(self.plot_freq, int, "plot frequency")
         self.chi2_tol = self._parse_input(self.chi2_tol, float, "chi2 tolerance")
@@ -306,10 +292,11 @@ class SimulationOptions(tk.Tk):
         msg = f"""
             --------------------------------------------------
             Proceeding with:
-            ### Probe: {self.probe_var.get()}
-            ### Crucible: {self.crucible_var.get()}
-            ### Sample: {self.sample_var.get()}
-            ### Cross-section: {self.cross_section_var.get()}
+            ### Probe: {self.probe.name}
+            ### Crucible: {self.crucible.name}
+            ### Sample: {self.sample.name}
+            ### Cross-section: {self.cross_section}
+            ### Simulation: {self.simulation_name}
             ### Decision Variables: {[list(self.decision_vars.keys())[i] for i in self.decision_vars_indx]}
             ### Overridden Test Duration: {self.override_dur}
             ### Plot Frequency (Iterations): {self.plot_freq}
@@ -323,3 +310,22 @@ class SimulationOptions(tk.Tk):
 
         self.user_cancelled = False
         self.destroy()  # close the GUI
+
+
+    def get_selections_dict(self):
+        selections_dict = {
+            "probe": self.probe,
+            "crucible": self.crucible,
+            "sample": self.sample,
+            "simulation": self.simulation_options[self.simulation_name],
+            "simulation cross section": self.cross_section,
+            "decision variables indices": self.decision_vars_indx,
+            "test duration override": self.override_dur,
+            "plot frequency": self.plot_freq,
+            "chi2 tolerance": self.chi2_tol,
+            "perform new calibration": self.perf_calibration,
+            "calibration data": self.calibration,
+            "test data folder": self.test_folder_path
+        }
+        
+        return selections_dict
