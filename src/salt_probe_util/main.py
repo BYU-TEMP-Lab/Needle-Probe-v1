@@ -11,7 +11,7 @@ from .GUI.GUI_main import SimulationOptions
 from .process_data import get_files_data
 from .flexPDE_model import run as run_flex_model
 from .thermal_quadrupoles_model import run as run_therm_quad_model
-from .optimizer import run as run_optimizer
+from .optimizer import run as run_optimizer, prepare_for_pickling
 
 # import .libraries.materials, .libraries.probes, .optim as optim
 # from .libraries.materials import options as material_options
@@ -23,8 +23,8 @@ simulation_options_dict = {"FlexPDE": run_flex_model, "Thermal Quadrupoles": run
 cross_section_options_dict = {"Axial": None, "Radial": None}
 
 # function to be multi threaded
-def get_solved_values(file_data, main_GUI):
-    return run_optimizer(main_GUI, file_data)
+def get_solved_values(prepared_file_data, model_template):
+    return run_optimizer(prepared_file_data, model_template)
 
 
 def main():
@@ -52,12 +52,23 @@ def main():
         print("No valid data found. Exiting program.")
         return
     
+    # solve and store properties for each file in folder_data at ambient temperature (multi-threading requires pickling, which doesn't like nested functions)
+    # Note that this means we assume constant properties during optimization at each temperature, and that the ambient temperature is representative of the entire test
+    prepared_folder_data = prepare_for_pickling(folder_data, main_GUI)
+
+    def get_model_template(main_GUI):
+        return 2
+
+    # set up model template for optimization runs
+    model_template = get_model_template(main_GUI)
+    
     # set up multi-threading for running optimization
     with ProcessPoolExecutor() as executor:
+        print("Beginning multi-threaded optimization...")
         folder_solved_values = list(executor.map(
             get_solved_values, 
-            folder_data,
-            itertools.repeat(user_selections)))
+            prepared_folder_data,
+            itertools.repeat(model_template)))
 
     # Process results...
     print(f"Processed {len(folder_solved_values)} files.")

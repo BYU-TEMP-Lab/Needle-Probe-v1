@@ -55,7 +55,7 @@ def get_start_stop(voltage, time, V_min_cutoff, test_duration):
     return V_start, V_end
 
 
-def process_data(filename: Path, test_duration: float=None, V_min_cutoff: float=0.8):
+def process_data(filepath: Path, test_duration: float=None, V_min_cutoff: float=0.8):
     """
     Given filename (and optionally the test length in seconds and 
     Voltage to detect the heating wire is active in Volts),
@@ -64,12 +64,16 @@ def process_data(filename: Path, test_duration: float=None, V_min_cutoff: float=
     average power applied, and ambient temperature in Kelvin.
     """
 
-    time, temp, voltage, current = read_data(filename)
+    time, temp, voltage, current = read_data(filepath)
     V_start, V_end = get_start_stop(voltage, time, V_min_cutoff, test_duration)
 
     # Ambient temperature
     avgT_amb_C = np.mean(temp[:V_start-1])
     avgT_amb_K = avgT_amb_C + 273.15  # Convert Celsius to Kelvin (used in heat transfer eq.)
+
+    # Estimate noise
+    temp_noise_std = np.std(temp[:V_start-1]) # standard deviation of temps in general
+    temp_amb_sem = temp_noise_std / np.sqrt(V_start-1) # standard error of the mean for ambient temp
 
     # Align time, temp, Voltage, and Current with V_start and V_end
     time = time[V_start:V_end] - time[V_start]
@@ -77,20 +81,39 @@ def process_data(filename: Path, test_duration: float=None, V_min_cutoff: float=
     voltage = voltage[V_start:V_end]
     current = current[V_start:V_end]
 
-    # Average power
+    # Average voltage during heating period, standard deviation, and standard error
     avgVoltage = np.mean(voltage)
+    std_V = np.std(voltage)
+    sem_V = std_V / np.sqrt(len(voltage))
+
+    # Average current during heating period, standard deviation, and standard error
     avgCurrent = np.nanmean(current) / 1000  # Convert mA to A
+    std_I = np.nanstd(current) / 1000
+    n_valid = np.count_nonzero(~np.isnan(current)) # handle NaN values
+    sem_I = std_I / np.sqrt(n_valid) if n_valid > 0 else 0
+
+    # Average power applied during heating period, error propagation for standard error
     avgQ = avgVoltage * avgCurrent
+    semQ = avgQ * np.sqrt((sem_V / avgVoltage)**2 + (sem_I / avgCurrent)**2)
 
     # Construct experimental temp vs time array
     tempData = np.column_stack((time, deltaT))
 
     data_dict = {
+        "filepath": filepath,
         "tempData": tempData,
-        "avgQ": avgQ,
-        "avgT_amb_K": avgT_amb_K
+        "tempData_std": temp_noise_std,
+        "avgT_amb_K": {
+            "initial_value": avgT_amb_K,
+            "bounds": (avgT_amb_K - 5, avgT_amb_K + 5),
+            "prior_sigma": temp_amb_sem
+            },
+        "avgQ": {
+            "initial_value": avgQ,
+            "bounds": (0.9 * avgQ, 1.1 * avgQ),
+            "prior_sigma": semQ
+        }
     }
-
     return data_dict
 
 def get_files_data(data_folder: Path):

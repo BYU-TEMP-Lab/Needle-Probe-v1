@@ -27,15 +27,36 @@ class Crucible:
 # 0 is the theoretical. 
 # No idea what the names mean
 # The materials are unknown as of 1/2/26
+# ALL NEED TO BE REFORMATTED TO MATCH CRUCIBLE_0 STYLE IF THEY ARE TO BE USED IN FITTING
 
 crucible_0 = Crucible(
     name = "0 (Theoretical)",
     description = "Thesis", 
-    inner_radius = 3.97e-3,
-    outer_radius = 25.5e-3,
-    hole_depth = 110e-3,
-    height = 153.4e-3,
-    indent_height = 0,
+    inner_radius = {
+        "initial_value":3.97e-3,
+        "bounds": (3.8e-3, 4.1e-3),
+        "prior_sigma": 0.1e-3
+        },
+    outer_radius = {
+        "initial_value":25.5e-3,
+        "bounds": (25.0e-3, 26.0e-3),
+        "prior_sigma": 0.1e-3
+        },
+    hole_depth = {
+        "initial_value":110e-3,
+        "bounds": (105e-3, 115e-3),
+        "prior_sigma": 2e-3
+        },
+    height = {
+        "initial_value":153.4e-3,
+        "bounds": (150e-3, 157e-3),
+        "prior_sigma": 2e-3
+        },
+    indent_height = {
+        "initial_value":0e-3,
+        "bounds": (0e-3, 5e-3),
+        "prior_sigma": 1e-3
+    },
     material = material_options["Nickel 200"]
 )
 

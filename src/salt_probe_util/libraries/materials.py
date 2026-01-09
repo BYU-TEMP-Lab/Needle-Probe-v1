@@ -1,4 +1,5 @@
-from .materials_utils import Material, thermal_contact_resistance, apply_porosity
+from .materials_utils import Material, thermal_contact_resistance, apply_porosity, load_nist_fluid_properties
+from pathlib import Path
 
 # List of materials available for use in simulations
 # SORTED ALPHABETICALLY BY MATERIAL NAME
@@ -83,41 +84,53 @@ Alumina = Material("Alumina",
 # Argon
 # ========================================
 # From NIST (https://webbook.nist.gov/cgi/cbook.cgi?ID=7440-37-1)
+# Eric W. Lemmon, Ian H. Bell, Marcia L. Huber, and Mark O. McLinden, "Thermophysical Properties of Fluid Systems" in NIST Chemistry WebBook, NIST Standard Reference Database Number 69, Eds. P.J. Linstrom and W.G. Mallard, National Institute of Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303, (retrieved January 8, 2026).
 
-def k_Argon(T):
-    # Aggarwal, Springer, 1979
-    if T >= 273 and T < 473:
-        return -1.3127E-08*T^2 + 5.3488E-05*T + 3.1611E-03
-    elif T >= 473 and T < 673:
-        return -1.52385E-08*T^2 + 5.52618E-05*T + 2.90397E-03
-    else:
-        return -1.3127E-08*T^2 + 5.3488E-05*T + 3.1611E-03; 
+argon_data_path = Path(__file__).parent.parent / "config" / "raw_material_data" / "argon nist fluid properties - 0-1700C - 1 atm.txt"
+k_Argon, cp_Argon, rho_Argon = load_nist_fluid_properties(argon_data_path)
 
-def cp_Argon(T):
-    # Heat Capacity- Argon: Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]
-    if T >= 273 and T < 473:
-        return -3.5705E-14*T^5 + 1.3617E-10*T^4 - 2.0614E-07*T^3 + 1.5592E-04*T^2 - 5.9846E-02*T + 5.3000E+02
-    elif T >= 473 and T < 673:
-        return -8.80430E-14*T^5 + 2.79446E-10*T^4 - 3.58934E-07*T^3 + 2.35173E-04*T^2 - 7.98606E-02*T + 5.31985E+02
-    else: 
-        return -3.5705E-14*T^5 + 1.3617E-10*T^4 - 2.0614E-07*T^3 + 1.5592E-04*T^2 - 5.9846E-02*T + 5.3000E+02
+Argon = Material(
+    name="Argon", 
+    k_func=k_Argon, 
+    k_perc_uncertainty=0.02, # 2% uncertainty
+    cp_func=cp_Argon, 
+    cp_perc_uncertainty=0.002, # 0.2% uncertainty
+    rho_func=rho_Argon, 
+    rho_perc_uncertainty=0.003, # 0.03% uncertainty
+    valid_range=(273, 1973), 
+    ignore_out_of_range=False
+    )
 
-def rho_Argon(T):
-    # Density- Argon: Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]
-    if T >= 273 and T < 473:
-        return 4.8953E+02*T^(-1.0005)
-    elif T >= 473 and T < 673:
-        return 4.88954E+02*T^(-1.00033)
-    else:
-        return 4.8953E+02*T^(-1.0005)
-    
-# uncertainties
-# Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
-# uncertainty_k_Argon = 0.02*k_Argon(Temp)
-# uncertainty_cp_Argon = 0.02*cp_Argon(Temp)
-# uncertainty_rho_Argon = 0.002*rho_Argon(Temp)
+# OLD POLYNOMIAL FITS FOR ARGON VVVVVVV (REPLACED BY NIST DATA ABOVE)
+# def k_Argon(T):
+#     # Aggarwal, Springer, 1979
+#     if T >= 273 and T < 473:
+#         return -1.3127E-08*T^2 + 5.3488E-05*T + 3.1611E-03
+#     elif T >= 473 and T < 673:
+#         return -1.52385E-08*T^2 + 5.52618E-05*T + 2.90397E-03
+#     else:
+#         return -1.3127E-08*T^2 + 5.3488E-05*T + 3.1611E-03; 
 
-Argon = Material("Argon", k_func=k_Argon, cp_func=cp_Argon, rho_func=rho_Argon, valid_range=(273, 673), ignore_out_of_range=True)
+# def cp_Argon(T):
+#     # Heat Capacity- Argon: Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]
+#     if T >= 273 and T < 473:
+#         return -3.5705E-14*T^5 + 1.3617E-10*T^4 - 2.0614E-07*T^3 + 1.5592E-04*T^2 - 5.9846E-02*T + 5.3000E+02
+#     elif T >= 473 and T < 673:
+#         return -8.80430E-14*T^5 + 2.79446E-10*T^4 - 3.58934E-07*T^3 + 2.35173E-04*T^2 - 7.98606E-02*T + 5.31985E+02
+#     else: 
+#         return -3.5705E-14*T^5 + 1.3617E-10*T^4 - 2.0614E-07*T^3 + 1.5592E-04*T^2 - 5.9846E-02*T + 5.3000E+02
+
+# def rho_Argon(T):
+#     # Density- Argon: Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]
+#     if T >= 273 and T < 473:
+#         return 4.8953E+02*T^(-1.0005)
+#     elif T >= 473 and T < 673:
+#         return 4.88954E+02*T^(-1.00033)
+#     else:
+#         return 4.8953E+02*T^(-1.0005)
+
+
+# Argon = Material("Argon", k_func=k_Argon, cp_func=cp_Argon, rho_func=rho_Argon, valid_range=(273, 673), ignore_out_of_range=True)
 
 
 # ========================================
@@ -558,32 +571,31 @@ np1NaNO3_KNO3 = Material(
 # ========================================
 def k_Ni(T):
     if T >= 173 and T < 673:
-        return 76.12158+0.02717507*T^1-2.126458E-4*T^2+1.876168E-7*T^3
+        return 76.12158+0.02717507*T**1-2.126458E-4*T**2+1.876168E-7*T**3
     elif T >= 673 and T <= 1273:
-        return 40.623+0.02201643*T^1-3.571429E-7*T^2
+        return 40.623+0.02201643*T**1-3.571429E-7*T**2
     else:
-        return 40.623+0.02201643*T^1-3.571429E-7*T^2 # placeholder
+        return 40.623+0.02201643*T**1-3.571429E-7*T**2 # placeholder
     
 def cp_Ni(T):
     if T >= 293 and T < 633:
-        return 292.88+0.50208*T^1
+        return 292.88+0.50208*T**1
     elif T >= 633 and T < 1726:
-        return 418.4+0.1284488*T^1
+        return 418.4+0.1284488*T**1
     else:
-        return 418.4+0.1284488*T^1 # placeholder
-
+        return 418.4+0.1284488*T**1 # placeholder
 def rho_Ni(T):
-    return 8964.214-0.1681755*T^1-3.536041E-4*T^2+2.01714E-7*T^3-4.919056E-11*T^4; # 73 to 1373 K
+    return 8964.214-0.1681755*T**1-3.536041E-4*T**2+2.01714E-7*T**3-4.919056E-11*T**4; # 73 to 1373 K
 
 def alpha_Ni(T):
     if T >= 293 and T < 633:
-        return 3.044717E-5-5.149323E-8*T^1+3.129624E-11*T^2
+        return 3.044717E-5-5.149323E-8*T**1+3.129624E-11*T**2
     elif T >= 633 and T < 676:
-        return 4.81462E-5-1.036816E-7*T^1+7.54384E-11*T^2
+        return 4.81462E-5-1.036816E-7*T**1+7.54384E-11*T**2
     elif T >= 676 and T <= 1273:
-        return 1.087891E-5+2.600264E-9*T^1-2.279477E-13*T^2
+        return 1.087891E-5+2.600264E-9*T**1-2.279477E-13*T**2
     else:
-        return 1.087891E-5+2.600264E-9*T^1-2.279477E-13*T^2 # placeholder
+        return 1.087891E-5+2.600264E-9*T**1-2.279477E-13*T**2 # placeholder
             
 
 Nickel200 = Material(

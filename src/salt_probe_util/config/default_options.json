@@ -1,11 +1,12 @@
 {
-        "probe": "BYU Probe 2C.2",
+        "probe": "??? BYU Probe 2C.2",
         "crucible": "0 (Theoretical)",
         "sample": "Argon",
         "simulation": "FlexPDE",
         "simulation cross section": "Radial",
-        "decision variables": ["Wire rho", "Insulation k"],
+        "decision variables": ["Thermocouple k", "Wire k", "Insulation k", "Sheath k", "Crucible k", "Sample radius"],
         "test duration override": null, 
         "plot frequency": 5, 
-        "chi2 tolerance": 1e-4
+        "chi2 tolerance": 1e-4,
+        "convection coefficient": 10.0
 }

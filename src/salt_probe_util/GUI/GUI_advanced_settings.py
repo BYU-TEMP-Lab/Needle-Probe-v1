@@ -14,9 +14,14 @@ class AdvancedSettings(tk.Toplevel):
         self.grab_set()
 
         # Variables for settings
-        self.test_duration_override = tk.StringVar(value=parent.defaults.get("test duration override"))
-        self.plot_frequency = tk.StringVar(value=parent.defaults.get("plot frequency"))
-        self.chi2_tolerance = tk.StringVar(value=parent.defaults.get("chi2 tolerance"))
+        # self.test_duration_override = tk.StringVar(value=parent.defaults.get("test duration override"))
+        # self.plot_frequency = tk.StringVar(value=parent.defaults.get("plot frequency"))
+        # self.chi2_tolerance = tk.StringVar(value=parent.defaults.get("chi2 tolerance"))
+        # self.convection_coefficient = tk.StringVar(value=parent.defaults.get("convection coefficient"))
+        self.test_duration_override = tk.StringVar(value=parent.override_dur)
+        self.plot_frequency = tk.StringVar(value=parent.plot_freq)
+        self.chi2_tolerance = tk.StringVar(value=parent.chi2_tol)
+        self.convection_coefficient = tk.StringVar(value=parent.convection_coeff)
 
         # Layout
         form = ttk.Frame(self, padding=10)
@@ -31,14 +36,17 @@ class AdvancedSettings(tk.Toplevel):
         ttk.Label(form, text="Chi² Tolerance:").grid(row=2, column=0, sticky="e", padx=5, pady=5)
         ttk.Entry(form, textvariable=self.chi2_tolerance).grid(row=2, column=1, padx=5, pady=5)
 
+        ttk.Label(form, text="Convection Coefficient:").grid(row=3, column=0, sticky="e", padx=5, pady=5)
+        ttk.Entry(form, textvariable=self.convection_coefficient).grid(row=3, column=1, padx=5, pady=5)
+
         # --- Default Setting Selection ---
-        ttk.Label(form, text="Default Settings File:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        ttk.Label(form, text="Default Settings File:").grid(row=4, column=0, padx=5, pady=5, sticky="e")
         self.default_file_label = ttk.Label(form, text="/".join(parent.default_file_path.parts[-2:]), wraplength=250, justify="left")
-        self.default_file_label.grid(row=4, column=1, padx=5, pady=5, sticky="w")
-        ttk.Button(form, text="Load Defaults", command=self.get_defaults).grid(row=3, column=1, padx=5, pady=5, sticky="w")
+        self.default_file_label.grid(row=5, column=1, padx=5, pady=5, sticky="w")
+        ttk.Button(form, text="Load Defaults", command=self.get_defaults).grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
         self.save_and_close_button = ttk.Button(form, text="Save and Close", command=self.save_and_close)
-        self.save_and_close_button.grid(row=5, column=0, columnspan=2, pady=10)
+        self.save_and_close_button.grid(row=6, column=0, columnspan=2, pady=10)
 
     def get_defaults(self):
         selected_file = filedialog.askopenfilename(
@@ -58,11 +66,13 @@ class AdvancedSettings(tk.Toplevel):
         self.test_duration_override.set(self.parent.defaults.get("test duration override"))
         self.plot_frequency.set(self.parent.defaults.get("plot frequency"))
         self.chi2_tolerance.set(self.parent.defaults.get("chi2 tolerance"))
+        self.convection_coefficient.set(self.parent.defaults.get("convection coefficient"))
 
     def save_and_close(self):
         self.parent.override_dur = self.test_duration_override.get()
         self.parent.plot_freq = self.plot_frequency.get()
         self.parent.chi2_tol = self.chi2_tolerance.get()
+        self.parent.convection_coeff = self.convection_coefficient.get()
         self.destroy()
 
     # def get_settings(self):

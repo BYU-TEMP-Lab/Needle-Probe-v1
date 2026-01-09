@@ -8,7 +8,7 @@ from ..libraries.materials import options as samples
 from ..libraries.probes import options as probes
 from ..libraries.crucibles import options as crucibles
 from ..libraries.calibrations import options as cal_dict
-from ..optimizer import decision_var_options as decision_vars
+from ..optimizer import model_param_map as decision_vars
   
 
 class SimulationOptions(tk.Tk):
@@ -31,6 +31,7 @@ class SimulationOptions(tk.Tk):
         self.override_dur = self.defaults.get("test duration override")
         self.plot_freq = self.defaults.get("plot frequency")
         self.chi2_tol = self.defaults.get("chi2 tolerance")
+        self.convection_coeff = self.defaults.get("convection coefficient")
 
         # build UI
         self._build_ui()
@@ -42,7 +43,8 @@ class SimulationOptions(tk.Tk):
 
         # --- Container for centering ---
         self.form_frame = ttk.Frame(self)
-        self.form_frame.pack(expand=True)
+        self.form_frame.pack(expand=True, fill="both", padx=20, pady=20)
+        self.form_frame.columnconfigure(1, weight=10) # make second column wider for better layout
 
         # --- Title ---
         ttk.Label(self.form_frame, text="Simulation Options", font=("Arial", 16)).grid(row=0, column=0, columnspan=2, pady=10)
@@ -50,16 +52,16 @@ class SimulationOptions(tk.Tk):
         # --- Dropdowns for Probe, Crucible, Sample, Simulation Cross Section, Simulation ---
         self.empty_var = "Select..."
 
-        self.probe_var, self.probe_combobox = self.generate_dropdown("Probe", probes, (1, 0), self.defaults.get("probe"))
-        self.crucible_var, self.crucible_combobox = self.generate_dropdown("Crucible", crucibles, (2, 0), self.defaults.get("crucible"))
-        self.sample_var, self.sample_combobox = self.generate_dropdown("Sample", samples, (3, 0))
-        self.simulation_var, self.simulation_combobox = self.generate_dropdown("Simulation", self.simulation_options, (4, 0), self.defaults.get("simulation_name"))
-        self.cross_section_var, self.cross_section_combobox = self.generate_dropdown("Simulation Cross-section", self.cross_sections, (5, 0), self.defaults.get("simulation_name cross section"))
+        self.probe_var, self.probe_combobox = self.generate_dropdown("Probe:", probes, (1, 0), self.defaults.get("probe"))
+        self.crucible_var, self.crucible_combobox = self.generate_dropdown("Crucible:", crucibles, (2, 0), self.defaults.get("crucible"))
+        self.sample_var, self.sample_combobox = self.generate_dropdown("Sample:", samples, (3, 0))
+        self.simulation_var, self.simulation_combobox = self.generate_dropdown("Simulation:", self.simulation_options, (4, 0), self.defaults.get("simulation"))
+        self.cross_section_var, self.cross_section_combobox = self.generate_dropdown("Simulation Cross-section:", self.cross_sections, (5, 0), self.defaults.get("simulation cross section"))
 
         # --- Decision Variables ---
         ttk.Label(self.form_frame, text="Decision Variables:").grid(row=6, column=0, padx=10, pady=5, sticky="e")
-        self.decision_vars_box = tk.Listbox(self.form_frame, selectmode=tk.MULTIPLE, exportselection=False) # selectmode can be SINGLE, BROWSE, MULTIPLE, or EXTENDED
-        self.decision_vars_box.grid(row=6, column=1, padx=10, pady=5, sticky="w")
+        self.decision_vars_box = tk.Listbox(self.form_frame, selectmode=tk.MULTIPLE, exportselection=False, width=50) # selectmode can be SINGLE, BROWSE, MULTIPLE, or EXTENDED
+        self.decision_vars_box.grid(row=6, column=1, padx=10, pady=5, sticky="ew")
 
         for x in decision_vars.keys():
             self.decision_vars_box.insert(tk.END, x)
@@ -72,7 +74,7 @@ class SimulationOptions(tk.Tk):
         # --- Data Folder Selection ---
         ttk.Label(self.form_frame, text="Experimental Data Folder:").grid(row=7, column=0, padx=10, pady=5, sticky="e")
         self.folder_label = ttk.Label(self.form_frame, text="No folder selected", wraplength=250, justify="left")
-        self.folder_label.grid(row=8, column=1, padx=10, pady=5, sticky="w")
+        self.folder_label.grid(row=8, column=1, padx=10, pady=5, sticky="ew")
         ttk.Button(self.form_frame, text="Select Folder", command=self.select_data_folder).grid(row=7, column=1, padx=10, pady=5, sticky="w")
 
         # --- Advanced Settings Button ---
@@ -98,7 +100,7 @@ class SimulationOptions(tk.Tk):
             var.set(default_value)
 
         combobox = ttk.Combobox(self.form_frame, textvariable=var, values=list(vars_dict.keys()), state="readonly")
-        combobox.grid(row=pos[0], column=pos[1]+1, padx=10, pady=5, sticky="w")
+        combobox.grid(row=pos[0], column=pos[1]+1, padx=10, pady=5, sticky="ew")
         return var, combobox
     
 
@@ -118,6 +120,7 @@ class SimulationOptions(tk.Tk):
         self.override_dur = self.defaults.get("test duration override")
         self.plot_freq = self.defaults.get("plot frequency")
         self.chi2_tol = self.defaults.get("chi2 tolerance")
+        self.convection_coeff = self.defaults.get("convection coefficient")
 
 
     def load_defaults_file(self, filepath=None):
@@ -221,10 +224,18 @@ class SimulationOptions(tk.Tk):
             return True
         
         # check advanced settings for validity
-        if not self.chi2_tol:
+        advanced = [self.override_dur, self.plot_freq, self.chi2_tol, self.convection_coeff]
+        try:
+            for val in advanced:
+                val = self._parse_input(val, float, "advanced setting")
+                if val is not None and not isinstance(val, (int, float)):
+                    raise ValueError(f"Invalid value {val} type for advanced setting")
+                if isinstance(val, (int, float)) and val <= 0:
+                    raise ValueError(f"Value {val} must be positive non-zero for advanced setting")
+        except ValueError:
             messagebox.showerror(
                 "Error",
-                "Must select non-zero Chi-square value."
+                f"Invalid value for advanced settings. Please ensure all values are positive numbers or 'None'."
             )
             return True
         
@@ -301,6 +312,7 @@ class SimulationOptions(tk.Tk):
             ### Overridden Test Duration: {self.override_dur}
             ### Plot Frequency (Iterations): {self.plot_freq}
             ### Chi2 Tolerance: {self.chi2_tol}
+            ### Convection Coefficient: {self.convection_coeff}
             ### Perform New Calibration?: {disp_perf_cal}
             ### Calibration Parameters: {disp_cal}
             ### Data Folder: {self.test_folder_path}
@@ -323,6 +335,7 @@ class SimulationOptions(tk.Tk):
             "test duration override": self.override_dur,
             "plot frequency": self.plot_freq,
             "chi2 tolerance": self.chi2_tol,
+            "convection coefficient": self.convection_coeff,
             "perform new calibration": self.perf_calibration,
             "calibration data": self.calibration,
             "test data folder": self.test_folder_path

@@ -4,11 +4,13 @@ import  os, sys, warnings
 def relative_showwarning(message, category, filename, lineno, file=None, line=None):
     # 1. Generate the relative path
     rel_path = os.path.relpath(filename)
+    short_path = os.path.basename(rel_path)
     
     # 2. Build the output string
     # IMPORTANT: We DO NOT include the 'line' variable here. 
     # This is what removes the redundant source code line.
-    output = f"{rel_path}:{lineno}: {category.__name__}: {message}\n"
+    # output = f"{rel_path}:{lineno}: {category.__name__}: {message}\n"
+    output = f"{short_path}:{lineno}: {category.__name__}: {message}\n"
     
     # 3. Explicitly write to the output stream (usually stderr)
     if file is None:
