@@ -8,7 +8,7 @@ from ..libraries.materials import options as samples
 from ..libraries.probes import options as probes
 from ..libraries.crucibles import options as crucibles
 from ..libraries.calibrations import options as cal_dict
-from ..optimizer import model_param_map as decision_vars
+from ..build_model import model_param_map as decision_vars
   
 
 class SimulationOptions(tk.Tk):
@@ -329,7 +329,7 @@ class SimulationOptions(tk.Tk):
             "probe": self.probe,
             "crucible": self.crucible,
             "sample": self.sample,
-            "simulation": self.simulation_options[self.simulation_name],
+            "simulation": self.simulation,
             "simulation cross section": self.cross_section,
             "decision variables indices": self.decision_vars_indx,
             "test duration override": self.override_dur,

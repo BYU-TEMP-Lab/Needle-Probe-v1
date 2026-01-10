@@ -202,49 +202,39 @@ def generate_BYU_probe_2C_2():
             "bounds": (4.5e-4, 5.2e-4),
             "prior_sigma": 0.5e-4
         },
-        "HW_Ni": {
+        "HW_sheath": {
             "initial_value": 0.002,               # Distance between heating wire tip and inner Ni sheath
             "bounds": (0.0015, 0.0025),
             "prior_sigma": 0.0005
         },
-        "r_Al": {
-            "initial_value": 0.8293e-3,            # Alumina Layer radius (in meters)
-            "bounds": (0.8e-3, 0.85e-3),
+        "r_insulation": {
+            "initial_value": 2.159e-3/2,            # Insulation Layer radius (in meters)
+            "bounds": ((2.159-0.0508)*1e-3/2, (2.159+0.0508)*1e-3/2),
             "prior_sigma": 0.1e-3
         },
-        "r_Ni": {
-            "initial_value": 1.388e-3,             # Nickel Sheath radius (in meters) 
-            "bounds": (1.35e-3, 1.42e-3),
+        "r_sheath": {
+            "initial_value": 2.7686e-3 / 2,             # Sheath radius (in meters) 
+            "bounds": ((2.7686-0.0254)*1e-3 / 2, (2.7686+0.0254)*1e-3 / 2),
             "prior_sigma": 0.1e-3
         },
-        "Ni_curve": {
-            "initial_value": 0.001,            # Depth of Ni Sheath curved tip
-            "bounds": (0.0005, 0.0015),
+        "h_point": {
+            "initial_value":0.005,            # Depth of Sheath pointed tip
+            "bounds": (0.004, 0.006),
             "prior_sigma": 0.00025
         },
-        "samp_probe": {
-            "initial_value": -0.001,         # Distance between Sample and Probe tip (negative = BELOW probe tip)
-            "bounds": (-0.01, 0),
-            "prior_sigma": 0.001
-        },
-        "r_samp": {
-            "initial_value": 0.00207,            # Sample Radius (in meters) (commented out in original)
-            "bounds": (0.002, 0.01),
-            "prior_sigma": 1e-4
-        },
         "h_max": {
-            "initial_value": 0.1,                 # Height of Probe (m)
-            "bounds": (9e-2, 1e-1),
-            "prior_sigma": 5e-3
+            "initial_value": 143e-3,                 # Height of sensing region of Probe (m)
+            "bounds": (140e-3, 145e-3),
+            "prior_sigma": 2e-3
         }
     }
 
     # Derived values
-    geometry["h_base"] = {
-        "initial_value": -0.01 + geometry["samp_probe"]["initial_value"],  # Total area below probe (Crucible bottom + separation)
-        "bounds": (-0.02, 0),
-        "prior_sigma": 0.001
-    } # total area below probe (Crucible bottom + separation)
+    # geometry["h_base"] = {
+    #     "initial_value": -0.01 + geometry["samp_probe"]["initial_value"],  # Total area below probe (Crucible bottom + separation)
+    #     "bounds": (-0.02, 0),
+    #     "prior_sigma": 0.001
+    # } # total area below probe (Crucible bottom + separation)
     geometry["vol_wires"] = {
         "initial_value": math.pi * geometry["r_wires"]["initial_value"]**2 * (geometry["h_max"]["initial_value"]*2) +
                          (math.pi**2 * geometry["r_wires"]["initial_value"]**2 * geometry["r_wir_mid"]["initial_value"]),
@@ -255,7 +245,7 @@ def generate_BYU_probe_2C_2():
     geometry["L"] = {
         "initial_value": (
         geometry["h_max"]["initial_value"] -
-        (geometry["r_Ni"]["initial_value"] - geometry["r_Al"]["initial_value"] + geometry["HW_Ni"]["initial_value"] + geometry["HW_curve"]["initial_value"]) +
+        (geometry["r_sheath"]["initial_value"] - geometry["r_insulation"]["initial_value"] + geometry["HW_sheath"]["initial_value"] + geometry["HW_curve"]["initial_value"]) +
         2 * math.pi * geometry["r_wir_mid"]["initial_value"]
         ),  # Length of wires (Total length - spacing)
         "bounds": (0, 1e-1),

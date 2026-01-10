@@ -3,7 +3,7 @@ from .materials_utils import Material
 import warnings
 
 class Crucible:
-    def __init__(self, name, description, inner_radius, outer_radius, hole_depth, height, indent_height, material: Material):
+    def __init__(self, name, description, material: Material, inner_radius, outer_radius, hole_depth, height, indent_height, indent_radius=None,):
         self.name = name
         self.description = description
         self.inner_radius = inner_radius  # in meters
@@ -11,6 +11,7 @@ class Crucible:
         self.hole_depth = hole_depth      # in meters
         self.height = height              # in meters
         self.indent_height = indent_height  # in meters
+        self.indent_diameter = None if not indent_height else indent_radius
         self.material = material  # Material object
 
     def print_warnings(self):
@@ -61,7 +62,7 @@ crucible_0 = Crucible(
 )
 
 crucible_1 = Crucible(
-    name = "1 (???)",
+    name = "1 (Nickel 200)",
     description = "Shiny TriSTripe",
     inner_radius = 4.3e-3,
     outer_radius = 25.47e-3,
@@ -72,7 +73,7 @@ crucible_1 = Crucible(
 )
 
 crucible_2 = Crucible(
-    name = "2 (???)",
+    name = "2 (Nickel 200)",
     description = "Dull Goldtop (Teeth)",
     inner_radius = 4.18e-3,
     outer_radius = 25.48e-3,
@@ -83,7 +84,7 @@ crucible_2 = Crucible(
 )
 
 crucible_3 = Crucible(
-    name = "3 (???)",
+    name = "3 (Nickel 200)",
     description = "Shiny Greenspecks",
     inner_radius = 4.05e-3,
     outer_radius = 25.59e-3,
@@ -94,7 +95,7 @@ crucible_3 = Crucible(
 )
 
 crucible_4 = Crucible(
-    name = "4 (???)",
+    name = "4 (Nickel 200)",
     description = "Dark Grey, Striped",
     inner_radius = 4.12e-3,
     outer_radius = 25.57e-3,
@@ -105,7 +106,7 @@ crucible_4 = Crucible(
 )
 
 crucible_5 = Crucible(
-    name = "5 (???)",
+    name = "5 (Nickel 200)",
     description = "Dull Greytop",
     inner_radius = 4.11e-3,
     outer_radius = 25.54e-3,
@@ -116,7 +117,7 @@ crucible_5 = Crucible(
 )
 
 crucible_6 = Crucible(
-    name = "6 (???)",
+    name = "6 (Nickel 200)",
     description = "Gold Shiny",
     inner_radius = 4.2e-3,
     outer_radius = 25.35e-3,
@@ -127,7 +128,7 @@ crucible_6 = Crucible(
 )
 
 crucible_7 = Crucible(
-    name = "7 (???)",
+    name = "7 (Nickel 200)",
     description = "Cutaway",
     inner_radius = 4.16e-3,
     outer_radius = 25.36e-3,
@@ -136,6 +137,31 @@ crucible_7 = Crucible(
     indent_height = 0,
     material = material_options["Nickel 200"]
 )
+
+crucible_8 = Crucible(
+    name = "8 (Inconel ???)",
+    description = "Cutaway",
+    inner_radius = 4.16e-3,
+    outer_radius = 25.36e-3,
+    hole_depth = 117.41e-3,
+    height = 127.17e-3,
+    indent_height = 0,
+    material = material_options["Nickel 200"]
+)
+
+crucible_9 = Crucible(
+    name = "9 (SS ???)",
+    description = "SS Thru-hole",
+    inner_radius = 4.16e-3,
+    outer_radius = 25.36e-3,
+    hole_depth = 117.41e-3,
+    height = 127.17e-3,
+    indent_height = 0,
+    indent_radius=0,
+    material = material_options["Nickel 200"]
+)
+
+
 
 
 # =======================================

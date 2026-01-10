@@ -124,9 +124,10 @@ def generate_flex_file(file_data, user_selections):
     """
 
     file_contents = textwrap.dedent(file_contents).strip()
-    print(textwrap.dedent(msg).strip())
+    print(textwrap.dedent(file_contents).strip())
 
-def run_flexpde(par_vector, par_names, SolvNam, endtime, flexpde_path=r'C:\Program Files\FlexPDE7\FlexPDE7.exe'):
+
+def run_flexpde2(par_vector, par_names, SolvNam, endtime, flexpde_path=r'C:\Program Files\FlexPDE7\FlexPDE7.exe'):
     """
     Generates a full FlexPDE file from parameters, runs FlexPDE, and returns the temp vs time array.
     """
