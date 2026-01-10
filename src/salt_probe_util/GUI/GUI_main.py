@@ -8,11 +8,13 @@ from ..libraries.materials import options as samples
 from ..libraries.probes import options as probes
 from ..libraries.crucibles import options as crucibles
 from ..libraries.calibrations import options as cal_dict
+from ..libraries.simulations import simulation_options_dict, cross_section_options_dict
 from ..build_model import model_param_map as decision_vars
+
   
 
 class SimulationOptions(tk.Tk):
-    def __init__(self, simulation_options_dict, cross_section_options_dict):
+    def __init__(self):
         super().__init__()
         
         # Store option dictionaries
@@ -329,7 +331,7 @@ class SimulationOptions(tk.Tk):
             "probe": self.probe,
             "crucible": self.crucible,
             "sample": self.sample,
-            "simulation": self.simulation,
+            "simulation": self.simulation_name,
             "simulation cross section": self.cross_section,
             "decision variables indices": self.decision_vars_indx,
             "test duration override": self.override_dur,

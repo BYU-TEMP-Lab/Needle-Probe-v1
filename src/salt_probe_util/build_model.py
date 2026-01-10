@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from .optimizer import build_optim_vectors
 
 # mapping of model parameter names to their source paths in file data or user selections
@@ -42,9 +44,26 @@ model_param_map = {
         "??? Flux Decay": 1,
         "??? Decay Point": 1,
         "Convection Coefficient": ("user_input", "convection_coeff"), # W/(m^2*K)
-
-        "filepath": ("file_data", "filepath")
     }
+
+def prepare_folder_for_optim(folder_data, user_selections):
+    # initialize list to hold prepared data for all files
+    prepared_list = []
+
+    # import function for resolving parameters
+
+    # solve for values at ambient temperature to plug into model
+    for file_data in folder_data:
+        resolved_params, optim_vecs = resolve_params_at_T(file_data, user_selections)
+        
+        prepared_list.append({
+            "file_data": file_data,
+            "resolved_params": resolved_params,
+            "simulation": user_selections.simulation_name,
+            "optim_vecs": optim_vecs
+        })
+
+    return prepared_list
 
 
 def resolve_params_at_T(file_data, user_selections):
@@ -95,7 +114,7 @@ def resolve_params_at_T(file_data, user_selections):
             # Now current_obj should be the dict: {"initial_value": x, "bounds": y, ...}
             # OR numeric value
             # OR probe dictionary (for geometry)
-            if isinstance(current_obj, dict):
+            if isinstance(current_obj, (dict, Path)):
                 resolved_params[key] = current_obj.copy()
             elif isinstance(current_obj, (float, int)):
                 val = float(current_obj)
@@ -107,10 +126,10 @@ def resolve_params_at_T(file_data, user_selections):
                 }
             else:
                 # Handle cases where the path led to an object instead of a value
-                print(f"Warning: Could not resolve {key} to a numeric value.")
+                print(f"Warning: Could not resolve key \"{key}\" to a numeric value.")
                 
         except (KeyError, AttributeError):
-            print(f"Warning: Could not resolve path for {key}")
+            print(f"Warning: Could not resolve path for key \"{key}\".")
 
     # Append probe geometry parameters individually (different geometry for different probes/models)
     for key, value in resolved_params["Probe Geometry"].items():
@@ -125,5 +144,8 @@ def resolve_params_at_T(file_data, user_selections):
     for key, value, in resolved_params.items():
         if "initial_value" in value:
             resolved_params[key] = value["initial_value"]
+
+    # append filepath
+    resolved_params["filepath"] = file_data["filepath"]
 
     return resolved_params, optim_vecs

@@ -2,16 +2,12 @@ import glob, subprocess, time, os, sys, warnings, json, itertools, numpy as np, 
 from .bootstrap import setup_logging
 setup_logging()  # Apply custom warning format
 
-from scipy.interpolate import interp1d
-from scipy.optimize import least_squares
-from datetime import datetime
 from concurrent.futures import ProcessPoolExecutor
 
 from .GUI.GUI_main import SimulationOptions
 from .process_data import get_files_data
-from .flexPDE_model import run as run_flex_model
-from .thermal_quadrupoles_model import run as run_therm_quad_model
-from .optimizer import get_solved_values, prepare_folder_for_optim
+from .optimizer import get_solved_values
+from .build_model import prepare_folder_for_optim
 
 # import .libraries.materials, .libraries.probes, .optim as optim
 # from .libraries.materials import options as material_options
@@ -19,15 +15,10 @@ from .optimizer import get_solved_values, prepare_folder_for_optim
 # from .libraries.crucibles import options as crucibles_options
 
 # Generate simulation options dictionaries
-simulation_options_dict = {"FlexPDE": run_flex_model, "Thermal Quadrupoles": run_therm_quad_model}
-cross_section_options_dict = {"Axial": None, "Radial": None}
-
 def main():
 
     # get user selections
-    main_GUI = SimulationOptions(
-        simulation_options_dict, 
-        cross_section_options_dict)
+    main_GUI = SimulationOptions()
     main_GUI.mainloop()   # waits here until window closes
 
     if getattr(main_GUI, "user_cancelled", True): # default to True if the attribute doesn't exist
@@ -60,7 +51,9 @@ def main():
 
     # Process results...
     print(f"Processed {len(folder_solved_values)} files.")
-    print(f"RESULT: {folder_solved_values}")
+    
+    for solved_file in folder_solved_values:
+        print(solved_file["message"])
 
 
 

@@ -1,7 +1,9 @@
-import textwrap
+import textwrap, numpy as np
 
 def run(x, y):
-    return 2
+    times = np.linspace(0, 60, 100)
+    temps = np.linspace(20, 100, 100)
+    return np.column_stack((times, temps))
 
 def generate_flex_file(file_data, user_selections):
     endtime = file_data["tempData"][0, -1]

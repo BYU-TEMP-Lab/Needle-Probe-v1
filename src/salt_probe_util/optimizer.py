@@ -1,8 +1,7 @@
 
 import numpy as np
 from scipy.optimize import least_squares
-from .build_model import resolve_params_at_T
-from .main import simulation_options_dict
+from .libraries.simulations import simulation_options_dict
 
 
 def build_optim_vectors(resolved_params, user_selections):
@@ -34,25 +33,11 @@ def build_optim_vectors(resolved_params, user_selections):
     return optim_vecs
 
 
-def prepare_folder_for_optim(folder_data, user_selections):
-    # initialize list to hold prepared data for all files
-    prepared_list = []
-
-    # solve for values at ambient temperature to plug into model
-    for file in folder_data:
-        resolved_params, optim_vecs = resolve_params_at_T(file, user_selections)
-        
-        prepared_list.append({
-            "file_data": file,
-            "resolved_params": resolved_params,
-            "simulation": user_selections.simulation,
-            "optim_vecs": optim_vecs
-        })
-
-    return prepared_list
-
-
-def get_residuals(x, initial_model_params, active_decision_vars, x0, priors):
+def get_residuals(x, file_data, simulation_name, initial_model_params, active_decision_vars, x0, priors):
+    # get experimental temp curve and filename
+    exp_temp_curve = file_data["tempData"]
+    filepath = file_data["filepath"]
+    
     # create copy of prepared data to modify
     # iter_params = initial_model_params.copy()
     iter_model_params = initial_model_params.copy()
@@ -62,11 +47,8 @@ def get_residuals(x, initial_model_params, active_decision_vars, x0, priors):
         iter_model_params[key] = val
 
     # get simulation temp curve
-    simulation = simulation_options_dict[iter_model_params["simulation"]]
-    sim_temp_curve = simulation(iter_model_params)
-
-    # get experimental temp curve
-    exp_temp_curve = iter_model_params["file_data"]["tempData"]
+    simulation = simulation_options_dict[simulation_name]
+    sim_temp_curve = simulation(iter_model_params, filepath)
 
     # interpolate simulation to experimental time points
     exp_times = exp_temp_curve[:, 0]
@@ -75,7 +57,7 @@ def get_residuals(x, initial_model_params, active_decision_vars, x0, priors):
     sim_temps_interp = np.interp(exp_times, sim_times, sim_temps)
 
     # residuals
-    error_residuals = (sim_temps_interp - exp_temp_curve[:, 1]) / iter_model_params["file_data"]["tempData_std"]
+    error_residuals = (sim_temps_interp - exp_temp_curve[:, 1]) / file_data["tempData_std"]
     prior_residuals = (x - x0) / priors
 
     return np.concatenate((error_residuals, prior_residuals))
@@ -83,7 +65,9 @@ def get_residuals(x, initial_model_params, active_decision_vars, x0, priors):
 def get_solved_values(prepared_file_data):
     # unpack prepared data
     optim_vecs = prepared_file_data["optim_vecs"]
+    simulation_name = prepared_file_data["simulation"]
     initial_model_params = prepared_file_data["resolved_params"]
+    file_data = prepared_file_data["file_data"]
     active_decision_vars = optim_vecs["active_decision_vars"]
     x0 = optim_vecs["initial_values"]
     bounds = optim_vecs["bounds"]
@@ -96,6 +80,8 @@ def get_solved_values(prepared_file_data):
         method = 'trf',
         x_scale = priors,
         args = (
+            file_data,
+            simulation_name,
             initial_model_params, 
             active_decision_vars,
             x0,
@@ -105,8 +91,12 @@ def get_solved_values(prepared_file_data):
     
     # package results
     solved = {
-        "filepath": prepared_file_data["filepath"],
-        "solved_values": {}
+        "filepath": file_data["filepath"],
+        "solved_values": {},
+        "cost": result.cost,
+        "iterations": result.nfev,
+        "message": result.message,
+        "success": result.success
     }
 
     for key, val in zip(prepared_file_data["optim_vecs"]["active_decision_vars"], result.x):
