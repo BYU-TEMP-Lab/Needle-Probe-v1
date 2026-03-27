@@ -10,8 +10,10 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     # Add your required libraries here, e.g.:
-    # "numpy",
-    # "pandas",
+    "numpy",
+    "pandas",
+    "scipy",
+    "matplotlib"
 ]
 
 [tool.setuptools.packages.find]

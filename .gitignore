@@ -17,3 +17,19 @@ MATLAB_Data_Analysis/From_NonCOMSOL_Computer/Analysis_Results/**
 .DS_Store
 *.swp
 *.egg-info
+.venv
+build
+
+# Environments
+.venv/
+env/
+venv/
+
+# Build and Distribution
+build/
+dist/
+*.egg-info/
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
