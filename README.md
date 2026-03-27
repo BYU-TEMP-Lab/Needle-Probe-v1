@@ -8,6 +8,7 @@ main.py:
 - Define variables based on user selections in GUI
 - Perform simple calculations on selected folder data to prepare for optimization
 - Set up multi-threading for optimizer (runs files in parallel)
+- store and visualize solution 
 
 config:
 - default_options.json: contains settings auto-filled into GUI. Files formatted the same can be loaded into GUI for convenience
