@@ -54,11 +54,13 @@ today = sprintf('%02d%02d%02d', month(datetime), day(datetime), mod(year(datetim
 
 %crucible = 'Nickel200';
 
-m=menu('Crucible Material:',...
-    'Steel316',...
-    'Nickel 200',...
-    'Inconel 625',...
-    'end');
+% m=menu('Crucible Material:',...
+%     'Steel316',...
+%     'Nickel 200',...
+%     'Inconel 625',...
+%     'end');
+
+m=1; %Manually set crucible
 
 if m == 1
     crucible = 'Steel316';
@@ -73,24 +75,26 @@ end
 
 % sample = 'Ar';
 
-m=menu('Sample Material:',...
-    'H2O',...
-    'NaNO3',...
-    'Toluene',...
-    'KNO3',...
-    'Propylene Glycol',...
-    'FLiNaK',...
-    'FLiBe',...
-    'FMgNaK',...
-    'LiCl-KCl',...
-    'NaCl-KCl',...
-    'LiF-NaF',...
-    'LiCl-NaCl',...
-    'ZnCl-KCl',...
-    'NaNO3-KNO3',...
-    '1npNaNO3-KNO3',...
-    'Ar',...
-    'end');
+% m=menu('Sample Material:',...
+%     'H2O',...
+%     'NaNO3',...
+%     'Toluene',...
+%     'KNO3',...
+%     'Propylene Glycol',...
+%     'FLiNaK',...
+%     'FLiBe',...
+%     'FMgNaK',...
+%     'LiCl-KCl',...
+%     'NaCl-KCl',...
+%     'LiF-NaF',...
+%     'LiCl-NaCl',...
+%     'ZnCl-KCl',...
+%     'NaNO3-KNO3',...
+%     '1npNaNO3-KNO3',...
+%     'Ar',...
+%     'end');
+
+m=16; % Manually set sample
 
 if m == 1
     sample = 'H2O';
@@ -129,117 +133,119 @@ else
     return
 end
 
-choices = {
-    "1 - K Eff. Wires",           
-    "2 - Alpha Eff. Wires",           
-    "3 - K Insulation",           
-    "4 - Alpha Insulation",  
-    "5 - Rth Insulation-Sheath",  
-    "6 - K Sheath",           
-    "7 - Alpha Sheath", 
-    "8 - K Sample",
-    "9 - Alpha Sample",
-    "10 - K Crucible",
-    "11 - Alpha Crucible",
-    "12 - Emissivity Probe",
-    "13 - Emissivity Crucible",
-    "19 - Rwires",
-    "20 - Rsheath Inner",
-    "21 - Rsheath",
-    "22 - Rsample",
-    "23 - Rcrucible",
-    "26 - Rho Sample",
-    "27 - Cp Sample",
-    "28 - Rhosample * Cp Sample",
-    "29 - Current",
-    "30 - Flux Decay Factor"
-};
-
-% Display the dialog to select multiple values
-[m, ok] = listdlg('PromptString', 'Select Properties to Solve For:', ...
-    'SelectionMode', 'multiple', ...
-    'ListString', choices);
+% choices = {
+%     "1 - K Eff. Wires",           
+%     "2 - Alpha Eff. Wires",           
+%     "3 - K Insulation",           
+%     "4 - Alpha Insulation",  
+%     "5 - Rth Insulation-Sheath",  
+%     "6 - K Sheath",           
+%     "7 - Alpha Sheath", 
+%     "8 - K Sample",
+%     "9 - Alpha Sample",
+%     "10 - K Crucible",
+%     "11 - Alpha Crucible",
+%     "12 - Emissivity Probe",
+%     "13 - Emissivity Crucible",
+%     "19 - Rwires",
+%     "20 - Rsheath Inner",
+%     "21 - Rsheath",
+%     "22 - Rsample",
+%     "23 - Rcrucible",
+%     "26 - Rho Sample",
+%     "27 - Cp Sample",
+%     "28 - Rhosample * Cp Sample",
+%     "29 - Current",
+%     "30 - Flux Decay Factor"
+% };
+% 
+% % Display the dialog to select multiple values
+% [m, ok] = listdlg('PromptString', 'Select Properties to Solve For:', ...
+%     'SelectionMode', 'multiple', ...
+%     'ListString', choices);
 
 % Initialize the lists to store selected values
-SolveListNames = {};
-SolveList = [];
+
+% Manually set properties
+SolveListNames = ["8" "27"];
+SolveList = [8 27];
 
 % Check if the user made a selection
-if ok
-    for i = 1:length(m)
-        switch m(i)
-            case 1
-                SolveListNames = [SolveListNames, "1"];
-                SolveList = [SolveList, 1];
-            case 2
-                SolveListNames = [SolveListNames, "2"];
-                SolveList = [SolveList, 2];
-            case 3
-                SolveListNames = [SolveListNames, "3"];
-                SolveList = [SolveList, 3];
-            case 4
-                SolveListNames = [SolveListNames, "4"];
-                SolveList = [SolveList, 4];
-            case 5
-                SolveListNames = [SolveListNames, "5"];
-                SolveList = [SolveList, 5];
-            case 6
-                SolveListNames = [SolveListNames, "6"];
-                SolveList = [SolveList, 6];
-            case 7
-                SolveListNames = [SolveListNames, "7"];
-                SolveList = [SolveList, 7];
-            case 8
-                SolveListNames = [SolveListNames, "8"];
-                SolveList = [SolveList, 8];
-            case 9
-                SolveListNames = [SolveListNames, "9"];
-                SolveList = [SolveList, 9];
-            case 10
-                SolveListNames = [SolveListNames, "10"];
-                SolveList = [SolveList, 10];
-            case 11
-                SolveListNames = [SolveListNames, "11"];
-                SolveList = [SolveList, 11];
-            case 12
-                SolveListNames = [SolveListNames, "12"];
-                SolveList = [SolveList, 12];
-            case 13
-                SolveListNames = [SolveListNames, "13"];
-                SolveList = [SolveList, 13];
-            case 14
-                SolveListNames = [SolveListNames, "19"];
-                SolveList = [SolveList, 19];
-            case 15
-                SolveListNames = [SolveListNames, "20"];
-                SolveList = [SolveList, 20];
-            case 16
-                SolveListNames = [SolveListNames, "21"];
-                SolveList = [SolveList, 21];
-            case 17
-                SolveListNames = [SolveListNames, "22"];
-                SolveList = [SolveList, 22];
-            case 18
-                SolveListNames = [SolveListNames, "23"];
-                SolveList = [SolveList, 23];
-            case 19
-                SolveListNames = [SolveListNames, "26"];
-                SolveList = [SolveList, 26];
-            case 20
-                SolveListNames = [SolveListNames, "27"];
-                SolveList = [SolveList, 27];
-            case 21
-                SolveListNames = [SolveListNames, "28"];
-                SolveList = [SolveList, 28];
-            case 22
-                SolveListNames = [SolveListNames, "29"];
-                SolveList = [SolveList, 29];
-            case 23
-                SolveListNames = [SolveListNames, "30"];
-                SolveList = [SolveList, 30];
-        end
-    end
-end
+% if ok
+%     for i = 1:length(m)
+%         switch m(i)
+%             case 1
+%                 SolveListNames = [SolveListNames, "1"];
+%                 SolveList = [SolveList, 1];
+%             case 2
+%                 SolveListNames = [SolveListNames, "2"];
+%                 SolveList = [SolveList, 2];
+%             case 3
+%                 SolveListNames = [SolveListNames, "3"];
+%                 SolveList = [SolveList, 3];
+%             case 4
+%                 SolveListNames = [SolveListNames, "4"];
+%                 SolveList = [SolveList, 4];
+%             case 5
+%                 SolveListNames = [SolveListNames, "5"];
+%                 SolveList = [SolveList, 5];
+%             case 6
+%                 SolveListNames = [SolveListNames, "6"];
+%                 SolveList = [SolveList, 6];
+%             case 7
+%                 SolveListNames = [SolveListNames, "7"];
+%                 SolveList = [SolveList, 7];
+%             case 8
+%                 SolveListNames = [SolveListNames, "8"];
+%                 SolveList = [SolveList, 8];
+%             case 9
+%                 SolveListNames = [SolveListNames, "9"];
+%                 SolveList = [SolveList, 9];
+%             case 10
+%                 SolveListNames = [SolveListNames, "10"];
+%                 SolveList = [SolveList, 10];
+%             case 11
+%                 SolveListNames = [SolveListNames, "11"];
+%                 SolveList = [SolveList, 11];
+%             case 12
+%                 SolveListNames = [SolveListNames, "12"];
+%                 SolveList = [SolveList, 12];
+%             case 13
+%                 SolveListNames = [SolveListNames, "13"];
+%                 SolveList = [SolveList, 13];
+%             case 14
+%                 SolveListNames = [SolveListNames, "19"];
+%                 SolveList = [SolveList, 19];
+%             case 15
+%                 SolveListNames = [SolveListNames, "20"];
+%                 SolveList = [SolveList, 20];
+%             case 16
+%                 SolveListNames = [SolveListNames, "21"];
+%                 SolveList = [SolveList, 21];
+%             case 17
+%                 SolveListNames = [SolveListNames, "22"];
+%                 SolveList = [SolveList, 22];
+%             case 18
+%                 SolveListNames = [SolveListNames, "23"];
+%                 SolveList = [SolveList, 23];
+%             case 19
+%                 SolveListNames = [SolveListNames, "26"];
+%                 SolveList = [SolveList, 26];
+%             case 20
+%                 SolveListNames = [SolveListNames, "27"];
+%                 SolveList = [SolveList, 27];
+%             case 21
+%                 SolveListNames = [SolveListNames, "28"];
+%                 SolveList = [SolveList, 28];
+%             case 22
+%                 SolveListNames = [SolveListNames, "29"];
+%                 SolveList = [SolveList, 29];
+%             case 23
+%                 SolveListNames = [SolveListNames, "30"];
+%                 SolveList = [SolveList, 30];
+%         end
+%     end
+% end
 
 joinedString = char(strjoin(SolveListNames, '_'));
 
@@ -249,7 +255,7 @@ else
     run_name = [sample ' ' joinedString ' ' today '_global'];
 end
 
-runfolder = [currentFOLDER '\Analysis_Results\' run_name];
+runfolder = fullfile(currentFOLDER,"Analysis_Results",run_name); %[currentFOLDER '\Analysis_Results\' run_name];
 if ~exist(runfolder, 'dir')
     mkdir(runfolder);
 end 
@@ -661,7 +667,7 @@ for n = 3:numel(names)
         % Creates the histogram of values found using MC analysis.
 
         mcplots = ['MC Plots ', run_name];
-        mcplotsfolder = [runfolder '\' mcplots];
+        mcplotsfolder = fullfile(runfolder,mcplots); %[runfolder '\' mcplots];
         if ~exist(mcplotsfolder, 'dir')
             mkdir(mcplotsfolder);
         end

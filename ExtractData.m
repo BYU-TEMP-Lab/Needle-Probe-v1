@@ -5,28 +5,12 @@ starttime = timewindow(1);%set to 0 to start at the beginning. Make sure values 
 timesend = timewindow(2); % Comment
 
 % PUT RAW DATA INTO USABLE FORMAT
-prompt = 'Select a raw data folder ';
-m = 1;
-while m == 1
-    disp(prompt);
-    datafolder = uigetdir;
-    if datafolder == 0
-        datafolder = 'd';
-    end
 
-    if ~exist(datafolder, 'dir')
-        disp('404d. Folder not found.')
-        image404 = imread("404d.jpg");
-        imshow(image404)
-        return
-    else
-        m = 0;
-    end
-end
-
+% Manually set datafolder location
+datafolder = fullfile('testdata');
 
 plot = [run_name ' Plots'];
-plotfolder = [runfolder '\' plot];
+plotfolder = fullfile(runfolder,plot); %[runfolder '\' plot];
 if ~exist(plotfolder, 'dir')
     mkdir(plotfolder);
 end
@@ -38,7 +22,7 @@ end
 
 
 use =  [run_name ' Useable Data'];
-datafolderUSE = [runfolder '\' use];
+datafolderUSE = fullfile(runfolder,use); %[runfolder '\' use];
 
 i = 1;
 while i ~= 0
@@ -46,7 +30,7 @@ while i ~= 0
         mkdir(datafolderUSE);
         i = 0;
     else
-        datafolderUSE = [runfolder '\' use num2str(i)];
+        datafolderUSE = fullfile(runfolder,use,num2str(i)); %[runfolder '\' use num2str(i)];
         i = i+1;
     end
 end
