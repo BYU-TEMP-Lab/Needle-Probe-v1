@@ -1,21 +1,17 @@
-function [plotfolder, datafolderUSE, aveTemp_vector] = ExtractData(run_name,raw_plot,runfolder,timewindow)
+function [plotfolder, datafolderUSE, aveTemp_vector] = ExtractData(run_name,raw_plot,runfolder,timewindow,datafolder)
 
 currentfolder = pwd;
 starttime = timewindow(1);%set to 0 to start at the beginning. Make sure values are a multiple of the sampling period. 
 timesend = timewindow(2); % Comment
 
 % PUT RAW DATA INTO USABLE FORMAT
-
-% Manually set datafolder location
-datafolder = fullfile('testdata');
-
 plot = [run_name ' Plots'];
 plotfolder = fullfile(runfolder,plot); %[runfolder '\' plot];
 if ~exist(plotfolder, 'dir')
     mkdir(plotfolder);
 end
 
-rawplotfolder = [plotfolder '\raw data'];
+rawplotfolder = fullfile(plotfolder,"raw_data"); %[plotfolder '\raw data'];
 if ~exist(rawplotfolder, 'dir')
     mkdir(rawplotfolder);
 end

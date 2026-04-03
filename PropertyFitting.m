@@ -260,7 +260,10 @@ if ~exist(runfolder, 'dir')
     mkdir(runfolder);
 end 
 
-[plotfolder, datafolderUSE, aveTemp_vector] = ExtractData(run_name,raw_plot,runfolder,timewindow);
+% Manually set datafolder location
+datafolder = fullfile(pwd,'testdata');
+
+[plotfolder, datafolderUSE, aveTemp_vector] = ExtractData(run_name,raw_plot,runfolder,timewindow,datafolder);
 
 tic
 
