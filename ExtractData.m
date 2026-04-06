@@ -90,20 +90,20 @@ for n = 3:numel(names)
         time = time(2:end);
     end
 
-    if raw_plot == 1
-        figure
-        semilogx(time,temp,'o');
-        xlabel('Time (s)');
-        ylabel('Temperature (°C)');
-        f = gcf;
-        [~, name, ~] = fileparts(filename);
-        cd (rawplotfolder);
-        name1 = [name '.png'];
-        saveas(f,name1);
-        name1 = [name '.fig'];
-        saveas(f,name1);
-        close
-    end
+    % if raw_plot == 1
+    %     figure
+    %     semilogx(time,temp,'o');
+    %     xlabel('Time (s)');
+    %     ylabel('Temperature (°C)');
+    %     f = gcf;
+    %     [~, name, ~] = fileparts(filename);
+    %     cd (rawplotfolder);
+    %     name1 = [name '.png'];
+    %     saveas(f,name1);
+    %     name1 = [name '.fig'];
+    %     saveas(f,name1);
+    %     close
+    % end
 
     cd (currentfolder);
 

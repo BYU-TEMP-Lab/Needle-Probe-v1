@@ -463,39 +463,39 @@ for n = 3:numel(names)
         param(Ifitpar)=fitresult;
         Sfit=NeedleProbeModel(Time,param,cp,IV);
 
-        if MC == 0
-            figure;
-            semilogx(Time,dTemp-Sfit,'o',Time,Sstart-Sfit,'o');
-            zoom on;
-            xlabel('Time(sec)');
-            ylabel('▲T (Kelvin)');
-            legend('Data - Solved Model','Initial Model - Solved Model', 'Location', 'northwest')
-            title(['Residuals: ', num2str(Voltage),'V ', num2str(aveTemp), '°C ' ,today]);
-
-            f = gcf;
-            cd(plotfolder);
-            name1 = [sample '_' crucible '_' num2str(aveTemp) '_Voltage' num2str(Voltage) '_residues' '.png'];
-            saveas(f,name1);
-            close
-            cd(currentFOLDER);
-
-            figure;
-            semilogx(Time,dTemp,'o', Time,Sstart, Time,Sfit);
-            zoom on;
-            xlabel('Time(sec)');
-            ylabel('▲T (Kelvin)');
-            legend('Exp. Data', 'Initial Model', 'Solved Model', 'Location', 'northwest')
-            run_name_string = strrep(run_name, '_', ' ');
-            title(['Solution: ', run_name_string, ' ', num2str(fix(aveTemp)), '°C ', num2str(Voltage), 'V']);
-
-            f = gcf;
-            cd(plotfolder);
-            name1 = [sample '_' crucible '_' num2str(aveTemp) '_Voltage' num2str(Voltage) ' result fit' '.png'];
-            saveas(f,name1);
-            %close
-            cd(currentFOLDER);
-
-        end
+        % if MC == 0
+        %     figure;
+        %     semilogx(Time,dTemp-Sfit,'o',Time,Sstart-Sfit,'o');
+        %     zoom on;
+        %     xlabel('Time(sec)');
+        %     ylabel('▲T (Kelvin)');
+        %     legend('Data - Solved Model','Initial Model - Solved Model', 'Location', 'northwest')
+        %     title(['Residuals: ', num2str(Voltage),'V ', num2str(aveTemp), '°C ' ,today]);
+        % 
+        %     f = gcf;
+        %     cd(plotfolder);
+        %     name1 = [sample '_' crucible '_' num2str(aveTemp) '_Voltage' num2str(Voltage) '_residues' '.png'];
+        %     saveas(f,name1);
+        %     close
+        %     cd(currentFOLDER);
+        % 
+        %     figure;
+        %     semilogx(Time,dTemp,'o', Time,Sstart, Time,Sfit);
+        %     zoom on;
+        %     xlabel('Time(sec)');
+        %     ylabel('▲T (Kelvin)');
+        %     legend('Exp. Data', 'Initial Model', 'Solved Model', 'Location', 'northwest')
+        %     run_name_string = strrep(run_name, '_', ' ');
+        %     title(['Solution: ', run_name_string, ' ', num2str(fix(aveTemp)), '°C ', num2str(Voltage), 'V']);
+        % 
+        %     f = gcf;
+        %     cd(plotfolder);
+        %     name1 = [sample '_' crucible '_' num2str(aveTemp) '_Voltage' num2str(Voltage) ' result fit' '.png'];
+        %     saveas(f,name1);
+        %     %close
+        %     cd(currentFOLDER);
+        % 
+        % end
 
         %         fprintf('fit parameters: %s %s\n',par_names(Ifitpar(1),1), par_names(Ifitpar(2),1));
         %         fprintf('start parameters: %f   %f\n',Para1start, Para2start);
@@ -596,29 +596,29 @@ for n = 3:numel(names)
             sigpar=sqrt(abs(-P(2)^2+4*P(1)*P(3)))/(2*P(1));
             Chi2_error = sigpar/sqrt(ndata);
 
-            if chi2plots == 1
-                figure;
-                comstr=['par. ',int2str(ipar),' varies between ',num2str(parmin),' and ',num2str(parmax)];
-
-                semilogx(Time,familyvec);
-                zoom on;
-                xlabel('Time(sec)');
-                ylabel('▲T (Kelvin)');
-                title(['familyvec over Tvec',today,' ',comstr]);
-
-                figure;
-                plot(parvec,chitestvec,'o',parvec,parabool);
-                chisave=[parvec,chitestvec,parabool];
-                title([run_name,' par(',int2str(ipar),'): ',num2str(fitresult(ipar)),'+/-',num2str(sigpar),'/sqrt(',int2str(ndata),') file: ',fn]);
-                zoom on;
-
-                figure;
-                semilogx(Time,dTemp,'o',Time,Sstart,Time,Sfit,Tvec,familyvec)
-                zoom on;
-                xlabel('Time(sec)');
-                ylabel('exp,startfit,resultfit,trial curves');
-                title(['family vec 2',today,' ',comstr]);
-            end
+            % if chi2plots == 1
+            %     figure;
+            %     comstr=['par. ',int2str(ipar),' varies between ',num2str(parmin),' and ',num2str(parmax)];
+            % 
+            %     semilogx(Time,familyvec);
+            %     zoom on;
+            %     xlabel('Time(sec)');
+            %     ylabel('▲T (Kelvin)');
+            %     title(['familyvec over Tvec',today,' ',comstr]);
+            % 
+            %     figure;
+            %     plot(parvec,chitestvec,'o',parvec,parabool);
+            %     chisave=[parvec,chitestvec,parabool];
+            %     title([run_name,' par(',int2str(ipar),'): ',num2str(fitresult(ipar)),'+/-',num2str(sigpar),'/sqrt(',int2str(ndata),') file: ',fn]);
+            %     zoom on;
+            % 
+            %     figure;
+            %     semilogx(Time,dTemp,'o',Time,Sstart,Time,Sfit,Tvec,familyvec)
+            %     zoom on;
+            %     xlabel('Time(sec)');
+            %     ylabel('exp,startfit,resultfit,trial curves');
+            %     title(['family vec 2',today,' ',comstr]);
+            % end
 
         end
         iterations = iterations + 1;
@@ -667,58 +667,58 @@ for n = 3:numel(names)
     end
 
     if MC == 1
-        % Creates the histogram of values found using MC analysis.
-
-        mcplots = ['MC Plots ', run_name];
-        mcplotsfolder = fullfile(runfolder,mcplots); %[runfolder '\' mcplots];
-        if ~exist(mcplotsfolder, 'dir')
-            mkdir(mcplotsfolder);
-        end
-
-        for h=1:npar
-            one_std(h) = std(fitresult_run(:,h));
-            two_std(h) = 2*one_std(h);
-            meanfit(h) = mean(fitresult_run(:,h));
-
-            cd(mcplotsfolder)
-
-            figure
-            histogram(fitresult_run(:,1),'FaceColor',[0, 0.5, 0]);
-            xlabel(parlabel(h));
-            ylabel('Quantity');
-            title("Monte Carlo Simulation" + " (" + num2str(run) + " Iterations) " + par_names(Ifitpar(h),1)+ " " + sample + " " + num2str(aveTemp) + "°C");
-
-            xline(meanfit(h)+one_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%one standard deviation above
-            text(meanfit(h)+one_std(h)+.001,145,'1\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
-            xline(meanfit(h)+two_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%two standard deviations above
-            text(meanfit(h)+two_std(h)+.001,145,'2\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
-            xline(meanfit(h)-one_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%one standard deviation below
-            text(meanfit(h)-one_std(h)+.001,145,'1\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
-            xline(meanfit(h)-two_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%two standard deviations below
-            text(meanfit(h)-two_std(h)+.001,145,'2\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
-
-            saveas(gcf,['histogram', ' ', convertStringsToChars(par_names(Ifitpar(h),1)), ' ', sample, ' ', num2str(aveTemp), 'C.fig']);
-            saveas(gcf,['histogram', ' ', convertStringsToChars(par_names(Ifitpar(h),1)), ' ', sample, ' ', num2str(aveTemp), 'C.png']);
-
-            hold off
-
-            Points = 1:1:MC_iteration_limit;
-            standard_deviationk = zeros(MC_iteration_limit,1);
-            for N = 1:1:length(fitresult_run(:,1)) %number of points used in standard deviation
-                standard_deviation(N,h) = 2*std(fitresult_run(1:N,1));
-            end
-
-            figure
-            plot(Points,standard_deviation(:,h),'.');
-            xlabel('Number of Points');
-            ylabel('2 Standard Deviations');
-            title(['Convergence for MCM Standard Deviation of ', num2str(sample), ' ', num2str(aveTemp), '°C']);
-
-            saveas(gcf,['stdev convergence', ' ', convertStringsToChars(par_names(Ifitpar(h),1)), ' ', sample, ' ', num2str(aveTemp), 'C.fig']);
-            saveas(gcf,['stdev convergence', ' ', convertStringsToChars(par_names(Ifitpar(h),1)), ' ', sample, ' ', num2str(aveTemp), 'C.png']);
-
-
-        end
+    %     % Creates the histogram of values found using MC analysis.
+    % 
+    %     mcplots = ['MC Plots ', run_name];
+    %     mcplotsfolder = fullfile(runfolder,mcplots); %[runfolder '\' mcplots];
+    %     if ~exist(mcplotsfolder, 'dir')
+    %         mkdir(mcplotsfolder);
+    %     end
+    % 
+    %     for h=1:npar
+    %         one_std(h) = std(fitresult_run(:,h));
+    %         two_std(h) = 2*one_std(h);
+    %         meanfit(h) = mean(fitresult_run(:,h));
+    % 
+    %         cd(mcplotsfolder)
+    % 
+    %         figure
+    %         histogram(fitresult_run(:,1),'FaceColor',[0, 0.5, 0]);
+    %         xlabel(parlabel(h));
+    %         ylabel('Quantity');
+    %         title("Monte Carlo Simulation" + " (" + num2str(run) + " Iterations) " + par_names(Ifitpar(h),1)+ " " + sample + " " + num2str(aveTemp) + "°C");
+    % 
+    %         xline(meanfit(h)+one_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%one standard deviation above
+    %         text(meanfit(h)+one_std(h)+.001,145,'1\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
+    %         xline(meanfit(h)+two_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%two standard deviations above
+    %         text(meanfit(h)+two_std(h)+.001,145,'2\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
+    %         xline(meanfit(h)-one_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%one standard deviation below
+    %         text(meanfit(h)-one_std(h)+.001,145,'1\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
+    %         xline(meanfit(h)-two_std(h),'--','color',[0.6350, 0.0780, 0.1840],'LineWidth',2);%two standard deviations below
+    %         text(meanfit(h)-two_std(h)+.001,145,'2\sigma','FontSize',12,'FontWeight','bold','color',[0.6350, 0.0780, 0.1840]);
+    % 
+    %         saveas(gcf,['histogram', ' ', convertStringsToChars(par_names(Ifitpar(h),1)), ' ', sample, ' ', num2str(aveTemp), 'C.fig']);
+    %         saveas(gcf,['histogram', ' ', convertStringsToChars(par_names(Ifitpar(h),1)), ' ', sample, ' ', num2str(aveTemp), 'C.png']);
+    % 
+    %         hold off
+    % 
+    %         Points = 1:1:MC_iteration_limit;
+    %         standard_deviationk = zeros(MC_iteration_limit,1);
+    %         for N = 1:1:length(fitresult_run(:,1)) %number of points used in standard deviation
+    %             standard_deviation(N,h) = 2*std(fitresult_run(1:N,1));
+    %         end
+    % 
+    %         figure
+    %         plot(Points,standard_deviation(:,h),'.');
+    %         xlabel('Number of Points');
+    %         ylabel('2 Standard Deviations');
+    %         title(['Convergence for MCM Standard Deviation of ', num2str(sample), ' ', num2str(aveTemp), '°C']);
+    % 
+    %         saveas(gcf,['stdev convergence', ' ', convertStringsToChars(par_names(Ifitpar(h),1)), ' ', sample, ' ', num2str(aveTemp), 'C.fig']);
+    %         saveas(gcf,['stdev convergence', ' ', convertStringsToChars(par_names(Ifitpar(h),1)), ' ', sample, ' ', num2str(aveTemp), 'C.png']);
+    % 
+    % 
+    %     end
 
         % one_std1 = std(fitresult_brian(:,1));
         % two_std1 = 2*one_std1;
@@ -918,22 +918,22 @@ if Full_Analysis == 1
     % end
 
 
-    figure
-    hold on
-    errorbar(ave_temp,ave_k,Uncertaintyk,'s')
-    if strcmp(sample,'Water') && strcmp(Par1_label,'K Sample [W/(m*K)]')
-        plot(ave_temp, k_Water)
-    elseif strcmp(sample,'FliNaK') && strcmp(Par1_label,'K Sample [W/(m*K)]')
-        plot(ave_temp, k_FLiNaK)
-    elseif strcmp(sample,'KNO3') && strcmp(Par1_label,'K Sample [W/(m*K)]')
-        plot(ave_temp, k_KNO3)
-    end
-    title('Thermal Conductivity')
-    xlabel('Temperature [°C]')
-    ylabel('Thermal Conductivity [W/m*K]')
-    saveas(gcf,[sample, ' K Results.fig'])
-    saveas(gcf,[sample, ' K Results.png'])
-    hold off
+    % figure
+    % hold on
+    % errorbar(ave_temp,ave_k,Uncertaintyk,'s')
+    % if strcmp(sample,'Water') && strcmp(Par1_label,'K Sample [W/(m*K)]')
+    %     plot(ave_temp, k_Water)
+    % elseif strcmp(sample,'FliNaK') && strcmp(Par1_label,'K Sample [W/(m*K)]')
+    %     plot(ave_temp, k_FLiNaK)
+    % elseif strcmp(sample,'KNO3') && strcmp(Par1_label,'K Sample [W/(m*K)]')
+    %     plot(ave_temp, k_KNO3)
+    % end
+    % title('Thermal Conductivity')
+    % xlabel('Temperature [°C]')
+    % ylabel('Thermal Conductivity [W/m*K]')
+    % saveas(gcf,[sample, ' K Results.fig'])
+    % saveas(gcf,[sample, ' K Results.png'])
+    % hold off
 
     %    figure
     %    hold on
@@ -944,22 +944,22 @@ if Full_Analysis == 1
     %    saveas(gcf,[sample, ' KMC Results.png'])
     %    hold off
 
-    figure
-    hold on
-    errorbar(ave_temp,ave_par2,Uncertainty2,'s')
-    title('Specific Heat')
-    if strcmp(sample,'Water') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
-        plot(ave_temp, cp_Water)
-    elseif strcmp(sample,'FliNaK') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
-        plot(ave_temp, cp_Water)
-    elseif strcmp(sample,'KNO3') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
-        plot(ave_temp, cp_Water)
-    end
-    xlabel('Temperature [°C]')
-    ylabel('Specific Heat [J/(Kg*K)]')
-    saveas(gcf,[sample, 'Cp Results.fig'])
-    saveas(gcf,[sample, 'Cp Results.png']) %saveas(gcf,[sample, Para2 , 'Results.png'])
-    hold off
+    % figure
+    % hold on
+    % errorbar(ave_temp,ave_par2,Uncertainty2,'s')
+    % title('Specific Heat')
+    % if strcmp(sample,'Water') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
+    %     plot(ave_temp, cp_Water)
+    % elseif strcmp(sample,'FliNaK') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
+    %     plot(ave_temp, cp_Water)
+    % elseif strcmp(sample,'KNO3') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
+    %     plot(ave_temp, cp_Water)
+    % end
+    % xlabel('Temperature [°C]')
+    % ylabel('Specific Heat [J/(Kg*K)]')
+    % saveas(gcf,[sample, 'Cp Results.fig'])
+    % saveas(gcf,[sample, 'Cp Results.png']) %saveas(gcf,[sample, Para2 , 'Results.png'])
+    % hold off
 
     ResultsText = fopen([run_name, ' Final Results.txt'],'at');
     for q = 1:length(ave_temp)
@@ -988,27 +988,27 @@ if Full_Analysis == 1
 end
 
 cd(runfolder)
-figure
-yyaxis right
-plot(allresults(:,1),allresults(:,end),'x')
-ylabel('Chi^2 Value');
-
-for i = 1:length(SolveListNames)
-    len =length(SolveListNames);
-
-    yyaxis left
-    plot(allresults(:,1),allresults(:,i+1),'o')
-    ylabel(par_names(Ifitpar(i)));
-
-    % yyaxis right
-    % plot(allresults(:,1),allresults(:,end),'x')
-    % ylabel('Chi^2 Value');
-
-    xlabel('Temperature °C');
-    param = char(SolveListNames(i));
-    saveas(gcf,[sample, param, 'Solution.fig'])
-    saveas(gcf,[sample, param, 'Solution.png'])
-end
+% figure
+% yyaxis right
+% plot(allresults(:,1),allresults(:,end),'x')
+% ylabel('Chi^2 Value');
+% 
+% for i = 1:length(SolveListNames)
+%     len =length(SolveListNames);
+% 
+%     yyaxis left
+%     plot(allresults(:,1),allresults(:,i+1),'o')
+%     ylabel(par_names(Ifitpar(i)));
+% 
+%     % yyaxis right
+%     % plot(allresults(:,1),allresults(:,end),'x')
+%     % ylabel('Chi^2 Value');
+% 
+%     xlabel('Temperature °C');
+%     param = char(SolveListNames(i));
+%     saveas(gcf,[sample, param, 'Solution.fig'])
+%     saveas(gcf,[sample, param, 'Solution.png'])
+% end
     % figure
     % plot(allresults(:,1),allresults(:,3),'o')
 
