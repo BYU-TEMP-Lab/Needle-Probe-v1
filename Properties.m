@@ -15,7 +15,7 @@ T=Temp+273.15;
 %r_1 = .297315E-3; % inside radius up to wires %Not needed right now, but may be needed later
 %r_2 = .391629E-3; % middle of wires %Not needed right now, but may be needed later
 r_3 = .485942E-3; % outside of wires
-r_4 = .8293E-3; % inside radius of sheath
+r_4 = 0.8293E-3; % inside radius of sheath
 % r_5 = 1.323831E-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
 r_5 = 1.388E-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
 r_heating_wire = .094313E-3; % radius of heating wires
@@ -228,7 +228,7 @@ bias_k_insulation = 0;
 k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE
 
 if MC == 1
-    k_insulation = MonteCarloProp(k_insulation_uncertainty,bias_k_insulation,k_insulation);
+    kprobe = MonteCarloProp(k_insulation_uncertainty,bias_k_insulation,k_insulation);
 end
 %k_probe = kprobe;
 
@@ -542,169 +542,8 @@ if strcmp(sample,'NaNO3-KNO3')
     cp_sample = cp_NaNO3_KNO3;
 
     % Density- NaNO3_KNO3
-    if T < 498.15
-        rho_NaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
-                                           %mixtures in a range of 59-61 wt% NaNO3.
-    elseif T >= 498.15
-        rho_NaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+    rho_NaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
                                            %mixtures in a range of 59-61 wt% NaNO3. 
-    end
-
-    rho_sample = rho_NaNO3_KNO3;
-
-    % Thermal Diffusivity- NaNO3_KNO3
-    alpha_NaNO3_KNO3 = k_NaNO3_KNO3/(rho_NaNO3_KNO3*cp_NaNO3_KNO3);
-%     if T < 590
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
-%     elseif T >= 690
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
-
-    alpha_sample = alpha_NaNO3_KNO3;
-
-end
-
-%0.5%np-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 690K (417C)
-% Thermal Conductivity- NaNO3
-if strcmp(sample,'0_5npNaNO3-KNO3-T1')
-% if T < 590
-%     T = 590;
-% end
-
-    % if T < 590
-    %     k_NaNO3_KNO3 = 0;
-    % elseif T>=590 && T < 625
-    %     k_NaNO3_KNO3 = (.513-.517)/(625-600) * (T-600) + .517;
-    % elseif T>=625 && T < 650
-    %     k_NaNO3_KNO3 = (.510-.513)/(650-625) * (T-625) + .513;
-    % elseif T>=650 && T < 675
-    %     k_NaNO3_KNO3 = (.507-.510)/(675-650) * (T-650) + .510;
-    % elseif T>=675 && T < 700
-    %     k_NaNO3_KNO3 = (.503-.507)/(700-675) * (T-675) + .507;
-    % elseif T >= 700
-    %     k_NaNO3_KNO3 = (.503-.507)/(700-675) * (T-675) + .507; %because I don't know what it would be. placeholder for now
-    % end
-
-    k_NaNO3_KNO3 = -0.0002001993*T + 0.5535004504;
-
-    k_sample = k_NaNO3_KNO3;
-
-    %Not sure the purpose of the COMSOL values are
-    %     if T < 590
-    %         k_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-    %     elseif T >= 590 && T < 740
-    %         k_NaNO3_COMSOL = 0.4058875+2.624227E-4*T^1;
-    %     elseif T >= 740
-    %         k_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-    %     end
-
-    % Heat Capacity- NaNO3
-    %cp_NaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
-    % Heat Capacity- 1npNaNO3
-    %cp_1npNaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
-    if T < 585.15
-        cp_NaNO3_KNO3 = 1.31192E-03*(T-273.15) + 1139.51; % Joohyun 2024
-    elseif T >= 585.15
-        cp_NaNO3_KNO3 = 3.88350E-05*(T-273.15) + 1542.22;
-    end
-    
-    % cp_NaNO3_KNO3_COMSOL = 1821.38432;
-    cp_sample = cp_NaNO3_KNO3;
-
-    % Density- NaNO3_KNO3
-    if T < 498.15
-        rho_NaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
-                                           %mixtures in a range of 59-61 wt% NaNO3.
-    elseif T >= 498.15
-        rho_NaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
-                                           %mixtures in a range of 59-61 wt% NaNO3. 
-    end
-
-
-%     if T < 590
-%         rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         rho_NaNO3_KNO3_COMSOL = 2334.418-0.7672727*T^1;
-%     elseif T >= 690
-%         rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
-
-    rho_sample = rho_NaNO3_KNO3;
-
-    % Thermal Diffusivity- NaNO3_KNO3
-    alpha_NaNO3_KNO3 = k_NaNO3_KNO3/(rho_NaNO3_KNO3*cp_NaNO3_KNO3);
-%     if T < 590
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
-%     elseif T >= 690
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
-
-    alpha_sample = alpha_NaNO3_KNO3;
-
-end
-
-%0.5%np-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 690K (417C)
-% Thermal Conductivity- NaNO3
-if strcmp(sample,'0_5npNaNO3-KNO3-T2')
-% if T < 590
-%     T = 590;
-% end
-
-    % if T < 590
-    %     k_NaNO3_KNO3 = 0;
-    % elseif T>=590 && T < 625
-    %     k_NaNO3_KNO3 = (.513-.517)/(625-600) * (T-600) + .517;
-    % elseif T>=625 && T < 650
-    %     k_NaNO3_KNO3 = (.510-.513)/(650-625) * (T-625) + .513;
-    % elseif T>=650 && T < 675
-    %     k_NaNO3_KNO3 = (.507-.510)/(675-650) * (T-650) + .510;
-    % elseif T>=675 && T < 700
-    %     k_NaNO3_KNO3 = (.503-.507)/(700-675) * (T-675) + .507;
-    % elseif T >= 700
-    %     k_NaNO3_KNO3 = (.503-.507)/(700-675) * (T-675) + .507; %because I don't know what it would be. placeholder for now
-    % end
-
-    k_NaNO3_KNO3 = -0.0002001993*T + 0.5535004504;
-
-    k_sample = k_NaNO3_KNO3;
-
-    %Not sure the purpose of the COMSOL values are
-    %     if T < 590
-    %         k_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-    %     elseif T >= 590 && T < 740
-    %         k_NaNO3_COMSOL = 0.4058875+2.624227E-4*T^1;
-    %     elseif T >= 740
-    %         k_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-    %     end
-
-    % Heat Capacity- NaNO3
-    %cp_NaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
-    % Heat Capacity- 1npNaNO3
-    %cp_1npNaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
-    if T < 585.15
-        cp_NaNO3_KNO3 = 1.31192E-03*(T-273.15) + 1139.51; % Joohyun 2024
-    elseif T >= 585.15
-        cp_NaNO3_KNO3 = 3.88350E-05*(T-273.15) + 1542.22;
-    end
-    
-    % cp_NaNO3_KNO3_COMSOL = 1821.38432;
-    cp_sample = cp_NaNO3_KNO3;
-
-    % Density- NaNO3_KNO3
-    if T < 498.15
-        rho_NaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
-                                           %mixtures in a range of 59-61 wt% NaNO3.
-    elseif T >= 498.15
-        rho_NaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
-                                           %mixtures in a range of 59-61 wt% NaNO3. 
-    end
-
 
 %     if T < 590
 %         rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
@@ -733,7 +572,7 @@ end
 %1npSiO2-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %VALID UP TO 690K (417C)
 % Thermal Conductivity- NaNO3
-if strcmp(sample,'1npNaNO3-KNO3-T1')
+if strcmp(sample,'1npNaNO3-KNO3')
 
     k_1npNaNO3_KNO3 = -0.0002001993*T + 0.5535004504;
 
@@ -752,61 +591,8 @@ if strcmp(sample,'1npNaNO3-KNO3-T1')
     cp_sample = cp_1npNaNO3_KNO3;
 
     % Density- NaNO3_KNO3
-    if T < 498.15
-        rho_1npNaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
-                                           %mixtures in a range of 59-61 wt% NaNO3.
-    elseif T >= 498.15
-        rho_1npNaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+    rho_1npNaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
                                            %mixtures in a range of 59-61 wt% NaNO3. 
-    end
-
-
-    rho_sample = rho_1npNaNO3_KNO3;
-
-    % Thermal Diffusivity- NaNO3_KNO3
-    alpha_1npNaNO3_KNO3 = k_1npNaNO3_KNO3/(rho_1npNaNO3_KNO3*cp_1npNaNO3_KNO3);
-%     if T < 590
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
-%     elseif T >= 690
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
-
-    alpha_sample = alpha_1npNaNO3_KNO3;
-
-end
-
-%1npSiO2-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 690K (417C)
-% Thermal Conductivity- NaNO3
-if strcmp(sample,'1npNaNO3-KNO3-T2')
-
-    k_1npNaNO3_KNO3 = -0.0002001993*T + 0.5535004504;
-
-    k_sample = k_1npNaNO3_KNO3;
-
-
-
-    % Heat Capacity- 1npNaNO3
-    %cp_1npNaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
-    if T < 593.15
-        cp_1npNaNO3_KNO3 = 2.29435E-03*(T-273.15) + 1072.02; % Joohyun 2024
-    elseif T >= 593.15
-        cp_1npNaNO3_KNO3 = 2.23927E-03*(T-273.15) + 819.466;
-    end
-    % cp_NaNO3_KNO3_COMSOL = 1821.38432;
-    cp_sample = cp_1npNaNO3_KNO3;
-
-    % Density- NaNO3_KNO3
-    if T < 498.15
-        rho_1npNaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
-                                           %mixtures in a range of 59-61 wt% NaNO3.
-    elseif T >= 498.15
-        rho_1npNaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
-                                           %mixtures in a range of 59-61 wt% NaNO3. 
-    end
-
 
     rho_sample = rho_1npNaNO3_KNO3;
 
@@ -1305,8 +1091,7 @@ if strcmp(sample,'KCl-ZnCl')
 end
 
 %Scatter and Index of Refraction%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-index_of_refraction = 1.00028217; % Argon: T. Larsén. Beitrag zur Dispersion der Edelgase. Z. Physik 88, 389-394 (1934)
-%index_of_refraction = 1.462 - (1.4e-4)*T; %Solar salts (citation needed)
+index_of_refraction = 1.462 - (1.4e-4)*T; %Solar salts (citation needed)
 scatter = 0;
 
 %Crucible Properties%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1610,127 +1395,323 @@ end
 Flux_decay = 0; % Decay constant
 decay_point = 0; % Decay point
  
-
-% % % % Really good! 1-9-25
-% % % % % k_eff_wire = 57.62221495;
-% % % % % alpha_eff_wire = 8.89804E-06;
-% % % % % k_insulation = 0.451363089;
-% % % % % RthInsShth = 0.598239264;
-% % % % % k_sheath = 102.9065954;
-% % % % % alpha_sheath = 1.83879E-05;
-% % % % % % emissivity_probe = 1.205136793;
-% % % % % % emissivity_crucible = 1.045841826;
-% % % % % rwires = 0.000475918;
-% % % % % rsheath_inner = 0.000734046;
-% % % % % rsheath = 0.001042299;
-% % % % % rsample = 0.002245927;
-
-% Really good! 1-9-25
-% k_eff_wire = 3.27578E-01*(T-273.15) + -2.87603E+01;
-% alpha_eff_wire = 8.05101E-08*(T-273.15) + -1.31077E-05;
-% k_insulation = 3.12407E-03*(T-273.15) + -2.13745E-01;
-% RthInsShth = -4.90425E-03*(T-273.15) + 2.27267E+00;
-% k_sheath = -2.84612E-02*(T-273.15) + 1.03515E+01;
-% alpha_sheath = -5.10286E-09*(T-273.15) + 1.85309E-06;
-% % emissivity_probe = 1.205136793;
-% % emissivity_crucible = 1.045841826;
-% rwires = 0.000479878;
-% rsheath_inner = 0.000724697;
-% rsheath = 0.001046545;
-% rsample = 0.002282701;
-
-% Calibration values: 1st column is calibrated value, second is bias, third is uncertainty
-% From initial MC
-% cal.k_eff_wire = [4.4495E+01, 0, 3.273366967];
-% cal.alpha_eff_wire = [6.3725E-06, 0, 5.15068E-07];
-% cal.k_insulation = [3.9523E-01, 0, 0.032284057];
-% cal.RthInsShth = [4.8670E-01, 0, 0.053583928];
-% cal.k_sheath = [9.5858E+01, 0, 14.35581911];
-% cal.alpha_sheath = [1.7181E-05, 0, 2.20411E-06];
-% cal.emissivity_probe = [8.9272E-01, 0, 0.081162636];
-% cal.emissivity_crucible = [6.7060E-01, 0, 0.069493736];
-% cal.rwires = [4.8110E-04, 0, 2.02529E-05];
-% cal.rsheath_inner = [7.4063E-04, 0, 3.15338E-05];
-% cal.rsheath = [1.0478E-03, 0, 2.55872E-05];
-% cal.rsample = [2.2241E-03, 0, 0.000103171];
-
-% % From MC of 2 samples of each temp
-% cal.k_eff_wire = [4.4495E+01, 0, 3.937528497];
-% cal.alpha_eff_wire = [6.3725E-06, 0, 4.46645E-06];
-% cal.k_insulation = [3.9523E-01, 0, 0.035712088];
-% cal.RthInsShth = [4.8670E-01, 0, 0.056163815];
-% cal.k_sheath = [9.5858E+01, 0, 9.603553586];
-% cal.alpha_sheath = [1.7181E-05, 0, 4.71508E-06];
-% cal.emissivity_probe = [8.9272E-01, 0, 0.141055869];
-% cal.emissivity_crucible = [6.7060E-01, 0, 0.093548769];
-% cal.rwires = [4.8110E-04, 0, 2.38288E-05];
-% cal.rsheath_inner = [7.4063E-04, 0, 2.78963E-05];
-% cal.rsheath = [1.0478E-03, 0, 2.5857E-05];
-% cal.rsample = [2.2241E-03, 0, 0.000126113];
-
-% % From MC of all Argon data
-% cal.k_eff_wire = [44.83184871, 0, 4.364430452];
-% cal.alpha_eff_wire = [6.56217E-06, 0, 4.44449E-06];
-% cal.k_insulation = [0.3833085, 0, 0.069164132];
-% cal.RthInsShth = [0.500066305, 0, 0.062775729];
-% cal.k_sheath = [96.36535545, 0, 15.38185151];
-% cal.alpha_sheath = [1.74369E-05, 0, 4.88921E-06];
-% cal.emissivity_probe = [0.865944386, 0, 0.197333771];
-% cal.emissivity_crucible = [0.671821998, 0, 0.126807432];
-% cal.rwires = [0.000486525, 0, 3.23568E-05];
-% cal.rsheath_inner = [0.000736535, 0, 3.58085E-05];
-% cal.rsheath = [0.001050344, 0, 3.4313E-05];
-% cal.rsample = [0.002201326, 0, 0.000410645];
-
-% From MC-approx.formula of all Argon data
-cal.k_eff_wire = [44.83184871, 0, 6.372063996];
-cal.alpha_eff_wire = [6.56217E-06, 0, 1.97318E-06];
-cal.k_insulation = [0.3833085, 0, 0.093277606];
-cal.RthInsShth = [0.500066305, 0, 0.090898829];
-cal.k_sheath = [96.36535545, 0, 21.56055776];
-cal.alpha_sheath = [1.74369E-05, 0, 6.15064E-06];
-cal.emissivity_probe = [0.865944386, 0, 0.26058421];
-cal.emissivity_crucible = [0.671821998, 0, 0.186969856];
-cal.rwires = [0.000486525, 0, 7.36942E-05];         % Radius up to outside of heating wires
-cal.rsheath_inner = [0.000736535, 0, 0.000106993];
-cal.rsheath = [0.001050344, 0, 7.96631E-05];
-cal.rsample = [0.002201326, 0, 0.000586233];
-
-
-% Get the list of field names
-calpars = fieldnames(cal);
-if MC == 1
-    for i = 1:length(calpars)
-        field_name = calpars{i};  % Get the field name
-        calparval = cal.(field_name);
-        MonteCarloProp(calparval(3),calparval(2),calparval(1));
-    end    
-end
+% if T <= 473
+%     rsample = -5.2377E-07*(T-273.15) + 2.7471E-03;
+% elseif T > 473 && T < 673
+%     rsample = 4.2436E-05*(T-273.15) - 5.4785E-03;
+% elseif T > 673 
+%     rsample = 5.5820E-04*(T-273.15) - 2.0294E-01;
+% end
+% 
+% % RthInsShth = 1.916E-6*(T-273.15)^2 + 0.004386*(T-273.15) + 4.609;    % 0-4s
+% % RthInsShth = 0.003266*(T-273.15) + 3.578;    % 0-20s KNO3-NANO3 11/25
+% % RthInsShth = 0.0068124*(T-273.15)+2.6327;            % 0-10s Argon 11/25
+% % RthInsShth = 0.011753984201922*(T-273.15)+3.370506821281554;            % 0-20s Argon 11/25
+% % RthInsShth = 0.010464*(T-273.15)+ 2.0336;            % 0-15s Argon 11/25
+% % RthInsShth = 2.0314E-08*(T-273.15)^3 - 4.5606E-06*(T-273.15)^2 - 4.9113E-05*(T-273.15) + 3.9379; % 0.1-38s 11/25
+% if T <= 673
+%     RthInsShth = 8.1734E-04*(T-273.15) + 3.8855;
+% elseif T > 673 
+%     RthInsShth = -1.7394E-04*(T-273.15)^2 + 2.0755E-01*(T-273.15) - 5.0090E+01;
+% end
+% 
+% %RthInsShth = 0.01187*(T-273.15)+3.181;              % 0-30s
+% %RthInsShth = 0.008333*(T-273.15)+3.2;              % 0-30s
+% 
+% %alpha_Alumina = 5.975E-11*(T-273.15)^2 - 9.891E-8*(T-273.15) + 4.33E-5;     % 0-4s
+% %alpha_Alumina = -9.102E-8*(T-273.15) + 4.31E-5;     % 0-10s NaNO3-KNO3
+% %alpha_Alumina = -9.72222E-8*(T-273.15) + 4.33E-5;     % 0-4s
+% % alpha_Alumina = 5.238296412435035E-10*(T-273.15)^2-3.836363204818161E-07*(T-273.15)+8.456316300594885E-05; % 0-20s SolarSalt 11/25
+% % alpha_Alumina = 2.2349E-10*(T-273.15)^2 - 2.6602E-7*(T-273.15)+8.3682E-5; %0-10s Argon 11/25
+% % alpha_Alumina = -4.128774348085775E-08*(T-273.15)+2.635524769765463e-05; %0-20s Argon 11/25
+% % alpha_Alumina = 2.3972E-10*(T-273.15)^2-2.7606E-07*(T-273.15)+8.2334E-05; %0-15s Argon 11/25
+% alpha_Alumina =  -5.1304E-12*(T-273.15)^2 - 3.4765E-08*(T-273.15) + 2.5514E-05; %0.1-35s s Argon 11/26
+% alpha_insulation = alpha_Alumina;
+% 
+% % alpha_sheath = -2.911231996885954E-12*(T-273.15)^3+2.812545352000410E-09*(T-273.15)^2-8.978375473609233E-07*(T-273.15)+1.005636709944149E-04; % SolarSalt 0-20s 11/25
+% % alpha_sheath = 5.0686E-11*(T-273.15)^2-7.3538E-08*(T-273.15)+5.6239E-05; % 0-10s Argon 11/25
+% % alpha_sheath = 1.095345765553651E-10*(T-273.15)^2-1.603396906049985E-07*(T-273.15)+8.023671567834450E-05; % 0-20s Argon 11/25
+% alpha_sheath = -3.3753E-13*(T-273.15)^3+3.5029E-10*(T-273.15)^2+-1.4784E-07*(T-273.15)+6.4984E-05; % 0-15s Argon 11/25
+% %alpha_sheath = 1.235E-10*(T-273.15)^2-1.697E-07*(T-273.15)+7.775E-05;     % 0-30s
+% %alpha_sheath = -1.7912E-9*(T-273.15) + 8.458E-06;     % 0-10s KNO3-NANO3
+% %alpha_sheath = -2.43056E-9*(T-273.15)+7.775E-05;     % 0-30s
 
 
 
-par_vector(1) = cal.k_eff_wire(1); 
-par_vector(2) = cal.alpha_eff_wire(1); 
-par_vector(3) = cal.k_insulation(1);   %k_probe; 0.200935; %
+% % Argon Calibration 12/19 0.01-35s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% rsample = 4.44243244991150E-05*(T-273.15) - 0.00555076939756845;
+% 
+% RthInsShth = 0.00411283530613553*(T-273.15) + 3.21650228063207;
+% 
+% alpha_Alumina =  -1.17349761474969E-07*(T-273.15) + 6.41158749448306e-05;
+% alpha_insulation = alpha_Alumina;
+% 
+% alpha_sheath = -2.14845821180887E-08*(T-273.15)^ + 4.06511276268519e-05;
+
+
+% USED Argon Calibration 12/23 0.01-55s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% rsample = 2.34712E-09*(T-273.15)^3 - 1.59659E-06*(T-273.15)^2 + 3.75348E-04*(T-273.15) - 2.69037E-02;
+% 
+% RthInsShth = -2.64217E-05*(T-273.15)^2 + 1.70626E-02*(T-273.15) + 9.05431E-01;
+% 
+% alpha_Alumina = -1.08549E-07*(T-273.15) + 6.05985E-05;
+% alpha_insulation = alpha_Alumina;
+% 
+% alpha_sheath = 1.00604E-13*(T-273.15)^4 - 1.07475E-10*(T-273.15)^3 + 4.26121E-08*(T-273.15)^2 - 7.49533E-06*(T-273.15)^ + 5.29122E-04;
+
+
+% Argon Calibration 12/23 0.1-55s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% rsample = 4.18603E-07*(T-273.15)^2 - 1.86672E-04*(T-273.15) + 2.39711E-02;
+% 
+% RthInsShth = -3.62637E-05*(T-273.15)^2 + 2.28938E-02 - 2.00829E-01;
+% 
+% alpha_Alumina =  3.25576E-09*(T-273.15)^2 - 2.26825E-06*(T-273.15) + 4.32159E-04;
+% alpha_insulation = alpha_Alumina;
+% 
+% alpha_sheath =  5.11251E-10*(T-273.15)^2 - 3.24045E-07*(T-273.15) + 7.95818E-05;
+
+
+% Argon Calibration 12/23 0.1-35s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% rsample = 4.09661E-07*(T-273.15)^2 - 1.79974E-04*(T-273.15) + 2.29877E-02;
+% 
+% RthInsShth = -2.18856E-05*(T-273.15)^2 + 1.44856E-02*(T-273.15) + 1.35606E+00;
+% 
+% alpha_Alumina = -9.68347E-08*(T-273.15) + 5.54019E-05;
+% alpha_insulation = alpha_Alumina;
+% 
+% alpha_sheath = 8.56387E-14*(T-273.15)^4 - 9.11332E-11*(T-273.15)^3 + 3.60192E-08*(T-273.15)^2 - 6.32953E-06*(T-273.15) + 4.52287E-04;
+%%%GOOD but BAD^^^
+
+
+%%USed as of 12-27-24 % Argon Calibration 12/23 0.1-55s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % rsample = 4.51427E-07*(T-273.15)^2 - 2.04078E-04*(T-273.15) + 2.61576E-02;
+% % 
+% % RthInsShth = -2.56857E-05*(T-273.15)^2 + 1.66858E-02*(T-273.15) + 9.52260E-01;
+% % 
+% % alpha_Alumina =   1.58360E-10*(T-273.15)^2 - 1.98943E-07*(T-273.15) + 7.29375E-05;
+% % alpha_insulation = alpha_Alumina;
+% % 
+% % alpha_sheath = 9.93773E-14*(T-273.15)^4 - 1.06165E-10*(T-273.15)^3 + 4.20935E-08*(T-273.15)^2 - 7.40507E-06*(T-273.15) + 5.23302E-04;
+
+
+% Argon Calibration 12/23 0.1-58s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% rsample = 4.15275E-07*(T-273.15)^2 - 1.85845E-04*(T-273.15) + 2.39149E-02;
+% 
+% RthInsShth = -2.62611E-05*(T-273.15)^2 + 1.69516E-02*(T-273.15) + 9.12353E-01;
+% 
+% alpha_Alumina = -1.09752E-07*(T-273.15) + 6.11327E-05;
+% alpha_insulation = alpha_Alumina;
+% 
+% alpha_sheath = 1.01373E-13*(T-273.15)^4 - 1.08291E-10*(T-273.15)^3 + 4.29330E-08*(T-273.15)^2 - 7.55060E-06*(T-273.15) + 5.32691E-04;
+%% ^^ Worked pretty well
+
+% Argon Calibration 12/23 0.01-40s OMITTED 350C+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% rsample =   2.72727E-07*(T-273.15)^2 - 1.11478E-04*(T-273.15) + 1.45699E-02;
+% 
+% RthInsShth = -1.60645E-05*(T-273.15)^2 + 1.12237E-02*(T-273.15) + 1.72607;
+% 
+% alpha_Alumina =   -1.04533E-07*(T-273.15) + 5.85980E-05;
+% alpha_insulation = alpha_Alumina;
+% 
+% alpha_sheath =  -6.75240E-08*(T-273.15) + 4.88692E-05;
+%% ^^ Worked pretty well
+
+%12-28-24 % Argon Calibration 0.1-55s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % RthInsShth = 4.49311E-03*(T-273.15) + 2.09048;
+% % % % 
+% % % % alpha_insulation = -2.65651E-07*(T-273.15) + 1.21815E-04;
+% % % % 
+% % % % alpha_sheath = -6.78833E-08*(T-273.15) + 2.70591E-05;
+% % % % 
+% % % % rsheath = -1.35256E-06*(T-273.15) + 1.43143E-03;
+% % % % 
+% % % % rwires = -3.37152E-07*(T-273.15) + 6.09581E-04;
+% % % % 
+% % % % %rsample = -2.46069E-06*(T-273.15) + 2.64281E-03; % Calibrated subsequently
+
+%1-1-24 % Argon Calibration 0.1-55s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% alpha_insulation =  -1.47267E-07*(T-273.15) + 7.08562E-05;
+% 
+% rsheath_inner =  -3.03489E-07*(T-273.15) + 7.97885E-04;
+% 
+% RthInsShth = 3.02409E-03*(T-273.15) + 2.11317;
+% 
+% alpha_sheath = -6.36482E-08*(T-273.15) + 5.42570E-05;
+% 
+% rwires = -4.34867E-07*(T-273.15) + 6.29312E-04;
+% 
+% rsheath =  -6.41162E-07*(T-273.15) + 1.59325E-03;
+%^^^ Pretty meh
+
+%1-1-24 % Argon Calibration 0.1-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% k_insulation = -5.45642E-02*(T-273.15) + 3.48935E+01;
+% 
+% rsheath_inner = 2.88672E-07*(T-273.15) + 7.55285E-04;
+% 
+% RthInsShth = 5.72277E-03*(T-273.15) + 1.87824;
+% 
+% alpha_sheath = -7.67846E-08*(T-273.15) + 2.90127E-05;
+% 
+% rsheath = -1.37652E-06*(T-273.15) + 1.42372E-03;
+
+%1-2-24 % Argon Calibration 0.01-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% From averaged calibration values of 325C, with slope from property data
+% RthInsShth = 3.35902505146999E+00;
+% alpha_insulation = -1.890892E-08*(T-273.15) + 5.9596781E-05;
+% alpha_sheath = -3.334141E-08*(T-273.15) + 1.5962670E-05;
+% rsheath = 1.02235450752728E-03;
+% rwires = 5.44152832373480E-04;
+
+%1-2-24 % Argon Calibration 0.01-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% From averaged calibration values of all data
+% % % % RthInsShth = 4.044338;
+% % % % alpha_insulation = -3.48148E-07*(T-273.15) + 1.31723E-04;
+% % % % alpha_sheath = 1.75908E-08*(T-273.15) - 4.96434E-07;
+% % % % rsheath = 9.715527E-04;
+% % % % rwires = 4.493237E-04;
+
+%1-2-24 % Argon Calibration 0.01-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% From averaged calibration values of all data, with slope from property data
+% % % RthInsShth = 4.367479;
+% % % alpha_insulation = 3.26042E-07*(T-273.15) - 4.84118E-05;
+% % % alpha_sheath = 7.59135E-09*(T-273.15) + 2.33756E-06;
+% % % rsheath = 9.800777E-04;
+% % % rwires = 4.648918E-04;
+
+%1-2-24 % Argon Calibration 0.01-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% From averaged calibration values of all data, all sloped
+% RthInsShth = 2.986810;
+% k_insulation = -4.49983E-03*(T-273.15) + 3.90049;
+% alpha_sheath = -5.30254E-08*(T-273.15) + 2.20054E-05;
+% rsheath = -9.70252E-07*(T-273.15) + 1.29708E-03;
+%rwires = 4.18936E-07*(T-273.15) + 3.50358E-04;
+
+%1-3-24 % Argon Calibration 0.5-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% From GLOBAL opt averaged calibration values of all data
+% RthInsShth = 4.172070;
+% alpha_insulation = 2.835005E-05;
+% alpha_sheath = 2.542139E-06;
+% rsheath = 9.002901E-04;
+% rwires = 3.667542E-04;
+
+%1-3-24 % Argon Calibration 0.5-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Geometry only
+% rsheath_inner = 1.073742E-04;
+% %rsample = 1.634050E-03;
+% rwires = 5.926679E-04;
+% rsheath = 9.531941E-04;
+
+%1-3-24 % Argon Calibration 0.5-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Geometry with 1 par -- looking best so far
+% % alpha_sheath =  5.03983E-08*(T-273.15) + 1.74380E-05;
+% % rsheath_inner = 1.293267E-04;
+% % rwires = 2.21206E-08*(T-273.15) + 5.85510E-04;
+% % rsheath = 1.109956E-03;
+
+%1-3-24 % Argon Calibration 0.5-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Geometry with 2 par
+%k_sheath = 2.591857E+01;
+% alpha_sheath = 1.232249E-05;
+% rsheath_inner = 1.217765E-04;
+% rwires = 5.929848E-04;
+% rsheath = 1.221500E-03;
+
+%1-3-24 % Argon Calibration 0.5-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Geometry with 2 par
+% k_sheath = 2.591857E+01;
+% RthInsShth = 4.055116E-01;
+% alpha_sheath = 1.232249E-05;
+% rsheath_inner = 1.217765E-04;
+% rwires = 5.929848E-04;
+% rsheath = 1.221500E-03;
+
+%1-3-24 % Argon Calibration 0.5-57s %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALL
+% % k_eff_wire = 1.9458E+01;
+% % alpha_eff_wire = 5.0812E-06;
+% % k_insulation = 2.4306E+01;
+% % alpha_insulation = 1.5159E-06;
+% % RthInsShth = 3.3587E-01;
+% % k_sheath = 6.4765E+01;
+% % alpha_sheath = 1.3236E-05;
+% % %k_crucible = 6.6441E+01;
+% % alpha_crucible = 8.3344E-01;
+% % emissivity_probe = 8.0076E-01;
+% % emissivity_crucible = 1.0730E-03;
+% % rwires = 1.8580E-04;
+% % rsheath_inner = 1.1630E-03;
+% % rsheath = 1.7168E-03;
+% % rsample = 1.5059E-03;
+% % % % % % % k_eff_wire = 2.3197E+01;
+% % % % % % % alpha_eff_wire = 5.2636E-06;
+% % % % % % % k_insulation = 1.9718E+01;
+% % % % % % % alpha_insulation = 3.2503E-06;
+% % % % % % % RthInsShth = 3.8061E-01;
+% % % % % % % k_sheath = 5.5065E+01;
+% % % % % % % alpha_sheath = 1.3716E-05;
+% % % % % % % %k_crucible = 6.6441E+01;
+% % % % % % % alpha_crucible = 6.1785E-06;
+% % % % % % % emissivity_probe = 8.4415E-01;
+% % % % % % % emissivity_crucible = 8.6863E-01;
+% % % % % % % rwires = 7.5338E-04;
+% % % % % % % rsheath_inner = 1.2469E-04;
+% % % % % % % rsheath = 1.1115E-03;
+% % % % % % % rsample = 1.7802E-03;
+% % k_eff_wire = 2.9424E+01;
+% % alpha_eff_wire = 3.8266E-06;
+% % k_insulation = 4.0176E+01;
+% % alpha_insulation = 1.2838E-06;
+% % RthInsShth = 4.9324E-01;
+% % k_sheath = 5.9199E+01;
+% % alpha_sheath = 9.2341E-06;
+% % k_crucible = 7.2516E+01;
+% % alpha_crucible = 6.1785E-06;
+% % emissivity_probe = 7.3956E-01;
+% % emissivity_crucible = 8.6825E-01;
+% % rwires = 1.0157E-03;
+% % rsheath_inner = 2.5997E-04;
+% % rsheath = 1.0772E-03;
+% % rsample = 1.5059E-03;
+% k_eff_wire = 3.15635E-02*(T-273.15) + 1.68352E+01;
+% alpha_eff_wire = 9.25914E-09*(T-273.15) + 2.23438E-06;
+% k_insulation = -1.53454E-01*(T-273.15) + 7.86208E+01;
+% alpha_insulation = -4.59797E-09*(T-273.15) + 2.59869E-06;
+% RthInsShth = 2.43352E-04*(T-273.15) + 3.10536E-01;
+% k_sheath = 5.80573E-02*(T-273.15) + 4.38316E+01;
+% alpha_sheath = -2.18990E-08*(T-273.15) + 1.61903E-05;
+% k_crucible = -1.18321E-02*(T-273.15) + 7.53320E+01;
+% alpha_crucible = 3.56139E-08*(T-273.15) + -3.53423E-06;
+% emissivity_probe = 2.28843E-03*(T-273.15) + 9.71729E-02;
+% emissivity_crucible = -2.34475E-03*(T-273.15) + 1.56743E+00;
+% rwires = -6.11364E-07*(T-273.15) + 1.22234E-03;
+% rsheath_inner = -1.52146E-07*(T-273.15) + 2.49347E-04;
+% rsheath = -1.02395E-06*(T-273.15) + 1.37954E-03;
+% rsample = -7.65965E-07*(T-273.15) + 1.72608E-03;
+
+
+
+par_vector(1) = k_eff_wire; 
+par_vector(2) = alpha_eff_wire; 
+par_vector(3) = k_insulation;   %k_probe; 0.200935; %
 par_vector(4) = alpha_insulation;   %k_probe; 2.44524E-8; %
-par_vector(5) = cal.RthInsShth(1); %6.9944; %
-par_vector(6) = cal.k_sheath(1); %26.6127; %
-par_vector(7) = cal.alpha_sheath(1); %1.0028E-4; %
+par_vector(5) = RthInsShth; %6.9944; %
+par_vector(6) = k_sheath; %26.6127; %
+par_vector(7) = alpha_sheath; %1.0028E-4; %
 par_vector(8) = k_sample;
 par_vector(9) = alpha_sample;
 par_vector(10) = k_crucible;
 par_vector(11) = alpha_crucible;
-par_vector(12) = cal.emissivity_probe(1);
-par_vector(13) = cal.emissivity_crucible(1);
+par_vector(12) = emissivity_probe;
+par_vector(13) = emissivity_crucible;
 par_vector(14) = index_of_refraction;
 par_vector(15) = scatter;
 par_vector(16) = Temp;
 par_vector(17) = Voltage;
 par_vector(18) = Resistance;
-par_vector(19) = cal.rwires(1);
-par_vector(20) = cal.rsheath_inner(1);
-par_vector(21) = cal.rsheath(1);
-par_vector(22) = cal.rsample(1);
+par_vector(19) = rwires;
+par_vector(20) = rsheath_inner;
+par_vector(21) = rsheath;
+par_vector(22) = rsample;
 par_vector(23) = rcrucible;
 par_vector(24) = L;
 par_vector(25) = h_convection;

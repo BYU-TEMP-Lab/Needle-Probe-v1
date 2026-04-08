@@ -267,6 +267,21 @@ ExcelFile = [run_name '.xlsx'];
 
 Results = zeros(numel(names)-2, 9);
 
+% this is  running just to create the par_names to put a header on the output text file
+[~, par_names] = Properties(crucible,sample,25,5,0.00225,0.1,0.00225,MC);
+
+cd(runfolder)
+textfile = fopen([run_name, '.txt'],'at');
+fprintf(textfile, '%s\t', 'Voltage (V)');
+fprintf(textfile, '%s\t', 'Temp (°C)');
+for p=1:length(SolveList)
+    fprintf(textfile, '%s', [par_names(str2double(SolveListNames(p)),1),' (',par_names(str2double(SolveListNames(p)),2),')']);
+    fprintf(textfile, '\t');
+end
+fprintf(textfile, '%s', 'Chi2 Error');
+fprintf(textfile, '\n');
+cd(currentFOLDER)
+
 for n = 3:numel(names)
     [~, fn] = fileparts(names(n).name);
     %loading data
@@ -455,7 +470,7 @@ for n = 3:numel(names)
         Sfit=NeedleProbeModel(Time,param,cp,IV);
 
         if MC == 0
-            figure;
+            figure('Visible','off');
             semilogx(Time,dTemp-Sfit,'o',Time,Sstart-Sfit,'o');
             zoom on;
             xlabel('Time(sec)');
@@ -464,13 +479,16 @@ for n = 3:numel(names)
             title(['Residuals: ', num2str(Voltage),'V ', num2str(aveTemp), '°C ' ,today]);
 
             f = gcf;
-            cd(plotfolder);
+            drawnow; %new
+            %cd(plotfolder);
             name1 = [sample '_' crucible '_' num2str(aveTemp) '_Voltage' num2str(Voltage) '_residues' '.png'];
-            saveas(f,name1);
-            close
-            cd(currentFOLDER);
+            %saveas(f,name1);
+            fullPath = fullfile(plotfolder, name1); %new
+            exportgraphics(f, fullPath); %new
+            close(f)
+            %cd(currentFOLDER);
 
-            figure;
+            figure('Visible','off');
             semilogx(Time,dTemp,'o', Time,Sstart, Time,Sfit);
             zoom on;
             xlabel('Time(sec)');
@@ -480,11 +498,14 @@ for n = 3:numel(names)
             title(['Solution: ', run_name_string, ' ', num2str(fix(aveTemp)), '°C ', num2str(Voltage), 'V']);
 
             f = gcf;
-            cd(plotfolder);
+            drawnow;
+            %cd(plotfolder);
             name1 = [sample '_' crucible '_' num2str(aveTemp) '_Voltage' num2str(Voltage) ' result fit' '.png'];
-            saveas(f,name1);
-            %close
-            cd(currentFOLDER);
+            %saveas(f,name1);
+            fullPath = fullfile(plotfolder, name1); %new
+            exportgraphics(f, fullPath); %new
+            close(f)
+            %cd(currentFOLDER);
 
         end
 
@@ -588,7 +609,7 @@ for n = 3:numel(names)
             Chi2_error = sigpar/sqrt(ndata);
 
             if chi2plots == 1
-                figure;
+                figure('Visible','off');
                 comstr=['par. ',int2str(ipar),' varies between ',num2str(parmin),' and ',num2str(parmax)];
 
                 semilogx(Time,familyvec);
@@ -597,13 +618,13 @@ for n = 3:numel(names)
                 ylabel('▲T (Kelvin)');
                 title(['familyvec over Tvec',today,' ',comstr]);
 
-                figure;
+                figure('Visible','off');
                 plot(parvec,chitestvec,'o',parvec,parabool);
                 chisave=[parvec,chitestvec,parabool];
                 title([run_name,' par(',int2str(ipar),'): ',num2str(fitresult(ipar)),'+/-',num2str(sigpar),'/sqrt(',int2str(ndata),') file: ',fn]);
                 zoom on;
 
-                figure;
+                figure('Visible','off');
                 semilogx(Time,dTemp,'o',Time,Sstart,Time,Sfit,Tvec,familyvec)
                 zoom on;
                 xlabel('Time(sec)');
@@ -624,10 +645,8 @@ for n = 3:numel(names)
 
     if MC == 0
         cd(runfolder)
-
         textfile = fopen([run_name, '.txt'],'at');
-        fprintf(textfile, '%s', [num2str(Voltage), 'V ', num2str(aveTemp), '°C']);
-        fprintf(textfile,'\t');
+        fprintf(textfile, '%f\t%f\t',Voltage, aveTemp);
 
         for e=1:npar
             if any([2 4 6 14 20 21]==Ifitpar(e))
@@ -673,7 +692,7 @@ for n = 3:numel(names)
 
             cd(mcplotsfolder)
 
-            figure
+            figure('Visible','off');
             histogram(fitresult_run(:,1),'FaceColor',[0, 0.5, 0]);
             xlabel(parlabel(h));
             ylabel('Quantity');
@@ -699,7 +718,7 @@ for n = 3:numel(names)
                 standard_deviation(N,h) = 2*std(fitresult_run(1:N,1));
             end
 
-            figure
+            figure('Visible','off');
             plot(Points,standard_deviation(:,h),'.');
             xlabel('Number of Points');
             ylabel('2 Standard Deviations');
@@ -722,7 +741,7 @@ for n = 3:numel(names)
         % 
         % cd(mcplotsfolder)
         % 
-        % figure
+        % figure('Visible','off');
         % histogram(fitresult_brian(:,1),'FaceColor',[0, 0.5, 0]);
         % xlabel(Par1_label);
         % ylabel('Quantity');
@@ -742,7 +761,7 @@ for n = 3:numel(names)
         % 
         % hold off
         % 
-        % figure
+        % figure('Visible','off');
         % histogram(fitresult_brian(:,2),'FaceColor',[0, 0.5, 0]);
         % xlabel(Par2_label);
         % ylabel('Quantity');
@@ -771,7 +790,7 @@ for n = 3:numel(names)
         %     standard_deviation2(N,1) = 2*std(fitresult_brian(1:N,2));
         % end
         % 
-        % figure
+        % figure('Visible','off');
         % plot(Points,standard_deviationk,'.');
         % xlabel('Number of Points');
         % ylabel('2 Standard Deviations [W/m-K]');
@@ -780,7 +799,7 @@ for n = 3:numel(names)
         % saveas(gcf,['stdev convergence k', sample, ' ', num2str(aveTemp), 'C.fig']);
         % saveas(gcf,['stdev convergence k', sample, ' ', num2str(aveTemp), 'C.png']);
         % 
-        % figure
+        % figure('Visible','off');
         % plot(Points,standard_deviation2,'.');
         % xlabel('Number of Points');
         % ylabel('2 Standard Deviations [W/m-K]');
@@ -897,7 +916,7 @@ if Full_Analysis == 1
     %     saveas(gcf,[sample, param, 'Solution.png'])
     % 
     % 
-    %     figure
+    %     figure('Visible','off');
     %     hold on
     %     errorbar(ave_temp,ave_k,Uncertaintyk,'s')
     %     title('Thermal Conductivity')
@@ -909,7 +928,7 @@ if Full_Analysis == 1
     % end
 
 
-    figure
+    figure('Visible','off');
     hold on
     errorbar(ave_temp,ave_k,Uncertaintyk,'s')
     if strcmp(sample,'Water') && strcmp(Par1_label,'K Sample [W/(m*K)]')
@@ -926,7 +945,7 @@ if Full_Analysis == 1
     saveas(gcf,[sample, ' K Results.png'])
     hold off
 
-    %    figure
+    %    figure('Visible','off');
     %    hold on
     %    errorbar(ave_temp,ave_kMC,Uncertaintyk,'s')
     %    title('Thermal Conductivity by MC')
@@ -935,7 +954,7 @@ if Full_Analysis == 1
     %    saveas(gcf,[sample, ' KMC Results.png'])
     %    hold off
 
-    figure
+    figure('Visible','off');
     hold on
     errorbar(ave_temp,ave_par2,Uncertainty2,'s')
     title('Specific Heat')
@@ -979,7 +998,7 @@ if Full_Analysis == 1
 end
 
 cd(runfolder)
-figure
+figure('Visible','off');
 yyaxis right
 plot(allresults(:,1),allresults(:,end),'x')
 ylabel('Chi^2 Value');
@@ -1000,7 +1019,7 @@ for i = 1:length(SolveListNames)
     saveas(gcf,[sample, param, 'Solution.fig'])
     saveas(gcf,[sample, param, 'Solution.png'])
 end
-    % figure
+    % figure('Visible','off');
     % plot(allresults(:,1),allresults(:,3),'o')
 
 toc

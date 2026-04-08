@@ -63,42 +63,42 @@ chi2vec=[chi2vec;chi2];
 
 i = size(Ifitpar,2);
 
-% if ((iplotfit==0)||mod(counter-1,5)~=0) % This mod thing is basically saying to only graph it every fifth iteration
-%     %fprintf(['Current iteration: %i K : %f ', para2, ' : %e chi2: %e\n'],counter,param(Ifitpar(1)),param(Ifitpar(2)),chi2);
-%     fprintf('Iter: %i ', counter)
-%     for n=1:i
-%         if any([2 4 6 14 20 21]==Ifitpar(n))
-%             fprintf('Par%i: %e ',Ifitpar(n),param(Ifitpar(n)))
-%         else
-%             fprintf('Par%i: %f ',Ifitpar(n),param(Ifitpar(n)))
-%         end
-%     end
-%     fprintf('chi2: %e\n',chi2)
-% else
-%     %fprintf(['Current iteration: %i K : %f ', para2, ' : %e chi2: %e\n'],counter,param(Ifitpar(1)),param(Ifitpar(2)),chi2);
-%     fprintf('Iter: %i ', counter)
-%     for n=1:i
-%         if any([2 4 6 14 20 21]==Ifitpar(n))
-%             fprintf('Par%i: %e ',Ifitpar(n),param(Ifitpar(n)))
-%         else
-%             fprintf('Par%i: %f ',Ifitpar(n),param(Ifitpar(n)))
-%         end
-%     end
-%     fprintf('chi2: %e\n',chi2)
-% 
-%     figure(1, 'visible', 'off');
-%         subplot(2,1,1);
-%         semilogx(Time,(dTemp),'o',Time,(Sstart),Time,(Sfit),Time,(Sfit));
-%         zoom on;
-%         xlabel('x-variable');
-%         ylabel('exp,startfit,resultfit ');
-%         title([today, ' ' num2str(param(12)) 'V ', num2str(param(11)) '°C', ' fit iteration: ',int2str(counter)]);
-%         subplot(2,1,2);
-%         semilogy(1:length(chi2vec),chi2vec);
-%         xlabel('iteration');
-%         ylabel('chi2 fit data and chi2 all data');
-%         zoom on;
-% end
+if ((iplotfit==0)||mod(counter-1,5)~=0) % This mod thing is basically saying to only graph it every fifth iteration
+    %fprintf(['Current iteration: %i K : %f ', para2, ' : %e chi2: %e\n'],counter,param(Ifitpar(1)),param(Ifitpar(2)),chi2);
+    fprintf('Iter: %i ', counter)
+    for n=1:i
+        if any([2 4 6 14 20 21]==Ifitpar(n))
+            fprintf('Par%i: %e ',Ifitpar(n),param(Ifitpar(n)))
+        else
+            fprintf('Par%i: %f ',Ifitpar(n),param(Ifitpar(n)))
+        end
+    end
+    fprintf('chi2: %e\n',chi2)
+else
+    %fprintf(['Current iteration: %i K : %f ', para2, ' : %e chi2: %e\n'],counter,param(Ifitpar(1)),param(Ifitpar(2)),chi2);
+    fprintf('Iter: %i ', counter)
+    for n=1:i
+        if any([2 4 6 14 20 21]==Ifitpar(n))
+            fprintf('Par%i: %e ',Ifitpar(n),param(Ifitpar(n)))
+        else
+            fprintf('Par%i: %f ',Ifitpar(n),param(Ifitpar(n)))
+        end
+    end
+    fprintf('chi2: %e\n',chi2)
+    
+    figure(1);
+        subplot(2,1,1);
+        semilogx(Time,(dTemp),'o',Time,(Sstart),Time,(Sfit),Time,(Sfit));
+        zoom on;
+        xlabel('x-variable');
+        ylabel('exp,startfit,resultfit ');
+        title([today, ' ' num2str(param(12)) 'V ', num2str(param(11)) '°C', ' fit iteration: ',int2str(counter)]);
+        subplot(2,1,2);
+        semilogy(1:length(chi2vec),chi2vec);
+        xlabel('iteration');
+        ylabel('chi2 fit data and chi2 all data');
+        zoom on;
+end
 
 if manual_delay == 1
     pause(0.1);
