@@ -52,6 +52,24 @@ currentFOLDER = pwd;
 today = sprintf('%02d%02d%02d', month(datetime), day(datetime), mod(year(datetime), 100));
 % today = char(todaysdate);
 
+m=menu('Probe:',...
+    '2A-SS-03', ...
+    '2A-SS-04', ...
+    '3A-IN718-01', ...
+    'INL',...
+    'end');
+
+if m == 1
+    probe = '2A-SS-03';
+elseif m == 2
+    probe = '2A-SS-04';
+elseif m == 3
+    probe = '3A-IN718-01';
+else
+    disp('No probe selected, program terminated')
+    return
+end
+
 %crucible = 'Nickel200';
 
 m=menu('Crucible Material:',...
@@ -244,9 +262,9 @@ end
 joinedString = char(strjoin(SolveListNames, '_'));
 
 if global_fitting == 0
-    run_name = [sample ' ' joinedString ' ' today '_fminsearch'];
+    run_name = [sample ' ' probe ' ' crucible ' ' today '_fminsearch'];
 else
-    run_name = [sample ' ' joinedString ' ' today '_global'];
+    run_name = [sample ' ' probe ' ' crucible ' ' today '_global'];
 end
 
 runfolder = [currentFOLDER '\Analysis_Results\' run_name];
@@ -268,7 +286,7 @@ ExcelFile = [run_name '.xlsx'];
 Results = zeros(numel(names)-2, 9);
 
 % this is  running just to create the par_names to put a header on the output text file
-[~, par_names] = Properties(crucible,sample,25,5,0.00225,0.1,0.00225,MC);
+[~, par_names] = Properties(probe,crucible,sample,25,5,0.00225,0.1,0.00225,MC);
 
 cd(runfolder)
 textfile = fopen([run_name, '.txt'],'at');
@@ -342,7 +360,7 @@ for n = 3:numel(names)
                 MC = 1;
             end
         end
-        [par_vector, par_names] = Properties(crucible,sample,aveTemp,Voltage,VoltageSTD,Current,CurrentSTD,MC);
+        [par_vector, par_names] = Properties(probe,crucible,sample,aveTemp,Voltage,VoltageSTD,Current,CurrentSTD,MC);
 
         if ~exist('iexecuted','var')
             n0=length(par_vector);			%total number of parameters
