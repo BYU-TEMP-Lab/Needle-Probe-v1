@@ -295,12 +295,12 @@ end
 if strcmp(probe,"3A-IN718-01")
     disp("PROBE "+ probe +" PROPERTIES NOT YET DEFINED")
     return
-    % Properties not yet defined are replaced with zeros
+    % Properties not yet defined are replaced with ~
     %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
     %r_2 = ; % middle of wires %Not needed right now, but may be needed later
-    r_3 = 0; % outside of wires
-    r_4 = 0; % inside radius of sheath
+    r_3 = ~; % outside of wires
+    r_4 = ~; % inside radius of sheath
     r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
     r_heating_wire = 0.0001143; % radius of heating wires
     r_TC_wire = 0.0001143; % radius of thermocouple wires
@@ -310,8 +310,8 @@ if strcmp(probe,"3A-IN718-01")
     %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
     %A_chromel = pi*(r_TC_wire^2);%1 chromel wire
     %A_nichrome = 2*pi*(r_heating_wire^2);% 2 nichrome wires
-    %A_alumina = ;
-    %A_ni = ;
+    %A_magnesium_oxide = ;
+    %A_IN718 = ;
     %A_total = ;
     
     % Relevant Volumes
@@ -326,37 +326,41 @@ if strcmp(probe,"3A-IN718-01")
     
     %Inconel 718: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Thermal Conductivity- IN718
-    if T >= ~ && T < ~
-        k_IN718 = 0;
-    elseif T >= 673 && T <= 1273
-        k_IN718 = 0;
+    if T >= 298 && T < 800
+        k_IN718 = 5.291 + 0.0152*T + 1.382e-6*(T^2); % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
+    elseif T >= 800 && T < 1173
+        k_IN718 = 18.34 + ((T-800)/(1173-800))*(22.72-18.34) % linearly interpolating between ranges based on Table 2 from Agazhanov
+    elseif T >= 1173 && T <= 1375
+        k_IN718 = 11.75 + 0.011*T - 9.327e-7*(T^2); % A Sh Agazhanov et al
     end
     
     %Density- Inconel 718 %Not needed right now, but may be needed later
-    rho_IN718 = 0; % ~ to ~ K
+    %rho_IN718 = ~; % ~ to ~ K
     
     %Heat Capacity- Inconel 718 %Not needed right now, but may be needed later
-    if T >= ~ && T < ~
-         cp_IN718 = 0;
-    elseif T >= ~ && T < ~
-         cp_IN718 = 0;
+    if T >= 298 && T < 800
+         cp_IN718 = 0.362 + 2.118e-4*T; % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
+    elseif T >= 800 && T < 900
+         cp_IN718 = -0.946 + 0.295e-2*T - 1.379e-6*(T^2);
+    elseif T >= 900 && T < 1070
+        cp_IN718 = 0.595; % grabbing a rough middle point for this range from Figures 1 & 2
+    elseif T >= 1070 && T <= 1361
+         cp_IN718 = 0.639 - 3.355e-6*T;
     end
     
     % Thermal Diffusivity- Inconel 718
-    if T >= ~ && T < ~
-        alpha_IN718 = 0;
-    elseif T >= ~ && T < ~
-        alpha_IN718 = 0;
-    elseif T >= ~ && T <= ~
-        alpha_IN718 = 0;
+    if T >= 298 && T < 980
+        alpha_IN718 = 1.901 + 0.0034*T - 4.475e-7*(T^2);  % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
+    elseif T >= 980 && T < 1173
+        alpha_IN718 = 4.75; % rough middle point for range from Figure 4
+    elseif T >= 1173 && T <= 1375
+        alpha_IN718 = 2.233 + 0.0021*T - 1.85e-8*(T^2);
     end
     
     %Magnesium Oxide: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Thermal Conductivity- Magnesium Oxide
-    if T >= ~ && T < ~
-        k_Magnesium_Oxide = 0;
-    elseif T >= ~
-        k_Magnesium_Oxide = 0;
+    if T >= 400 && T <= 1300
+        k_Magnesium_Oxide = -3e-8*(T^3) + 0.0001*(T^2) - 0.1274*T + 65.823; %excel 3rd order polynomial fit to Table 2 data from https://pmc.ncbi.nlm.nih.gov/articles/PMC4887202/
     end
     
     % Porous Magnesium_Oxide
@@ -364,13 +368,11 @@ if strcmp(probe,"3A-IN718-01")
     k_Magnesium_Oxide = k_Magnesium_Oxide*exp((-1.5*phi)/(1-phi));  % (Z. Zivcoca et al, 2009)
     
     % Density- Magnesium_Oxide
-    rho_Magnesium_Oxide = 0;
+    rho_Magnesium_Oxide = 3580; %AZoM max
     
     % Heat Capacity- Magnesium_Oxide
-    if T >= ~ && T < ~
-        cp_Magnesium_Oxide = 0;
-    elseif T >= ~ && T < ~
-        cp_Magnesium_Oxide = 0;
+    if T >= 298 && T < 3105
+        cp_Magnesium_Oxide = 47.25995 + 5.681621*T - 0.872665*(T^2) + 0.1043*(T^3) + (-1.053955/(T^2)); % https://webbook.nist.gov/cgi/cbook.cgi?ID=C1309484&Mask=2&Type=JANAFS&Plot=on#JANAFS
     end
     
     % Thermal Diffusivity- Magnesium_Oxide
@@ -439,6 +441,40 @@ if strcmp(probe,"3A-IN718-01")
     
     % Density- Chromel
     rho_Chromel = 8670; %Not needed right now, but may be later
+
+    %NICHROME: VALID UP TO ~ %%%%%
+    %Thermal Conductivity- Nichrome Not needed right now, but may be needed
+    %later
+    if T>= ~ && T < ~
+        k_Nichrome = ~;
+    elseif T >= ~ && T < ~
+        k_Nichrome = ~;
+    elseif T >= ~
+        k_Nichrome = ~;
+    end
+    
+    % % Heat Capacity- Nichrome Not needed right now, but may be needed later
+    if T >=~ && T < ~
+        cp_Nichrome = ~;
+    elseif T >=~ && T < ~
+        cp_Nichrome = ~;
+    elseif T >= ~
+        cp_Nichrome = ~;
+    end
+    
+    % Thermal Diffusivity- Nichrome
+    if T >= ~ && T < ~
+        alpha_Nichrome = ~;
+    elseif T >=~ && T < ~
+        alpha_Nichrome = ~;
+    elseif T >=~ && T < ~
+        alpha_Nichrome = ~;
+    elseif T >= ~
+        alpha_Nichrome = ~;
+    end
+    
+    % Density- Nichrome
+    rho_Nichrome = ~; %Not needed right now, but may be needed later
     
     %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -454,10 +490,9 @@ if strcmp(probe,"3A-IN718-01")
     % alpha_Magnesium_Oxide = R*alpha_Magnesium_Oxide + (1-R)*alpha_air;
     
     %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    REVISIT (Type K TC + Nichrome heating
-    alpha_eff_wire = %(alpha_Chromel*(V_tc/2+2*V_h)+ alpha_Alumel*V_tc/2+alpha_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
-    rho_eff_wire = %(rho_Chromel*(V_tc/2+2*V_h)+ rho_Alumel*V_tc/2+rho_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
-    cp_eff_wire = %(cp_Chromel*(V_tc/2+2*V_h)+ cp_Alumel*V_tc/2+cp_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
+    alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
+    rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
+    cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
     k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire);
     
     k_insulation = k_Magnesium_Oxide;   % Use if separated into probe layers
@@ -471,9 +506,9 @@ if strcmp(probe,"3A-IN718-01")
     end
     %k_probe = kprobe;
     
-    alphaprobe = %(alpha_Chromel*(V_tc+2*V_h)+ alpha_Alumel*V_tc+alpha_Magnesium_Oxide*V_i+alpha_IN718*V_s+2.074e-5*V_A)/V_total; %Volume-based weighted average of wires, insluation, and sheath. This is how Hollar describes it. 
+    alphaprobe = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_Magnesium_Oxide*V_i+alpha_IN718*V_s+2.074e-5*V_A)/V_total; %Volume-based weighted average of wires, insluation, and sheath. This is how Hollar describes it 
     
-    alpha_wires_ins = (alpha_Chromel*(V_tc/2+V_h)+ alpha_Alumel*V_tc/2+alpha_Magnesium_Oxide*V_i)/V_total; %Weighted avg thermal diff. of wires, insulation 
+    alpha_wires_ins = (alpha_Chromel*(V_tc/2+V_h)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_Magnesium_Oxide*V_i)/V_total; %Weighted avg thermal diff. of wires, insulation 
     %pCp_probe = (A_alumel*(rho_Alumel*cp_Alumel)+A_chromel*(rho_Chromel*cp_Chromel)+A_Magnesium_Oxide*(rho_Magnesium_Oxide*cp_Magnesium_Oxide)+A_ni*(rho_Ni*cp_Ni))/A_total;
     %alphaprobe = k_probe/pCp_probe;
     
@@ -504,12 +539,12 @@ if strcmp(probe,"3A-IN718-01")
     
     
     % Total Radiative Emissivity- IN718
-    if T < ~
-        emissivity_probe = 0;
-    elseif T >=~ && T < ~
-        emissivity_probe = 0; %max emissivity of ~ found in literature
-    elseif T >= ~
-        emissivity_probe = 0;
+    if T < 600
+        emissivity_probe = 0.2;
+    elseif T >= 600 && T < 1200
+        emissivity_probe = 0.2 + ((T-600)/(1200-600))*(0.5-0.2) % Linearly interpolating between min and max of Keller at al.'s data, doi.org/10.1016/j.nucengdes.2015.02.018 
+    elseif T >= 1200
+        emissivity_probe = 0.5
     end
     bias_emissitivy_probe = 0;
     uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
