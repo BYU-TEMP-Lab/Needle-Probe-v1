@@ -294,14 +294,14 @@ if strcmp(probe,"2A-SS-03")
     r_5 = 1.375e-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
     r_heating_wire = 0.15e-3; % radius of heating wires
     r_TC_wire = 0.15e-3; % radius of thermocouple wires
-    L = ~; % Length of the sensing region of probe
+    L = 145e-3; % Length of the sensing region of probe
     
     % Areas for each material %Not needed right now, but may be needed later
     %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
     %A_chromel = pi*(r_TC_wire^2);%1 chromel wire
     %A_nichrome = 2*pi*(r_heating_wire^2);% 2 nichrome wires
-    %A_magnesium_oxide = ;
-    %A_IN718 = ;
+    %A_~ = ;
+    %A_SS316 = ;
     %A_total = ;
     
     % Relevant Volumes
@@ -591,14 +591,12 @@ if strcmp(probe,"2A-SS-04")
 end
 
 if strcmp(probe,"3A-IN718-01")
-    disp("PROBE "+ probe +" PROPERTIES NOT YET DEFINED")
-    return
     % Properties not yet defined are replaced with ~
     %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
     %r_2 = ; % middle of wires %Not needed right now, but may be needed later
-    r_3 = ~; % outside of wires
-    r_4 = ~; % inside radius of sheath
+    r_3 = 0.35e-3; % outside of wires
+    r_4 = 1e-3; % inside radius of sheath
     r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
     r_heating_wire = 0.0001143; % radius of heating wires
     r_TC_wire = 0.0001143; % radius of thermocouple wires
@@ -627,7 +625,7 @@ if strcmp(probe,"3A-IN718-01")
     if T >= 298 && T < 800
         k_IN718 = 5.291 + 0.0152*T + 1.382e-6*(T^2); % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
     elseif T >= 800 && T < 1173
-        k_IN718 = 18.34 + ((T-800)/(1173-800))*(22.72-18.34) % linearly interpolating between ranges based on Table 2 from Agazhanov
+        k_IN718 = 18.34 + ((T-800)/(1173-800))*(22.72-18.34); % linearly interpolating between ranges based on Table 2 from Agazhanov
     elseif T >= 1173 && T <= 1375
         k_IN718 = 11.75 + 0.011*T - 9.327e-7*(T^2); % A Sh Agazhanov et al
     end
@@ -829,9 +827,9 @@ if strcmp(probe,"3A-IN718-01")
     if T < 600
         emissivity_probe = 0.2;
     elseif T >= 600 && T < 1200
-        emissivity_probe = 0.2 + ((T-600)/(1200-600))*(0.5-0.2) % Linearly interpolating between min and max of Keller at al.'s data, doi.org/10.1016/j.nucengdes.2015.02.018 
+        emissivity_probe = 0.2 + ((T-600)/(1200-600))*(0.5-0.2); % Linearly interpolating between min and max of Keller at al.'s data, doi.org/10.1016/j.nucengdes.2015.02.018 
     elseif T >= 1200
-        emissivity_probe = 0.5
+        emissivity_probe = 0.5;
     end
     bias_emissitivy_probe = 0;
     uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
