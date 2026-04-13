@@ -285,6 +285,304 @@ end
 if strcmp(probe,"2A-SS-03")
     disp("PROBE "+ probe +" PROPERTIES NOT YET DEFINED")
     return
+    % Properties not yet defined are replaced with ~
+    %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
+    %r_2 = ; % middle of wires %Not needed right now, but may be needed later
+    r_3 = 0.735e-3; % outside of wires
+    r_4 = 1.02e-3; % inside radius of sheath
+    r_5 = 1.375e-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    r_heating_wire = 0.15e-3; % radius of heating wires
+    r_TC_wire = 0.15e-3; % radius of thermocouple wires
+    L = ~; % Length of the sensing region of probe
+    
+    % Areas for each material %Not needed right now, but may be needed later
+    %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
+    %A_chromel = pi*(r_TC_wire^2);%1 chromel wire
+    %A_nichrome = 2*pi*(r_heating_wire^2);% 2 nichrome wires
+    %A_magnesium_oxide = ;
+    %A_IN718 = ;
+    %A_total = ;
+    
+    % Relevant Volumes
+    V_tc = 2*pi*(r_TC_wire^2)*L/2; % Thermocouple volume
+    V_h = 2*pi*(r_heating_wire^2)*L; % Heating element volume (2 lengths of heating wire
+    V_i = pi*(r_4^2)*L-V_tc-V_h; % Insulation
+    V_A = pi*(r_3^2)*L-V_tc-V_h; % Insulation inside outer wire radius
+    V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
+    V_total = V_tc+V_h+V_i+V_s; % Total Probe Volume    
+    
+    %Probe Materials%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %Stainless Steel 316: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Thermal Conductivity- Stainless Steel 316
+    if T >= 4 && T < 9
+        k_SS316 = -0.9611905+0.5776587*T^1-0.08547619*T^2+0.004722222*T^3;
+    elseif T >= 9 && T < 135
+        k_SS316 = -0.575597+0.1484296*T^1+1.184549E-5*T^2-6.696619E-6*T^3+2.25279E-8*T^4;
+    elseif T >= 135 && T < 1220
+        k_SS316 = 7.956002+0.02084122*T^1-4.706772E-6*T^2+6.271478E-10*T^3-1.240772E-12*T^4;
+    end
+
+    % Density- Stainless Steel 316
+    if T >= 4 && T < 114
+        rho_SS316 = 8042.496-0.01245121*T^1+3.834401E-5*T^2-7.363868E-6*T^3;
+    elseif T >= 114 && T < 1273
+        rho_SS316 = 8058.746-0.1963973*T^1-4.830884E-4*T^2+4.114383E-7*T^3-1.337946E-10*T^4;
+    end
+
+    % Specific Heat- Steel316
+    if T >= 4 && T < 18
+        cp_SS316 = 0.363452365+0.26377074*T^1+0.0493134608*T^2-0.0038147097*T^3+1.19554913E-4*T^4;
+    elseif T >= 18 && T < 50
+        cp_SS316 = -14.0795868+2.9024659*T^1-0.153359541*T^2+0.004588802*T^3-3.66629778E-5*T^4;
+    elseif T >= 50 && T < 140
+        cp_SS316 = -20.5016084-0.832746541*T^1+0.0955618906*T^2-7.74522415E-4*T^3+1.944414E-6*T^4;
+    elseif T >= 140 && T < 300
+        cp_SS316 = -75.5829977+5.00692586*T^1-0.0164947547*T^2+2.02748649E-5*T^3;
+    elseif T >= 300 && T < 1500
+        cp_SS316 = 235.650788+1.30084242*T^1-0.00189052617*T^2+1.34841366E-6*T^3-3.43379416E-10*T^4;
+    end
+
+    % Thermal Diffusivity- Steel316
+    alpha_Steel316 = k_SS316/(rho_SS316*cp_SS316);
+
+    
+    %ALUMINA: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Thermal Conductivity- Alumina
+    if T >= 293 && T < 298
+        k_Alumina = 37.1754;
+    elseif T >= 298 && T < 300
+        k_Alumina = ((36.9601-37.1754)/(300-298))*(T-298)+37.1754;
+    elseif T >= 300 && T < 373
+        k_Alumina = ((30.2503-36.9601)/(373-300))*(T-300)+36.9601;
+    elseif T >= 373 && T < 400
+        k_Alumina = ((27.209-30.2503)/(400-373))*(T-373)+30.2503;
+    elseif T >= 400 && T < 473
+        k_Alumina = ((22.5099-27.209)/(473-400))*(T-400)+27.209;
+    elseif T >= 473 && T < 500
+        k_Alumina = ((20.93-22.5099)/(500-473))*(T-473)+22.5099;
+    elseif T >= 500 && T < 600
+        k_Alumina = ((16.3045-20.93)/(600-500))*(T-500)+20.93;
+    elseif T >= 600 && T < 673
+        k_Alumina = ((13.1378-16.3045)/(673-600))*(T-600)+16.3045;
+    elseif T >= 673 && T < 700
+        k_Alumina = ((12.558-13.1378)/(700-673))*(T-673)+13.1378;
+    elseif T >= 700 && T < 873
+        k_Alumina = ((9.1211-12.558)/(873-700))*(T-700)+12.558;
+    elseif T >= 873
+        k_Alumina = ((9.1211-12.558)/(873-700))*(T-700)+12.558; %because I don't know what it would be. placeholder for now
+    end
+    
+    % Porous Alumina
+    phi = 0/100;   % =48 Volume fraction of voids (modelling cracked insulation), 7.38 correction from old files
+    k_Alumina = k_Alumina*exp((-1.5*phi)/(1-phi));  % (Z. Zivcoca et al, 2009)
+    
+    % Density- Alumina
+    rho_Alumina = 3900;
+    
+    % Heat Capacity- Alumina
+    if T >= 293 && T < 298
+        cp_Alumina = 782.218;
+    elseif T >= 298 && T < 300
+        cp_Alumina = ((785.025-782.218)/(300-298))*(T-298)+782.218;
+    elseif T >= 300 && T < 373
+        cp_Alumina = ((901.3683-785.025)/(373-300))*(T-300)+785.025;
+    elseif T >= 373 && T < 400
+        cp_Alumina = ((942.03-901.3683)/(400-373))*(T-373)+901.3683;
+    elseif T >= 400 && T < 473
+        cp_Alumina = ((1016.802-942.03)/(473-400))*(T-400)+942.03;
+    elseif T >= 473 && T < 500
+        cp_Alumina = ((1046.7-1016.802)/(500-473))*(T-473)+1016.802;
+    elseif T >= 500 && T < 600
+        cp_Alumina = ((1109.502-1046.7)/(600-500))*(T-500)+1046.7;
+    elseif T >= 600 && T < 673
+        cp_Alumina = ((1148.873-1109.502)/(673-600))*(T-600)+1109.502;
+    elseif T >= 673 && T < 700
+        cp_Alumina = ((1151.37-1148.873)/(700-673))*(T-673)+1148.873;
+    elseif T >= 700 && T < 873
+        cp_Alumina = ((1214.92-1151.37)/(873-700))*(T-700)+1151.37;
+    elseif T >= 873
+        cp_Alumina = ((1214.92-1151.37)/(873-700))*(T-700)+1151.37; %because I don't know what it would be. placeholder for now
+    end
+
+    % Thermal Diffusivity- Alumina
+    alpha_Alumina = k_Alumina/(rho_Alumina*cp_Alumina);
+    
+
+    %Ceramabond: VALID UP TO ~ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Thermal Conductivity- Ceramabond
+    k_ceramabond = ~;
+
+    % Density- Ceramabond
+    rho_ceramabond = ~;
+
+    % Heat Capacity- Ceramabond
+    cp_ceramabond = ~;
+
+
+    %ALUMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%%
+    %Thermal Conductivity- Alumel Not needed right now, but may be needed
+    %later
+    if T>= 100 && T < 400
+        k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3;
+    elseif T >= 400 && T < 773
+        k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3;
+    elseif T >= 773
+        k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %out of COMSOL'S RANGE
+    end
+    
+    % % Heat Capacity- Alumel Not needed right now, but may be needed later
+    if T >=100 && T < 410
+        cp_Alumel = -120.397194+4.83234846*T^1-0.0141451249*T^2+0.0000151245324*T^3;
+    elseif T >=410 && T < 450
+        cp_Alumel = 4215.99923-16.6533325*T^1+0.018666665*T^2;
+    elseif T >= 450
+        cp_Alumel = 4215.99923-16.6533325*(T)^1+0.018666665*(T)^2; %out of COMSOL'S RANGE
+    end
+    
+    % Thermal Diffusivity- Alumel
+    if T >= 100 && T < 175
+        alpha_Alumel = 2.777243E-5-3.26281E-7*T^1+1.773714E-9*T^2-3.253333E-12*T^3;
+    elseif T >=175 && T < 422
+        alpha_Alumel = 9.912174E-6-2.568489E-8*T^1+8.732857E-11*T^2-1.005653E-13*T^3;
+    elseif T >=422 && T < 450
+        alpha_Alumel = -0.00007507129+0.0000003614333*T^1-0.0000000003952381*T^2;
+    elseif T >= 450
+        alpha_Alumel = -0.00007507129+0.0000003614333*(T)^1-0.0000000003952381*(T)^2; %out of COMSOL'S RANGE
+    end
+    
+    % Density- Alumel
+    rho_Alumel = 8600; %Not needed right now, but may be needed later
+    
+    %CHROMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%
+    %Thermal Conductivity- Chromel Not needed right now, but may be needed
+    %later
+    if T >= 100 && T < 450
+        k_Chromel = 13.1709-0.02474581*T^1+2.79175E-4*T^2-6.862022E-7*T^3+6.09438E-10*T^4; %100 to 450 K
+    elseif T >= 450
+        k_Chromel = 13.1709-0.02474581*(T)^1+2.79175E-4*(T)^2-6.862022E-7*(T)^3+6.09438E-10*(T)^4; %out of COMSOL'S RANGE
+    end
+    
+    % Heat Capacity- Chromel- Not needed right now, but may be later
+    if T >= 100 && T < 450
+        cp_Chromel = -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4;
+    elseif T >= 450
+        cp_Chromel = -169.134351+5.88577506*(T)^1-0.0235877058*(T)^2+0.0000447834022*(T)^3-0.0000000321153924*(T)^4; %out of COMSOL'S RANGE
+    end
+    
+    
+    % Thermal Diffusivity- Chromel
+    if T >= 100 && T < 175
+        alpha_Chromel = 3.466E-5-6.301667E-7*T^1+5.119333E-9*T^2-1.893333E-11*T^3+2.666667E-14*T^4;
+    elseif T >= 175 && T < 450
+        alpha_Chromel = 6.607453E-6-1.986064E-8*T^1+6.038939E-11*T^2-5.155141E-14*T^3;
+    elseif T >= 450
+        alpha_Chromel = 6.607453E-6-1.986064E-8*(T)^1+6.038939E-11*(T)^2-5.155141E-14*(T)^3; %out of COMSOL'S RANGE
+    end
+    
+    % Density- Chromel
+    rho_Chromel = 8670; %Not needed right now, but may be later
+
+    %NICHROME: VALID UP TO 1400 K %%%%%
+    %Thermal Conductivity- Nichrome Not needed right now, but may be needed
+    %later
+    if T>= 290 && T < 570
+        k_Nichrome = 15; % https://www.kanthal.com/en/products/datasheets/material-datasheets/wire/resistance-heating-wire-and-resistance-wire/nikrothal-80/
+    elseif T >= 570 && T < 1100
+        k_Nichrome = 0.0177*T + 5.0852; % excel linear fit to data from Kanthal
+    elseif T >= 1370
+        k_Nichrome = 2.579 + 0.019*T; % https://doi.org/10.1016/j.tca.2009.04.015
+    end
+    
+    % Heat Capacity- Nichrome Not needed right now, but may be needed later
+    if T >=290 && T < 1370
+        cp_Nichrome = 0.4699 - 0.0002*T + (4e-7)*(T^2) - (1e-10)*(T^3); % Excel 3rd order fit to Kanthal
+    end
+
+    % Density- Nichrome
+    rho_Nichrome = 8300; %Not needed right now, but may be needed later
+    
+    % Thermal Diffusivity- Nichrome
+    aplha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome);
+    
+    
+    %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    k_air = 1E-11*(T^3) - 5E-8*(T^2) + 1E-4*T + .0003; %Made from data from engineeringtoolbox.com
+    density_air = 355.1*T^-1.001; %Made from data from engineersedge.com
+    cp_air = 1E-10*T^4 - 6E-07*T^3 + 0.001*T^2 - 0.3867*T + 1050; %Made from data from engineeringtoolbox.com
+    
+    alpha_air = k_air/(density_air*cp_air);
+    % 
+    % R=1;
+    % 
+    % k_~ = R*k_~ + (1-R)*k_air;
+    % alpha_~ = R*alpha_~ + (1-R)*alpha_air;
+    
+    %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_~*V_A)/(V_tc+V_h+V_A);
+    rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_~*V_A)/(V_tc+V_h+V_A);
+    cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_~*V_A)/(V_tc+V_h+V_A);
+    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire);
+    
+    k_insulation = ;   % Use if separated into probe layers
+    alpha_insulation = ;
+    
+    bias_k_insulation = 0;
+    k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE
+    
+    if MC == 1
+        kprobe = MonteCarloProp(k_insulation_uncertainty,bias_k_insulation,k_insulation);
+    end
+    %k_probe = kprobe;
+    
+    alphaprobe = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_~*V_i+alpha_SS316*V_s+2.074e-5*V_A)/V_total; %Volume-based weighted average of wires, insluation, and sheath. This is how Hollar describes it 
+    
+    alpha_wires_ins = (alpha_Chromel*(V_tc/2+V_h)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_~*V_i)/V_total; %Weighted avg thermal diff. of wires, insulation 
+    %pCp_probe = (A_alumel*(rho_Alumel*cp_Alumel)+A_chromel*(rho_Chromel*cp_Chromel)+A_Magnesium_Oxide*(rho_Magnesium_Oxide*cp_Magnesium_Oxide)+A_ni*(rho_Ni*cp_Ni))/A_total;
+    %alphaprobe = k_probe/pCp_probe;
+    
+    bias_alphaprobe = 0;
+    alphaprobe_uncertainty = .05; %LOOK INTO THIS ONE
+    
+    if MC == 1
+        alphaprobe = MonteCarloProp(alphaprobe_uncertainty,bias_alphaprobe,alphaprobe);
+    end
+    %alpha_probe = alphaprobe;
+    
+    k_sheath = k_SS316;
+    alpha_sheath = alpha_SS316;
+    
+    bias_k_sheath = 0;
+    k_sheath_uncertainty = .05;
+    
+    bias_alpha_sheath = 0;
+    alpha_sheath_uncertainty = .05;
+    
+    if MC == 1
+        k_sheath = MonteCarloProp(k_sheath_uncertainty,bias_k_sheath,k_sheath);
+    end
+    
+    if MC == 1
+        alpha_sheath = MonteCarloProp(alpha_sheath_uncertainty,bias_alpha_sheath,alpha_sheath);
+    end
+    
+    
+    % Total Radiative Emissivity- Steel316
+    if T < 660
+        emissivity_probe = 0.38;
+    elseif T >= 660 && T < 1138
+        emissivity_probe = 0.0005*T + 0.0569;
+    elseif T >= 1075
+        emissivity_probe = 0.6;
+    end
+    bias_emissitivy_probe = 0;
+    uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
+    
+    if MC == 1
+        emissivity_probe = MonteCarloProp(uncertainty_emissitivy_probe,bias_emissitivy_probe,emissivity_probe);
+    end
 end
 
 if strcmp(probe,"2A-SS-04")
@@ -442,39 +740,28 @@ if strcmp(probe,"3A-IN718-01")
     % Density- Chromel
     rho_Chromel = 8670; %Not needed right now, but may be later
 
-    %NICHROME: VALID UP TO ~ %%%%%
+    %NICHROME: VALID UP TO 1400 K %%%%%
     %Thermal Conductivity- Nichrome Not needed right now, but may be needed
     %later
-    if T>= ~ && T < ~
-        k_Nichrome = ~;
-    elseif T >= ~ && T < ~
-        k_Nichrome = ~;
-    elseif T >= ~
-        k_Nichrome = ~;
+    if T>= 290 && T < 570
+        k_Nichrome = 15; % https://www.kanthal.com/en/products/datasheets/material-datasheets/wire/resistance-heating-wire-and-resistance-wire/nikrothal-80/
+    elseif T >= 570 && T < 1100
+        k_Nichrome = 0.0177*T + 5.0852; % excel linear fit to data from Kanthal
+    elseif T >= 1370
+        k_Nichrome = 2.579 + 0.019*T; % https://doi.org/10.1016/j.tca.2009.04.015
     end
     
-    % % Heat Capacity- Nichrome Not needed right now, but may be needed later
-    if T >=~ && T < ~
-        cp_Nichrome = ~;
-    elseif T >=~ && T < ~
-        cp_Nichrome = ~;
-    elseif T >= ~
-        cp_Nichrome = ~;
+    % Heat Capacity- Nichrome Not needed right now, but may be needed later
+    if T >=290 && T < 1370
+        cp_Nichrome = 0.4699 - 0.0002*T + (4e-7)*(T^2) - (1e-10)*(T^3); % Excel 3rd order fit to Kanthal
     end
+
+    % Density- Nichrome
+    rho_Nichrome = 8300; %Not needed right now, but may be needed later
     
     % Thermal Diffusivity- Nichrome
-    if T >= ~ && T < ~
-        alpha_Nichrome = ~;
-    elseif T >=~ && T < ~
-        alpha_Nichrome = ~;
-    elseif T >=~ && T < ~
-        alpha_Nichrome = ~;
-    elseif T >= ~
-        alpha_Nichrome = ~;
-    end
+    aplha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome);
     
-    % Density- Nichrome
-    rho_Nichrome = ~; %Not needed right now, but may be needed later
     
     %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -1371,8 +1658,8 @@ scatter = 0;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %STAINLESS STEEL 316 (SOLID/POLISHED/OXIDIZED): VALID UP TO 1220K (947C)
-% Thermal Conductivity- Steel316
 if strcmp(crucible,'Steel316')
+    % Thermal Conductivity- Steel316
     if T >= 4 && T < 9
         k_Steel316 = -0.9611905+0.5776587*T^1-0.08547619*T^2+0.004722222*T^3;
     elseif T >= 9 && T < 135
