@@ -283,8 +283,6 @@ if strcmp(probe,"INL")
 end
 
 if strcmp(probe,"2A-SS-03")
-    disp("PROBE "+ probe +" PROPERTIES NOT YET DEFINED")
-    return
     % Properties not yet defined are replaced with ~
     %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
@@ -294,6 +292,8 @@ if strcmp(probe,"2A-SS-03")
     r_5 = 1.375e-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
     r_heating_wire = 0.15e-3; % radius of heating wires
     r_TC_wire = 0.15e-3; % radius of thermocouple wires
+    r_alumina_outer = 0.9525e-3; % outside radius of alumina core
+    r_alumina_bore = 0.1905e-3; % radius of inside bores of alumina core
     L = 145e-3; % Length of the sensing region of probe
     
     % Areas for each material %Not needed right now, but may be needed later
@@ -308,6 +308,8 @@ if strcmp(probe,"2A-SS-03")
     V_tc = 2*pi*(r_TC_wire^2)*L/2; % Thermocouple volume
     V_h = 2*pi*(r_heating_wire^2)*L; % Heating element volume (2 lengths of heating wire
     V_i = pi*(r_4^2)*L-V_tc-V_h; % Insulation
+    V_alumina = pi*(r_alumina_outer^2)*L - 4*pi*(r_alumina_bore^2)*L; % Volume of alumina
+    V_ceramabond = V_i - V_alumina; % Assumes ceramabond fills volume inside the sheath besides wires and alumina
     V_A = pi*(r_3^2)*L-V_tc-V_h; % Insulation inside outer wire radius
     V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
     V_total = V_tc+V_h+V_i+V_s; % Total Probe Volume    
@@ -412,13 +414,16 @@ if strcmp(probe,"2A-SS-03")
 
     %Ceramabond: VALID UP TO ~ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Thermal Conductivity- Ceramabond
-    k_ceramabond = ~;
+    k_ceramabond = 13; % this is just in the range of data I've found about similar mixtures of sodium silicate with BN and diamond
 
     % Density- Ceramabond
-    rho_ceramabond = ~;
+    rho_ceramabond = 1950; % lower bound from Aremco datasheet
 
     % Heat Capacity- Ceramabond
-    cp_ceramabond = ~;
+    cp_ceramabond = (50 + (T-300)*25)*(122.0632/1000);
+
+    % Thermal Diffusivity- Ceramabond
+    alpha_ceramabond = k_ceramabond/(rho_ceramabond*cp_ceramabond);
 
 
     %ALUMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%%
@@ -504,7 +509,7 @@ if strcmp(probe,"2A-SS-03")
     rho_Nichrome = 8300; %Not needed right now, but may be needed later
     
     % Thermal Diffusivity- Nichrome
-    aplha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome);
+    alpha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome);
     
     
     %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -519,15 +524,20 @@ if strcmp(probe,"2A-SS-03")
     % 
     % k_~ = R*k_~ + (1-R)*k_air;
     % alpha_~ = R*alpha_~ + (1-R)*alpha_air;
+
+    % probably do a similar volume weighted average like below for the
+    % alumina and ceramabond, assuming the ceramabond fills whatever volume
+    % is left inside the sheath besides the alumina and wires
+    k_insulation = (k_Alumina*(V_alumina) + k_ceramabond*(V_ceramabond))/V_i;   % Use if separated into probe layers
+    alpha_insulation = (alpha_Alumina*(V_alumina) + alpha_ceramabond*(V_ceramabond))/V_i;
+    rho_insulation = (rho_Alumina*(V_alumina) + rho_ceramabond*(V_ceramabond))/V_i;
+    cp_insulation = (cp_Alumina*(V_alumina) + cp_ceramabond*(V_ceramabond))/V_i;
     
     %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_~*V_A)/(V_tc+V_h+V_A);
-    rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_~*V_A)/(V_tc+V_h+V_A);
-    cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_~*V_A)/(V_tc+V_h+V_A);
+    alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_insulation*V_A)/(V_tc+V_h+V_A);
+    rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_insulation*V_A)/(V_tc+V_h+V_A);
+    cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_insulation*V_A)/(V_tc+V_h+V_A);
     k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire);
-    
-    k_insulation = ;   % Use if separated into probe layers
-    alpha_insulation = ;
     
     bias_k_insulation = 0;
     k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE
@@ -537,10 +547,10 @@ if strcmp(probe,"2A-SS-03")
     end
     %k_probe = kprobe;
     
-    alphaprobe = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_~*V_i+alpha_SS316*V_s+2.074e-5*V_A)/V_total; %Volume-based weighted average of wires, insluation, and sheath. This is how Hollar describes it 
+    alphaprobe = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_insulation*V_i+alpha_SS316*V_s+2.074e-5*V_A)/V_total; %Volume-based weighted average of wires, insluation, and sheath. This is how Hollar describes it 
     
-    alpha_wires_ins = (alpha_Chromel*(V_tc/2+V_h)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_~*V_i)/V_total; %Weighted avg thermal diff. of wires, insulation 
-    %pCp_probe = (A_alumel*(rho_Alumel*cp_Alumel)+A_chromel*(rho_Chromel*cp_Chromel)+A_Magnesium_Oxide*(rho_Magnesium_Oxide*cp_Magnesium_Oxide)+A_ni*(rho_Ni*cp_Ni))/A_total;
+    alpha_wires_ins = (alpha_Chromel*(V_tc/2+V_h)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_insulation*V_i)/V_total; %Weighted avg thermal diff. of wires, insulation 
+    %pCp_probe = (A_alumel*(rho_Alumel*cp_Alumel)+A_chromel*(rho_Chromel*cp_Chromel)+A_~*(rho_~*cp_~)+A_ni*(rho_Ni*cp_Ni))/A_total;
     %alphaprobe = k_probe/pCp_probe;
     
     bias_alphaprobe = 0;
@@ -635,22 +645,22 @@ if strcmp(probe,"3A-IN718-01")
     
     %Heat Capacity- Inconel 718 %Not needed right now, but may be needed later
     if T >= 298 && T < 800
-         cp_IN718 = 0.362 + 2.118e-4*T; % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
+         cp_IN718 = (0.362 + 2.118e-4*T)*1e3; % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
     elseif T >= 800 && T < 900
-         cp_IN718 = -0.946 + 0.295e-2*T - 1.379e-6*(T^2);
+         cp_IN718 = (-0.946 + 0.295e-2*T - 1.379e-6*(T^2))*1e3;
     elseif T >= 900 && T < 1070
-        cp_IN718 = 0.595; % grabbing a rough middle point for this range from Figures 1 & 2
+        cp_IN718 = (0.595)*1e3; % grabbing a rough middle point for this range from Figures 1 & 2
     elseif T >= 1070 && T <= 1361
-         cp_IN718 = 0.639 - 3.355e-6*T;
+         cp_IN718 = (0.639 - 3.355e-6*T)*1e3;
     end
     
     % Thermal Diffusivity- Inconel 718
     if T >= 298 && T < 980
-        alpha_IN718 = 1.901 + 0.0034*T - 4.475e-7*(T^2);  % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
+        alpha_IN718 = (1.901 + 0.0034*T - 4.475e-7*(T^2))*1e-6;  % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
     elseif T >= 980 && T < 1173
-        alpha_IN718 = 4.75; % rough middle point for range from Figure 4
+        alpha_IN718 = (4.75)*1e-6; % rough middle point for range from Figure 4
     elseif T >= 1173 && T <= 1375
-        alpha_IN718 = 2.233 + 0.0021*T - 1.85e-8*(T^2);
+        alpha_IN718 = (2.233 + 0.0021*T - 1.85e-8*(T^2))*1e-6;
     end
     
     %Magnesium Oxide: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -661,14 +671,14 @@ if strcmp(probe,"3A-IN718-01")
     
     % Porous Magnesium_Oxide
     phi = 0/100;   % =48 Volume fraction of voids (modelling cracked insulation), 7.38 correction from old files
-    k_Magnesium_Oxide = k_Magnesium_Oxide*exp((-1.5*phi)/(1-phi));  % (Z. Zivcoca et al, 2009)
+    k_Magnesium_Oxide = k_Magnesium_Oxide*exp((-1.5*phi)/(1-phi));  
     
     % Density- Magnesium_Oxide
     rho_Magnesium_Oxide = 3580; %AZoM max
     
     % Heat Capacity- Magnesium_Oxide
     if T >= 298 && T < 3105
-        cp_Magnesium_Oxide = 47.25995 + 5.681621*T - 0.872665*(T^2) + 0.1043*(T^3) + (-1.053955/(T^2)); % https://webbook.nist.gov/cgi/cbook.cgi?ID=C1309484&Mask=2&Type=JANAFS&Plot=on#JANAFS
+        cp_Magnesium_Oxide = (47.25995 + 5.681621*T - 0.872665*(T^2) + 0.1043*(T^3) + (-1.053955/(T^2)))*(40.3044/1000); % https://webbook.nist.gov/cgi/cbook.cgi?ID=C1309484&Mask=2&Type=JANAFS&Plot=on#JANAFS
     end
     
     % Thermal Diffusivity- Magnesium_Oxide
@@ -751,14 +761,14 @@ if strcmp(probe,"3A-IN718-01")
     
     % Heat Capacity- Nichrome Not needed right now, but may be needed later
     if T >=290 && T < 1370
-        cp_Nichrome = 0.4699 - 0.0002*T + (4e-7)*(T^2) - (1e-10)*(T^3); % Excel 3rd order fit to Kanthal
+        cp_Nichrome = (0.4699 - 0.0002*T + (4e-7)*(T^2) - (1e-10)*(T^3))/1000; % Excel 3rd order fit to Kanthal
     end
 
     % Density- Nichrome
     rho_Nichrome = 8300; %Not needed right now, but may be needed later
     
     % Thermal Diffusivity- Nichrome
-    aplha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome);
+    alpha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome);
     
     
     %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -838,6 +848,8 @@ if strcmp(probe,"3A-IN718-01")
         emissivity_probe = MonteCarloProp(uncertainty_emissitivy_probe,bias_emissitivy_probe,emissivity_probe);
     end
 end
+
+
 %Sample Properties%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
