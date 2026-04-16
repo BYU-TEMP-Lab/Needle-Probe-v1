@@ -1,5 +1,5 @@
 function [par_vector,par_names] = Properties(probe,crucible,sample,Temp,Voltage,VoltSTD,Current,CurrentSTD,MC)
-
+disp("Properties calculations started.")
 if Temp < 20
     Temp = 20.01;
 end
@@ -347,7 +347,7 @@ if strcmp(probe,"2A-SS-03")
     end
 
     % Thermal Diffusivity- Steel316
-    alpha_Steel316 = k_SS316/(rho_SS316*cp_SS316);
+    alpha_SS316 = k_SS316/(rho_SS316*cp_SS316);
 
     
     %ALUMINA: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2063,7 +2063,7 @@ par_names(29,2) = "Amps";
 par_names(30,2) = "";
 par_names(31,2) = "";
 
-
+disp("Properties calculations complete.")
 end
 
 

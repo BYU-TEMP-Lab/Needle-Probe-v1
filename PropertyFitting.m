@@ -48,9 +48,7 @@ else
 end
 
 currentFOLDER = pwd;
-%todaysdate = datetime("today");
-today = sprintf('%02d%02d%02d', month(datetime), day(datetime), mod(year(datetime), 100));
-% today = char(todaysdate);
+today = char(datetime('now','Format','MM,dd,yy,HH-mm'));
 
 m=menu('Probe:',...
     '2A-SS-03', ...
@@ -301,6 +299,7 @@ fprintf(textfile, '\n');
 cd(currentFOLDER)
 
 for n = 3:numel(names)
+    disp("Fitting data to model for file "+num2str(n-2)+" of "+num2str(numel(names)-2))
     [~, fn] = fileparts(names(n).name);
     %loading data
     cd(datafolder);

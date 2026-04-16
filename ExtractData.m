@@ -57,6 +57,7 @@ names = dir();
 cd(runfolder);
 
 aveTemp_vector = 1:numel(names)-2;
+disp("Extracting data...")
 for n = 3:numel(names)
 
     [~, filename] = fileparts(names(n).name);
@@ -155,4 +156,5 @@ for n = 3:numel(names)
     cd(currentfolder);
 
 end
+disp("Data files trimmed and copied to useable data folder.")
 end
