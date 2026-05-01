@@ -10,7 +10,7 @@ global_fitting = off; % Uses fminsearch when off
 
 Full_Analysis = off; %Makes the code do an entire analysis with Monte Carlo and chi2 error analyses and plots the results.
 
-MC = off; %Turns on Monte Carlo error analysis.
+MC = on; %Turns on Monte Carlo error analysis.
 
 cp = off; %Makes the program fit for specific heat instead of thermal diffusivity. Requires accurate density data.
 rhocp = off; %Fits for rho*Cp, use if no known density data exists. Will overwrite cp;
@@ -412,6 +412,36 @@ for n = 3:numel(names)
             %[optimized_params, resnorm] = lsqcurvefit(objective_func, initial_params, x_data, y_data, [], [], options);
 
             fitresult = abs(fitresult);
+
+            %  % 1. Initial guess
+            % x0 = par_vector(Ifitpar);
+            % 
+            % % 2. Create an anonymous function to pass all your extra variables to 'Chi2'.
+            % %    MATLAB will optimize the variable 'x', while treating everything else as a constant.
+            % objFun = @(x) Chi2(x, par_vector(Ifixpar), Ifitpar, Ifixpar, Sstart, signal, manual_delay, iplotfit, cp, IV);
+            % 
+            % % 3. Define bounds (assuming 0 and 5000 apply to all variables)
+            % %    It is safest to make them the same size as your initial guess x0
+            % lb = zeros(size(x0));
+            % ub = 5000 * ones(size(x0));
+            % 
+            % if strcmp(sample,'Ar')
+            %     for i = 1:length(SolveList)
+            %         if SolveList(i) == 8
+            %             ub(i) = 0.1; % k_sample upper bound
+            %         end
+            %         if SolveList(i) == 26
+            %             ub(i) = 2; % rho upper bound
+            %         end
+            %         if SolveList(i) == 27
+            %             ub(i) = 600; % cp upper bound
+            %         end
+            %     end
+            % end
+            % 
+            % % 4. Call fmincon using strict positional arguments:
+            % %    fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
+            % [fitresult, Chi2_value] = fmincon(objFun, x0, [], [], [], [], lb, ub, [], foptions);
 
             clear Chi2
 
@@ -825,25 +855,25 @@ for n = 3:numel(names)
         % saveas(gcf,['stdev convergence ', Para2, ' ', sample, ' ', num2str(aveTemp), 'C.fig']);
         % saveas(gcf,['stdev convergence ', Para2, ' ', sample, ' ', num2str(aveTemp), 'C.png']);
 
-        if Full_Analysis == 0
-
-            cd(runfolder)
-
-            textfile = fopen([run_name, ' MC', '.txt'],'at');
-            fprintf(textfile, '%s', [num2str(Voltage), 'V ', num2str(aveTemp), '°C']);
-            fprintf(textfile,'\t');
-            fprintf(textfile, '%f', mean1);
-            fprintf(textfile,'\t');
-            fprintf(textfile, '%f', two_std1);
-
-            fprintf(textfile,'\t');
-            fprintf(textfile, '%s', num2str(mean2));
-            fprintf(textfile,'\t');
-            fprintf(textfile, '%s', num2str(two_std2));
-
-            fprintf(textfile, '\n');
-            fclose(textfile);
-        end
+        % if Full_Analysis == 0
+        % 
+        %     cd(runfolder)
+        % 
+        %     textfile = fopen([run_name, ' MC', '.txt'],'at');
+        %     fprintf(textfile, '%s', [num2str(Voltage), 'V ', num2str(aveTemp), '°C']);
+        %     fprintf(textfile,'\t');
+        %     fprintf(textfile, '%f', mean1);
+        %     fprintf(textfile,'\t');
+        %     fprintf(textfile, '%f', two_std1);
+        % 
+        %     fprintf(textfile,'\t');
+        %     fprintf(textfile, '%s', num2str(mean2));
+        %     fprintf(textfile,'\t');
+        %     fprintf(textfile, '%s', num2str(two_std2));
+        % 
+        %     fprintf(textfile, '\n');
+        %     fclose(textfile);
+        % end
         cd(currentFOLDER)
     end
 

@@ -295,6 +295,12 @@ if strcmp(probe,"2A-SS-03")
     r_alumina_outer = 0.9525e-3; % outside radius of alumina core
     r_alumina_bore = 0.1905e-3; % radius of inside bores of alumina core
     L = 145e-3; % Length of the sensing region of probe
+
+    %%%%% 4/20/26 Calibration %%%%
+    r_3 = 5.007360e-07*(T-273.15) + 6.240707e-04;
+    r_4 = -6.526157e-08*(T-273.15) + 9.572718e-04;
+    r_5 = 1.118932e-07*(T-273.15) + 1.268171e-03;
+
     
     % Areas for each material %Not needed right now, but may be needed later
     %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
@@ -494,9 +500,9 @@ if strcmp(probe,"2A-SS-03")
     %later
     if T>= 290 && T < 570
         k_Nichrome = 15; % https://www.kanthal.com/en/products/datasheets/material-datasheets/wire/resistance-heating-wire-and-resistance-wire/nikrothal-80/
-    elseif T >= 570 && T < 1100
+    elseif T >= 570 && T < 1235
         k_Nichrome = 0.0177*T + 5.0852; % excel linear fit to data from Kanthal
-    elseif T >= 1370
+    elseif T >= 1235
         k_Nichrome = 2.579 + 0.019*T; % https://doi.org/10.1016/j.tca.2009.04.015
     end
     
@@ -538,6 +544,13 @@ if strcmp(probe,"2A-SS-03")
     rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_insulation*V_A)/(V_tc+V_h+V_A);
     cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_insulation*V_A)/(V_tc+V_h+V_A);
     k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire);
+
+    %%%%% 4/20/26 Calibration %%%%%
+    k_insulation = -6.989289e-02*(T-273.15) + 4.797234e+01;
+    alpha_insulation = -1.481888e-06*(T-273.15) + 7.866033e-04;
+    k_eff_wire = -6.628096e-01*(T-273.15) + 2.154873e+03;
+    alpha_eff_wire =  2.216541e-07*(T-273.15) + 2.705504e-04;
+
     
     bias_k_insulation = 0;
     k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE
@@ -563,7 +576,11 @@ if strcmp(probe,"2A-SS-03")
     
     k_sheath = k_SS316;
     alpha_sheath = alpha_SS316;
-    
+
+    %%%%% 4/20/26 Calibration %%%%%
+    k_sheath = 4.706374e-03*(T-273.15) + 1.836468e+01;
+    alpha_sheath = 1.827733e-09*(T-273.15) + 2.745513e-06;
+
     bias_k_sheath = 0;
     k_sheath_uncertainty = .05;
     
@@ -589,6 +606,9 @@ if strcmp(probe,"2A-SS-03")
     end
     bias_emissitivy_probe = 0;
     uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
+
+    %%%%% 4/20/26 Calibration %%%%%
+    emissivity_probe = 1.710418e-04*(T-273.15) + 4.051501e-01;
     
     if MC == 1
         emissivity_probe = MonteCarloProp(uncertainty_emissitivy_probe,bias_emissitivy_probe,emissivity_probe);
@@ -1716,6 +1736,11 @@ if strcmp(crucible,'Steel316')
     
     emissivity_crucible = emissivity_Steel316;
 
+    %%%%% 4/20/26 Calibration %%%%%
+    k_crucible = 4.530813e-04*(T-273.15) + 1.920861e+01;
+    alpha_crucible = 7.905145e-11*(T-273.15) + 4.993449e-06;
+    emissivity_crucible = -1.632123e-04*(T-273.15) + 5.949082e-01;
+
 end
 
 %NICKEL 200%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1866,6 +1891,7 @@ end
 
 %Wire Outer Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rwires = r_3;    %0.000485942;
+
 bias_rwires = 7.9e-6;
 uncertainty_rwires = 1.07218e-5/rwires;% This value definitely should be checked.
 
@@ -1893,6 +1919,10 @@ end
 
 %Sample Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rsample =  0.00209; % Nickel Crucible 2
+
+%%%%% 4/20/26 Calibration - 2A-SS-03 & SS316 %%%%%
+rsample = -8.893576e-07*(T-273.15) + 2.087011e-03;
+
 bias_rsample = 0.000005;
 %uncertainty_rsample = 6.22093e-5/rsample; %Check this
 uncertainty_rsample = 9.5e-5/rsample;
@@ -1903,6 +1933,10 @@ end
 
 %Crucible Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rcrucible = 0.0127;
+
+%%%%% 4/20/26 Calibration - 2A-SS-03 & SS316 %%%%%
+rcrucible = -2.280921e-05*(T-273.15) + 2.279899e-02;
+
 bias_rcrucible = 5e-6;
 uncertainty_rcrucible = 1.58114e-5/rcrucible;
 
@@ -1929,6 +1963,10 @@ end
 
 %Contact Resistance Insulation to Sheath%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 RthInsShth = 0.4;              % 0-30s
+
+%%%%% 4/20/26 Calibration %%%%%
+% 2A-SS-03 & SS316 Crucible
+RthInsShth = -2.112376e-05*(T-273.15) + 5.340992e-01;
 
 
 bias_RthInsShth = 0;
@@ -1962,6 +2000,8 @@ end
 
 % Fitted CALIBRATRATION Properties %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Flux_decay = 0; % Decay constant
+%%%%% 4/20/26 Calibration %%%%%
+Flux_decay = -8.406179e-06*(T-273.15) + 4.592408e-03;
 decay_point = 0; % Decay point
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2026,7 +2066,7 @@ par_names(24,1) = "Length";
 par_names(25,1) = "h convection";
 par_names(26,1) = "Rho Sample";
 par_names(27,1) = "Cp sample";
-par_names(28,1) = "Rhosample*cpsample";
+par_names(28,1) = "Rho cp sample";
 par_names(29,1) = "Current";
 par_names(30,1) = "Flux Decay Factor";
 par_names(31,1) = "Decay Point";
@@ -2057,7 +2097,7 @@ par_names(23,2) = "meters";
 par_names(24,2) = "meters";
 par_names(25,2) = "r/(m*K)";
 par_names(26,2) = "kg/m^3";
-par_names(27,2) = "J/(m^3*K)";
+par_names(27,2) = "J/(kg*K)";
 par_names(28,2) = "J/(m^3*K)";
 par_names(29,2) = "Amps";
 par_names(30,2) = "";
