@@ -10,7 +10,7 @@ global_fitting = off; % Uses fminsearch when off
 
 Full_Analysis = off; %Makes the code do an entire analysis with Monte Carlo and chi2 error analyses and plots the results.
 
-MC = on; %Turns on Monte Carlo error analysis.
+MC = off; %Turns on Monte Carlo error analysis.
 
 cp = off; %Makes the program fit for specific heat instead of thermal diffusivity. Requires accurate density data.
 rhocp = off; %Fits for rho*Cp, use if no known density data exists. Will overwrite cp;

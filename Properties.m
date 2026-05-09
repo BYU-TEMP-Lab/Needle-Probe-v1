@@ -652,7 +652,7 @@ if strcmp(probe,"3A-IN718-01")
     
     %Inconel 718: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Thermal Conductivity- IN718
-    if T >= 298 && T < 800
+    if T >= 293 && T < 800
         k_IN718 = 5.291 + 0.0152*T + 1.382e-6*(T^2); % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
     elseif T >= 800 && T < 1173
         k_IN718 = 18.34 + ((T-800)/(1173-800))*(22.72-18.34); % linearly interpolating between ranges based on Table 2 from Agazhanov
@@ -664,7 +664,7 @@ if strcmp(probe,"3A-IN718-01")
     %rho_IN718 = ~; % ~ to ~ K
     
     %Heat Capacity- Inconel 718 %Not needed right now, but may be needed later
-    if T >= 298 && T < 800
+    if T >= 293 && T < 800
          cp_IN718 = (0.362 + 2.118e-4*T)*1e3; % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
     elseif T >= 800 && T < 900
          cp_IN718 = (-0.946 + 0.295e-2*T - 1.379e-6*(T^2))*1e3;
@@ -675,7 +675,7 @@ if strcmp(probe,"3A-IN718-01")
     end
     
     % Thermal Diffusivity- Inconel 718
-    if T >= 298 && T < 980
+    if T >= 293 && T < 980
         alpha_IN718 = (1.901 + 0.0034*T - 4.475e-7*(T^2))*1e-6;  % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
     elseif T >= 980 && T < 1173
         alpha_IN718 = (4.75)*1e-6; % rough middle point for range from Figure 4
@@ -685,7 +685,9 @@ if strcmp(probe,"3A-IN718-01")
     
     %Magnesium Oxide: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Thermal Conductivity- Magnesium Oxide
-    if T >= 400 && T <= 1300
+    if T < 400
+        k_Magnesium_Oxide = 40;
+    elseif T >= 400 && T <= 1300
         k_Magnesium_Oxide = -3e-8*(T^3) + 0.0001*(T^2) - 0.1274*T + 65.823; %excel 3rd order polynomial fit to Table 2 data from https://pmc.ncbi.nlm.nih.gov/articles/PMC4887202/
     end
     
@@ -697,7 +699,7 @@ if strcmp(probe,"3A-IN718-01")
     rho_Magnesium_Oxide = 3580; %AZoM max
     
     % Heat Capacity- Magnesium_Oxide
-    if T >= 298 && T < 3105
+    if T >= 293 && T < 3105
         cp_Magnesium_Oxide = (47.25995 + 5.681621*T - 0.872665*(T^2) + 0.1043*(T^3) + (-1.053955/(T^2)))*(40.3044/1000); % https://webbook.nist.gov/cgi/cbook.cgi?ID=C1309484&Mask=2&Type=JANAFS&Plot=on#JANAFS
     end
     
@@ -1823,8 +1825,8 @@ end
 %Inconel625%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Valid to who know's where. This section needs work.
 if strcmp(crucible,'Inconel625')
-    if T >= 316 && T < 1093
-        k_Inconel625 = 0.2435*(T) + 339.27;
+    if T >= 295 && T < 1500
+        k_Inconel625 = 0.0175*T + 5.0231; %https://link.springer.com/article/10.1007/s10765-019-2490-8/tables/3
         bias_kInconel625 = 0; %Assumption. This value needs to be looked up.
         uncertainty_kInconel625 = .05; %Assumption for now. Update before real use.
     end
@@ -1840,12 +1842,12 @@ if strcmp(crucible,'Inconel625')
 
 
     % Heat Capacity- Inconel625
-    if T >= 316 && T < 1093
+    if T >= 295 && T < 1093
         cp_Inconel625 = 0.0163*(T) + 4.23;
     end
     % Thermal Diffusivity- Nickel200
 
-    if T >= 316 && T < 1093
+    if T >= 295 && T < 1093
         alpha_Inconel625 = k_Inconel625/(rho_Inconel625 * cp_Inconel625);
     end
 
