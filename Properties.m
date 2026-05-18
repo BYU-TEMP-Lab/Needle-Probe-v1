@@ -14,10 +14,12 @@ if strcmp(probe,"INL")
     %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %r_1 = .297315E-3; % inside radius up to wires %Not needed right now, but may be needed later
     %r_2 = .391629E-3; % middle of wires %Not needed right now, but may be needed later
+    %r_3 = .485942E-3; % outside of wires
     r_3 = .485942E-3; % outside of wires
     r_4 = 0.8293E-3; % inside radius of sheath
     % r_5 = 1.323831E-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
-    r_5 = 1.388E-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    r_5 = 1.388E-3; % outside radius of the probe, used in semi-infinite
+    %layer and sheath layer (meters)
     r_heating_wire = .094313E-3; % radius of heating wires
     r_TC_wire = .094313E-3; % radius of thermocouple wires
     L = 0.1; % Length of the sensing region of probe
@@ -219,7 +221,7 @@ if strcmp(probe,"INL")
     alpha_eff_wire = (alpha_Chromel*(V_tc/2+2*V_h)+ alpha_Alumel*V_tc/2+alpha_Alumina*V_A)/(V_tc+V_h+V_A);
     rho_eff_wire = (rho_Chromel*(V_tc/2+2*V_h)+ rho_Alumel*V_tc/2+rho_Alumina*V_A)/(V_tc+V_h+V_A);
     cp_eff_wire = (cp_Chromel*(V_tc/2+2*V_h)+ cp_Alumel*V_tc/2+cp_Alumina*V_A)/(V_tc+V_h+V_A);
-    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire);
+    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire); %/4 is added
     
     k_insulation = k_Alumina;   % Use if separated into probe layers
     alpha_insulation = alpha_Alumina;
@@ -625,9 +627,12 @@ if strcmp(probe,"3A-IN718-01")
     %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
     %r_2 = ; % middle of wires %Not needed right now, but may be needed later
+    %r_3 = 0.35e-3; % outside of wires
     r_3 = 0.35e-3; % outside of wires
-    r_4 = 1e-3; % inside radius of sheath
-    r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    %r_4 = 1e-3; % inside radius of sheath
+    r_4 = 3e-7; % inside radius of sheath
+    %r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    r_5 = .001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
     r_heating_wire = 0.0001143; % radius of heating wires
     r_TC_wire = 0.0001143; % radius of thermocouple wires
     L = 0.1016; % Length of the sensing region of probe
@@ -660,7 +665,8 @@ if strcmp(probe,"3A-IN718-01")
         k_IN718 = 11.75 + 0.011*T - 9.327e-7*(T^2); % A Sh Agazhanov et al
     end
     
-    %Density- Inconel 718 %Not needed right now, but may be needed later
+    %Density- Inconel 718 %Not needed right now, but may be needed
+    %later
     %rho_IN718 = ~; % ~ to ~ K
     
     %Heat Capacity- Inconel 718 %Not needed right now, but may be needed later
@@ -674,7 +680,7 @@ if strcmp(probe,"3A-IN718-01")
          cp_IN718 = (0.639 - 3.355e-6*T)*1e3;
     end
     
-    % Thermal Diffusivity- Inconel 718
+    %Thermal Diffusivity- Inconel 718
     if T >= 293 && T < 980
         alpha_IN718 = (1.901 + 0.0034*T - 4.475e-7*(T^2))*1e-6;  % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
     elseif T >= 980 && T < 1173
@@ -682,6 +688,7 @@ if strcmp(probe,"3A-IN718-01")
     elseif T >= 1173 && T <= 1375
         alpha_IN718 = (2.233 + 0.0021*T - 1.85e-8*(T^2))*1e-6;
     end
+
     
     %Magnesium Oxide: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Thermal Conductivity- Magnesium Oxide
@@ -810,7 +817,7 @@ if strcmp(probe,"3A-IN718-01")
     alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
     rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
     cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
-    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire);
+    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire); %/4 is added
     
     k_insulation = k_Magnesium_Oxide;   % Use if separated into probe layers
     alpha_insulation = alpha_Magnesium_Oxide;
@@ -856,12 +863,18 @@ if strcmp(probe,"3A-IN718-01")
     
     
     % Total Radiative Emissivity- IN718
-    if T < 600
-        emissivity_probe = 0.2;
-    elseif T >= 600 && T < 1200
-        emissivity_probe = 0.2 + ((T-600)/(1200-600))*(0.5-0.2); % Linearly interpolating between min and max of Keller at al.'s data, doi.org/10.1016/j.nucengdes.2015.02.018 
-    elseif T >= 1200
-        emissivity_probe = 0.5;
+    % if T < 600
+    %     emissivity_probe = 0.2;
+    % elseif T >= 600 && T < 1200
+    %     emissivity_probe = 0.2 + ((T-600)/(1200-600))*(0.5-0.2); % Linearly interpolating between min and max of Keller at al.'s data, doi.org/10.1016/j.nucengdes.2015.02.018 
+    % elseif T >= 1200
+    %     emissivity_probe = 0.5;
+        if T < 660
+        emissivity_probe = 0.38;
+    elseif T >= 660 && T < 1138
+        emissivity_probe = 0.0005*T + 0.0569;
+    elseif T >= 1075
+        emissivity_probe = 0.6;
     end
     bias_emissitivy_probe = 0;
     uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
@@ -1824,8 +1837,10 @@ end
 
 %Inconel625%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Valid to who know's where. This section needs work.
+%change1
 if strcmp(crucible,'Inconel625')
     if T >= 295 && T < 1500
+        %k_Inconel625 = 0.0175*T + 5.0231; %https://link.springer.com/article/10.1007/s10765-019-2490-8/tables/3
         k_Inconel625 = 0.0175*T + 5.0231; %https://link.springer.com/article/10.1007/s10765-019-2490-8/tables/3
         bias_kInconel625 = 0; %Assumption. This value needs to be looked up.
         uncertainty_kInconel625 = .05; %Assumption for now. Update before real use.
@@ -1838,16 +1853,18 @@ if strcmp(crucible,'Inconel625')
     k_crucible = k_Inconel625;
 
     % Density- Inconel625
-    rho_Inconel625 = 8440;
+    rho_Inconel625 = 8440; %Verified at https://www.hightempmetals.com/techdata/hitempInconel625data.php
 
 
     % Heat Capacity- Inconel625
     if T >= 295 && T < 1093
-        cp_Inconel625 = 0.0163*(T) + 4.23;
+        %cp_Inconel625 = 0.0163*(T) + 4.23; %Old equation
+        cp_Inconel625 = 0.2071*(T) + 364.8;% J/kg*K edited equation based on table at https://link.springer.com/article/10.1007/s10765-019-2490-8/tables/3
     end
     % Thermal Diffusivity- Nickel200
 
     if T >= 295 && T < 1093
+    %if T >= 0
         alpha_Inconel625 = k_Inconel625/(rho_Inconel625 * cp_Inconel625);
     end
 
@@ -1855,12 +1872,15 @@ if strcmp(crucible,'Inconel625')
 
     % Total Radiative Emissivity- Nickel200
     if T < 473
-        emissivity_Inconel625 = 0.35;
+        %emissivity_Inconel625 = .35;
+        emissivity_Inconel625 = .9;
     elseif T >=473 && T < 1144
         %     emissivity_Nickel200 = 0.0007*T + 0.0316;
-        emissivity_Inconel625 = 0; %not sure
+        %emissivity_Inconel625 = 0; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
+        emissivity_Inconel625 = .13; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
     elseif T >= 1144
-        emissivity_Inconel625 = 0; %not sure
+        %emissivity_Inconel625 = 0; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
+        emissivity_Inconel625 = .13; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
     end
 
     emissivity_crucible = emissivity_Inconel625;
@@ -1897,12 +1917,14 @@ rwires = r_3;    %0.000485942;
 bias_rwires = 7.9e-6;
 uncertainty_rwires = 1.07218e-5/rwires;% This value definitely should be checked.
 
+
 if MC == 1
     rwires = MonteCarloProp(uncertainty_rwires,bias_rwires,rwires);
 end
 
 %Sheath Inner Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rsheath_inner = r_4;
+%rsheath_inner = r_4;
+rsheath_inner = .0003; %random value that seems to create good results - not sure why
 bias_rsheath_inner = 7.9e-6;
 uncertainty_rsheath_inner = 3.55448E-18; %Check this
 
@@ -1926,8 +1948,7 @@ rsample =  0.00209; % Nickel Crucible 2
 rsample = -8.893576e-07*(T-273.15) + 2.087011e-03;
 
 bias_rsample = 0.000005;
-%uncertainty_rsample = 6.22093e-5/rsample; %Check this
-uncertainty_rsample = 9.5e-5/rsample;
+uncertainty_rsample = 6.22093e-5/rsample; %Check this
 
 if MC == 1
     rsample = MonteCarloProp(uncertainty_rsample,bias_rsample,rsample);

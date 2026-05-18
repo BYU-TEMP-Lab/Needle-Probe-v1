@@ -16,7 +16,7 @@ cp = off; %Makes the program fit for specific heat instead of thermal diffusivit
 rhocp = off; %Fits for rho*Cp, use if no known density data exists. Will overwrite cp;
 
 raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
-iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
+iplotfit = on; %Shows the plot during the fitting process. Keep off to increase speed.
 manual_delay = off; %Adds in a manual delay that helps to see the fitting process. Significantly increases runtime.
 chi2plots = off; %show plots from the chi2 error analysis
 
@@ -283,7 +283,7 @@ ExcelFile = [run_name '.xlsx'];
 
 Results = zeros(numel(names)-2, 9);
 
-% this is  running just to create the par_names to put a header on the output text file
+% this is running just to create the par_names to put a header on the output text file
 [~, par_names] = Properties(probe,crucible,sample,25,5,0.00225,0.1,0.00225,MC);
 
 cd(runfolder)
@@ -445,7 +445,7 @@ for n = 3:numel(names)
 
             clear Chi2
 
-            %%%%%%%%%%% lsqnonlin:
+            % %%%%%%%%%%% lsqnonlin:
             % % Generate the initial starting model
             % Sstart = NeedleProbeModel(Time, par_vector, cp, IV);
             % close all;
@@ -468,10 +468,10 @@ for n = 3:numel(names)
             % % Ensure parameters are positive (optional)
             % fitresult = abs(fitresult);
             % 
-            % chi2 = Chi2(fitparam,par_vector(Ifixpar),Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,cp,IV)
+            % chi2 = Chi2(fitparam,par_vector(Ifixpar),Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,cp,IV);
             % 
             % [chi2_fitresult, Chi2_value]=fminsearch('Chi2',par_vector(Ifitpar),foptions,par_vector(Ifixpar),Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,cp,IV);
-            % 
+
             % % Clear unnecessary variables
             % clear Chi2
 

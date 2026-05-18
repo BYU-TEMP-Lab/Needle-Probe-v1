@@ -1,4 +1,19 @@
-file_sought = "*fminsearch.txt";
+% 1. Pick the folder (You won't see files here, just folders)
+targetDir = uigetdir('', 'Select the folder containing the data');
+
+if targetDir == 0
+    error('User cancelled folder selection.');
+end
+
+% 2. Define the pattern (using wildcards to be safe)
+% If files are in a subfolder, you'd need: fullfile(targetDir, 'SubfolderName', 'pattern')
+file_pattern = fullfile(targetDir, '*fminsearch*');
+%file_sought = "*fminsearch.txt";
+file_sought = "*Ar 3A-IN718-01 Inconel625 05,11,26,11-22_fminsearch*";
+file_info = dir(file_sought);
+if isempty(file_info)
+    error('File not found! Check the filename and your current folder: %s', pwd);
+end
 fullfile = dir(file_sought);
 SolvedPropTable = readtable(fullfile.name);
 SolvedPropTable = sortrows(SolvedPropTable,"Temp__C_","ascend");
