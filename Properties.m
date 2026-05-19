@@ -7,887 +7,374 @@ end
 T=Temp+273.15;
 %MC = 0;
 
+% Material Properties
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%Probe Properties and Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if strcmp(probe,"INL") %INL PROBE
-    %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %r_1 = .297315E-3; % inside radius up to wires %Not needed right now, but may be needed later
-    %r_2 = .391629E-3; % middle of wires %Not needed right now, but may be needed later
-    %r_3 = .485942E-3; % outside of wires
-    r_3 = .485942E-3; % outside of wires
-    r_4 = 0.8293E-3; % inside radius of sheath
-    % r_5 = 1.323831E-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
-    r_5 = 1.388E-3; % outside radius of the probe, used in semi-infinite
-    %layer and sheath layer (meters)
-    r_heating_wire = .094313E-3; % radius of heating wires %INL PROBE
-    r_TC_wire = .094313E-3; % radius of thermocouple wires
-    L = 0.1; % Length of the sensing region of probe
-    
-    % Areas for each material %Not needed right now, but may be needed later
-    %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
-    %A_chromel = 3*pi*(r_heating_wire^2);%3 chromel wires %INL PROBE
-    %A_alumina = pi*r_4^2 - A_alumel - A_chromel;
-    %A_ni = pi*(r_5^2 - r_4^2);
-    %A_total = pi*r_5^2;
-    
-    % Relevant Volumes
-    V_tc = 2*pi*(r_TC_wire^2)*L/2; % Thermocouple volume
-    V_h = 2*pi*(r_heating_wire^2)*L; % Heating element volume (2 lengths of heating wire) %INL PROBE
-    V_i = pi*(r_4^2)*L-V_tc-V_h; % Insulation
-    V_A = pi*(r_3^2)*L-V_tc-V_h; % Insulation inside outer wire radius
-    V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
-    V_total = V_tc+V_h+V_i+V_s; % Total Probe Volume
-    % Pre-10-19-24:
-    % r_6 = r_4 - (r_4-r_3)/200000; % Radius of insulation minus something happening in the core???
-    % V_tc = pi*(r_TC_wire^2)*L/2; % Thermocouple volume
-    % V_h = pi*(r_heating_wire^2)*L; % Heating element volume
-    % V_i = pi*(r_6^2)*L-2*V_tc-2*V_h; % Insulation
-    % V_A = pi*(r_4^2)*L - V_i;
-    % V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
-    % V_total = 2*V_tc+2*V_h+V_i+V_s; % Total Probe Volume
-    %V_total_check = pi*(r_5^2)*L; %Not needed right now, but may be needed later %INL PROBE
-    
-    
-    %Probe Materials%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    %NICKEL 200: VALID UP TO 1273K (1000C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Thermal Conductivity- Nickel
-    if T >= 173 && T < 673
-        k_Ni = 76.12158+0.02717507*T^1-2.126458E-4*T^2+1.876168E-7*T^3; %INL PROBE
-    elseif T >= 673 && T <= 1273
-        k_Ni = 40.623+0.02201643*T^1-3.571429E-7*T^2;
-    end
-    
-    %Density- Nickel %Not needed right now, but may be needed later
-    rho_Ni = 8964.214-0.1681755*T^1-3.536041E-4*T^2+2.01714E-7*T^3-4.919056E-11*T^4; % 73 to 1373 K
-    
-    %Heat Capacity- Nickel %Not needed right now, but may be needed later
-    if T >= 293 && T < 633
-         cp_Ni = 292.88+0.50208*T^1; %INL PROBE
-    elseif T >= 633 && T < 1726
-         cp_Ni = 418.4+0.1284488*T^1;
-    end
-    
-    % Thermal Diffusivity- Nickel
-    if T >= 293 && T < 633
-        alpha_Ni = 3.044717E-5-5.149323E-8*T^1+3.129624E-11*T^2; %INL PROBE
-    elseif T >= 633 && T < 676
-        alpha_Ni = 4.81462E-5-1.036816E-7*T^1+7.54384E-11*T^2;
-    elseif T >= 676 && T <= 1273
-        alpha_Ni = 1.087891E-5+2.600264E-9*T^1-2.279477E-13*T^2;
-    end
-    
-    %ALUMINA: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Thermal Conductivity- Alumina
-    if T >= 293 && T < 298
-        k_Alumina = 37.1754;
-    elseif T >= 298 && T < 300
-        k_Alumina = ((36.9601-37.1754)/(300-298))*(T-298)+37.1754; %INL PROBE
-    elseif T >= 300 && T < 373
-        k_Alumina = ((30.2503-36.9601)/(373-300))*(T-300)+36.9601;
-    elseif T >= 373 && T < 400
-        k_Alumina = ((27.209-30.2503)/(400-373))*(T-373)+30.2503;
-    elseif T >= 400 && T < 473
-        k_Alumina = ((22.5099-27.209)/(473-400))*(T-400)+27.209;
-    elseif T >= 473 && T < 500
-        k_Alumina = ((20.93-22.5099)/(500-473))*(T-473)+22.5099;
-    elseif T >= 500 && T < 600
-        k_Alumina = ((16.3045-20.93)/(600-500))*(T-500)+20.93;
-    elseif T >= 600 && T < 673
-        k_Alumina = ((13.1378-16.3045)/(673-600))*(T-600)+16.3045; %INL PROBE
-    elseif T >= 673 && T < 700
-        k_Alumina = ((12.558-13.1378)/(700-673))*(T-673)+13.1378;
-    elseif T >= 700 && T < 873
-        k_Alumina = ((9.1211-12.558)/(873-700))*(T-700)+12.558;
-    elseif T >= 873
-        k_Alumina = ((9.1211-12.558)/(873-700))*(T-700)+12.558; %because I don't know what it would be. placeholder for now
-    end
-    
-    % Porous Alumina
-    phi = 0/100;   % =48 Volume fraction of voids (modelling cracked insulation), 7.38 correction from old files
-    k_Alumina = k_Alumina*exp((-1.5*phi)/(1-phi));  % (Z. Zivcoca et al, 2009)
-    
-    % Density- Alumina
-    rho_Alumina = 3900;
-    
-    % Heat Capacity- Alumina
-    if T >= 293 && T < 298
-        cp_Alumina = 782.218;
-    elseif T >= 298 && T < 300
-        cp_Alumina = ((785.025-782.218)/(300-298))*(T-298)+782.218; %INL PROBE
-    elseif T >= 300 && T < 373
-        cp_Alumina = ((901.3683-785.025)/(373-300))*(T-300)+785.025;
-    elseif T >= 373 && T < 400
-        cp_Alumina = ((942.03-901.3683)/(400-373))*(T-373)+901.3683;
-    elseif T >= 400 && T < 473
-        cp_Alumina = ((1016.802-942.03)/(473-400))*(T-400)+942.03;
-    elseif T >= 473 && T < 500
-        cp_Alumina = ((1046.7-1016.802)/(500-473))*(T-473)+1016.802;
-    elseif T >= 500 && T < 600
-        cp_Alumina = ((1109.502-1046.7)/(600-500))*(T-500)+1046.7;
-    elseif T >= 600 && T < 673
-        cp_Alumina = ((1148.873-1109.502)/(673-600))*(T-600)+1109.502; %INL PROBE
-    elseif T >= 673 && T < 700
-        cp_Alumina = ((1151.37-1148.873)/(700-673))*(T-673)+1148.873;
-    elseif T >= 700 && T < 873
-        cp_Alumina = ((1214.92-1151.37)/(873-700))*(T-700)+1151.37;
-    elseif T >= 873
-        cp_Alumina = ((1214.92-1151.37)/(873-700))*(T-700)+1151.37; %because I don't know what it would be. placeholder for now
-    end
-    
-    % Thermal Diffusivity- Alumina
-    alpha_Alumina = k_Alumina/(rho_Alumina*cp_Alumina);
-    
-    
-    %ALUMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%%
-    %Thermal Conductivity- Alumel Not needed right now, but may be needed
-    %later
-    if T>= 100 && T < 400
-        k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3;
-    elseif T >= 400 && T < 773
-        k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %INL PROBE
-    elseif T >= 773
-        k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %out of COMSOL'S RANGE
-    end
-    
-    % % Heat Capacity- Alumel Not needed right now, but may be needed later
-    if T >=100 && T < 410
-        cp_Alumel = -120.397194+4.83234846*T^1-0.0141451249*T^2+0.0000151245324*T^3; %INL PROBE
-    elseif T >=410 && T < 450
-        cp_Alumel = 4215.99923-16.6533325*T^1+0.018666665*T^2;
-    elseif T >= 450
-        cp_Alumel = 4215.99923-16.6533325*(T)^1+0.018666665*(T)^2; %out of COMSOL'S RANGE
-    end
-    
-    % Thermal Diffusivity- Alumel
-    if T >= 100 && T < 175
-        alpha_Alumel = 2.777243E-5-3.26281E-7*T^1+1.773714E-9*T^2-3.253333E-12*T^3;
-    elseif T >=175 && T < 422
-        alpha_Alumel = 9.912174E-6-2.568489E-8*T^1+8.732857E-11*T^2-1.005653E-13*T^3; %INL PROBE
-    elseif T >=422 && T < 450
-        alpha_Alumel = -0.00007507129+0.0000003614333*T^1-0.0000000003952381*T^2;
-    elseif T >= 450
-        alpha_Alumel = -0.00007507129+0.0000003614333*(T)^1-0.0000000003952381*(T)^2; %out of COMSOL'S RANGE
-    end
-    
-    % Density- Alumel
-    rho_Alumel = 8600; %Not needed right now, but may be needed later %INL PROBE
-    
-    %CHROMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%
-    %Thermal Conductivity- Chromel Not needed right now, but may be needed
-    %later
-    if T >= 100 && T < 450 %INL PROBE
-        k_Chromel = 13.1709-0.02474581*T^1+2.79175E-4*T^2-6.862022E-7*T^3+6.09438E-10*T^4; %100 to 450 K
-    elseif T >= 450
-        k_Chromel = 13.1709-0.02474581*(T)^1+2.79175E-4*(T)^2-6.862022E-7*(T)^3+6.09438E-10*(T)^4; %out of COMSOL'S RANGE
-    end
-    
-    % Heat Capacity- Chromel- Not needed right now, but may be later %INL PROBE
-    if T >= 100 && T < 450
-        cp_Chromel = -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4;
-    elseif T >= 450
-        cp_Chromel = -169.134351+5.88577506*(T)^1-0.0235877058*(T)^2+0.0000447834022*(T)^3-0.0000000321153924*(T)^4; %out of COMSOL'S RANGE
-    end
-    
-    
-    % Thermal Diffusivity- Chromel %INL PROBE
-    if T >= 100 && T < 175
-        alpha_Chromel = 3.466E-5-6.301667E-7*T^1+5.119333E-9*T^2-1.893333E-11*T^3+2.666667E-14*T^4;
-    elseif T >= 175 && T < 450
-        alpha_Chromel = 6.607453E-6-1.986064E-8*T^1+6.038939E-11*T^2-5.155141E-14*T^3;
-    elseif T >= 450
-        alpha_Chromel = 6.607453E-6-1.986064E-8*(T)^1+6.038939E-11*(T)^2-5.155141E-14*(T)^3; %out of COMSOL'S RANGE
-    end
-    
-    % Density- Chromel
-    rho_Chromel = 8670; %Not needed right now, but may be later %INL PROBE
-    
-    %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    k_air = 1E-11*(T^3) - 5E-8*(T^2) + 1E-4*T + .0003; %Made from data from engineeringtoolbox.com
-    density_air = 355.1*T^-1.001; %Made from data from engineersedge.com
-    cp_air = 1E-10*T^4 - 6E-07*T^3 + 0.001*T^2 - 0.3867*T + 1050; %Made from data from engineeringtoolbox.com
-    
-    alpha_air = k_air/(density_air*cp_air); %INL PROBE
-    % 
-    % R=1;
-    % 
-    % k_Alumina = R*k_Alumina + (1-R)*k_air;
-    % alpha_Alumina = R*alpha_Alumina + (1-R)*alpha_air; %INL PROBE
-    
-    %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    alpha_eff_wire = (alpha_Chromel*(V_tc/2+2*V_h)+ alpha_Alumel*V_tc/2+alpha_Alumina*V_A)/(V_tc+V_h+V_A);
-    rho_eff_wire = (rho_Chromel*(V_tc/2+2*V_h)+ rho_Alumel*V_tc/2+rho_Alumina*V_A)/(V_tc+V_h+V_A);
-    cp_eff_wire = (cp_Chromel*(V_tc/2+2*V_h)+ cp_Alumel*V_tc/2+cp_Alumina*V_A)/(V_tc+V_h+V_A); %INL PROBE
-    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire); %/4 is added
-    
-    k_insulation = k_Alumina;   % Use if separated into probe layers %INL PROBE
-    alpha_insulation = alpha_Alumina;
-    
-    bias_k_insulation = 0;
-    k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE
-    
-    if MC == 1
-        kprobe = MonteCarloProp(k_insulation_uncertainty,bias_k_insulation,k_insulation); %INL PROBE
-    end
-    %k_probe = kprobe;
-    
-    alphaprobe = (alpha_Chromel*(V_tc+2*V_h)+ alpha_Alumel*V_tc+alpha_Alumina*V_i+alpha_Ni*V_s+2.074e-5*V_A)/V_total; %Volume-based weighted average of wires, insluation, and sheath. This is how Hollar describes it.
-    
-    alpha_wires_ins = (alpha_Chromel*(V_tc/2+V_h)+ alpha_Alumel*V_tc/2+alpha_Alumina*V_i)/V_total; %Weighted avg thermal diff. of wires, insulation 
-    %pCp_probe = (A_alumel*(rho_Alumel*cp_Alumel)+A_chromel*(rho_Chromel*cp_Chromel)+A_alumina*(rho_Alumina*cp_Alumina)+A_ni*(rho_Ni*cp_Ni))/A_total;
-    %alphaprobe = k_probe/pCp_probe; %INL PROBE
-    
-    bias_alphaprobe = 0;
-    alphaprobe_uncertainty = .05; %LOOK INTO THIS ONE %INL PROBE
-    
-    if MC == 1
-        alphaprobe = MonteCarloProp(alphaprobe_uncertainty,bias_alphaprobe,alphaprobe); %INL PROBE
-    end
-    %alpha_probe = alphaprobe;
-    
-    k_sheath = k_Ni;
-    alpha_sheath = alpha_Ni; %INL PROBE
-    
-    bias_k_sheath = 0;
-    k_sheath_uncertainty = .05; %INL PROBE
-    
-    bias_alpha_sheath = 0;
-    alpha_sheath_uncertainty = .05; %INL PROBE
-    
-    if MC == 1
-        k_sheath = MonteCarloProp(k_sheath_uncertainty,bias_k_sheath,k_sheath); %INL PROBE
-    end
-    
-    if MC == 1
-        alpha_sheath = MonteCarloProp(alpha_sheath_uncertainty,bias_alpha_sheath,alpha_sheath); %INL PROBE
-    end
-    
-    
-    % Total Radiative Emissivity- Nickel200, Nickel200 or Nickel Oxide? %INL PROBE
-    if T < 473
-        emissivity_probe = 0.35;    %0.35
-    elseif T >=473 && T < 1144
-        %     emissivity_probe = 0.0007*T + 0.0316; %Why is this equation commented
-        %     out, could we still use it?
-        emissivity_probe = 0.86; %max emissivity of Nickel Oxide found in literature %INL PROBE
-    elseif T >= 1144
-        emissivity_probe = 0.86;
-    end
-    bias_emissitivy_probe = 0;
-    uncertainty_emissitivy_probe = .05; %LOOK INTO THIS %INL PROBE
-    
-    if MC == 1
-        emissivity_probe = MonteCarloProp(uncertainty_emissitivy_probe,bias_emissitivy_probe,emissivity_probe);
-    end
+% NICKEL 200: VALID UP TO 1273K (1000C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thermal Conductivity- Nickel
+if T >= 173 && T < 673
+    k_Nickel = 76.12158+0.02717507*T^1-2.126458E-4*T^2+1.876168E-7*T^3;
+elseif T >= 673 && T <= 1273
+    k_Nickel = 40.623+0.02201643*T^1-3.571429E-7*T^2;
 end
 
-if strcmp(probe,"2A-SS-03") %2A-SS-03 PROBE
-    % Properties not yet defined are replaced with ~
-    %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
-    %r_2 = ; % middle of wires %Not needed right now, but may be needed later
-    r_3 = 0.735e-3; % outside of wires
-    r_4 = 1.02e-3; % inside radius of sheath
-    r_5 = 1.375e-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
-    r_heating_wire = 0.15e-3; % radius of heating wires
-    r_TC_wire = 0.15e-3; % radius of thermocouple wires
-    r_alumina_outer = 0.9525e-3; % outside radius of alumina core
-    r_alumina_bore = 0.1905e-3; % radius of inside bores of alumina core %2A-SS-03 PROBE
-    L = 145e-3; % Length of the sensing region of probe
+%Density- Nickel %Not needed right now, but may be needed later
+rho_Nickel = 8964.214-0.1681755*T^1-3.536041E-4*T^2+2.01714E-7*T^3-4.919056E-11*T^4; % 73 to 1373 K
 
-    %%%%% 4/20/26 Calibration %%%%
-    r_3 = 5.007360e-07*(T-273.15) + 6.240707e-04;
-    r_4 = -6.526157e-08*(T-273.15) + 9.572718e-04;
-    r_5 = 1.118932e-07*(T-273.15) + 1.268171e-03;
-
-    
-    % Areas for each material %Not needed right now, but may be needed later %2A-SS-03 PROBE
-    %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
-    %A_chromel = pi*(r_TC_wire^2);%1 chromel wire
-    %A_nichrome = 2*pi*(r_heating_wire^2);% 2 nichrome wires
-    %A_~ = ;
-    %A_SS316 = ;
-    %A_total = ;
-    
-    % Relevant Volumes
-    V_tc = 2*pi*(r_TC_wire^2)*L/2; % Thermocouple volume
-    V_h = 2*pi*(r_heating_wire^2)*L; % Heating element volume (2 lengths of heating wire %2A-SS-03 PROBE
-    V_i = pi*(r_4^2)*L-V_tc-V_h; % Insulation
-    V_alumina = pi*(r_alumina_outer^2)*L - 4*pi*(r_alumina_bore^2)*L; % Volume of alumina
-    V_ceramabond = V_i - V_alumina; % Assumes ceramabond fills volume inside the sheath besides wires and alumina
-    V_A = pi*(r_3^2)*L-V_tc-V_h; % Insulation inside outer wire radius
-    V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
-    V_total = V_tc+V_h+V_i+V_s; % Total Probe Volume    
-    
-    %Probe Materials%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    %Stainless Steel 316: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% %2A-SS-03 PROBE
-        % Thermal Conductivity- Stainless Steel 316
-    if T >= 4 && T < 9
-        k_SS316 = -0.9611905+0.5776587*T^1-0.08547619*T^2+0.004722222*T^3;
-    elseif T >= 9 && T < 135
-        k_SS316 = -0.575597+0.1484296*T^1+1.184549E-5*T^2-6.696619E-6*T^3+2.25279E-8*T^4;
-    elseif T >= 135 && T < 1220
-        k_SS316 = 7.956002+0.02084122*T^1-4.706772E-6*T^2+6.271478E-10*T^3-1.240772E-12*T^4; %2A-SS-03 PROBE
-    end
-
-    % Density- Stainless Steel 316
-    if T >= 4 && T < 114
-        rho_SS316 = 8042.496-0.01245121*T^1+3.834401E-5*T^2-7.363868E-6*T^3;
-    elseif T >= 114 && T < 1273
-        rho_SS316 = 8058.746-0.1963973*T^1-4.830884E-4*T^2+4.114383E-7*T^3-1.337946E-10*T^4; %2A-SS-03 PROBE
-    end
-
-    % Specific Heat- Steel316
-    if T >= 4 && T < 18
-        cp_SS316 = 0.363452365+0.26377074*T^1+0.0493134608*T^2-0.0038147097*T^3+1.19554913E-4*T^4;
-    elseif T >= 18 && T < 50
-        cp_SS316 = -14.0795868+2.9024659*T^1-0.153359541*T^2+0.004588802*T^3-3.66629778E-5*T^4;
-    elseif T >= 50 && T < 140
-        cp_SS316 = -20.5016084-0.832746541*T^1+0.0955618906*T^2-7.74522415E-4*T^3+1.944414E-6*T^4; %2A-SS-03 PROBE
-    elseif T >= 140 && T < 300
-        cp_SS316 = -75.5829977+5.00692586*T^1-0.0164947547*T^2+2.02748649E-5*T^3;
-    elseif T >= 300 && T < 1500
-        cp_SS316 = 235.650788+1.30084242*T^1-0.00189052617*T^2+1.34841366E-6*T^3-3.43379416E-10*T^4;
-    end
-
-    % Thermal Diffusivity- Steel316
-    alpha_SS316 = k_SS316/(rho_SS316*cp_SS316); %2A-SS-03 PROBE
-
-    
-    %ALUMINA: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Thermal Conductivity- Alumina
-    if T >= 293 && T < 298
-        k_Alumina = 37.1754;
-    elseif T >= 298 && T < 300
-        k_Alumina = ((36.9601-37.1754)/(300-298))*(T-298)+37.1754;
-    elseif T >= 300 && T < 373
-        k_Alumina = ((30.2503-36.9601)/(373-300))*(T-300)+36.9601; %2A-SS-03 PROBE
-    elseif T >= 373 && T < 400 
-        k_Alumina = ((27.209-30.2503)/(400-373))*(T-373)+30.2503;
-    elseif T >= 400 && T < 473
-        k_Alumina = ((22.5099-27.209)/(473-400))*(T-400)+27.209;
-    elseif T >= 473 && T < 500
-        k_Alumina = ((20.93-22.5099)/(500-473))*(T-473)+22.5099;
-    elseif T >= 500 && T < 600
-        k_Alumina = ((16.3045-20.93)/(600-500))*(T-500)+20.93;
-    elseif T >= 600 && T < 673
-        k_Alumina = ((13.1378-16.3045)/(673-600))*(T-600)+16.3045; %2A-SS-03 PROBE
-    elseif T >= 673 && T < 700
-        k_Alumina = ((12.558-13.1378)/(700-673))*(T-673)+13.1378;
-    elseif T >= 700 && T < 873
-        k_Alumina = ((9.1211-12.558)/(873-700))*(T-700)+12.558;
-    elseif T >= 873
-        k_Alumina = ((9.1211-12.558)/(873-700))*(T-700)+12.558; %because I don't know what it would be. placeholder for now
-    end
-    
-    % Porous Alumina
-    phi = 0/100;   % =48 Volume fraction of voids (modelling cracked insulation), 7.38 correction from old files
-    k_Alumina = k_Alumina*exp((-1.5*phi)/(1-phi));  % (Z. Zivcoca et al, 2009)
-    
-    % Density- Alumina
-    rho_Alumina = 3900;
-    
-    % Heat Capacity- Alumina
-    if T >= 293 && T < 298
-        cp_Alumina = 782.218;
-    elseif T >= 298 && T < 300
-        cp_Alumina = ((785.025-782.218)/(300-298))*(T-298)+782.218; %2A-SS-03 PROBE
-    elseif T >= 300 && T < 373
-        cp_Alumina = ((901.3683-785.025)/(373-300))*(T-300)+785.025;
-    elseif T >= 373 && T < 400
-        cp_Alumina = ((942.03-901.3683)/(400-373))*(T-373)+901.3683;
-    elseif T >= 400 && T < 473
-        cp_Alumina = ((1016.802-942.03)/(473-400))*(T-400)+942.03;
-    elseif T >= 473 && T < 500
-        cp_Alumina = ((1046.7-1016.802)/(500-473))*(T-473)+1016.802;
-    elseif T >= 500 && T < 600
-        cp_Alumina = ((1109.502-1046.7)/(600-500))*(T-500)+1046.7;
-    elseif T >= 600 && T < 673
-        cp_Alumina = ((1148.873-1109.502)/(673-600))*(T-600)+1109.502; %2A-SS-03 PROBE
-    elseif T >= 673 && T < 700
-        cp_Alumina = ((1151.37-1148.873)/(700-673))*(T-673)+1148.873;
-    elseif T >= 700 && T < 873
-        cp_Alumina = ((1214.92-1151.37)/(873-700))*(T-700)+1151.37;
-    elseif T >= 873
-        cp_Alumina = ((1214.92-1151.37)/(873-700))*(T-700)+1151.37; %because I don't know what it would be. placeholder for now
-    end
-
-    % Thermal Diffusivity- Alumina
-    alpha_Alumina = k_Alumina/(rho_Alumina*cp_Alumina); %2A-SS-03 PROBE
-    
-
-    %Ceramabond: VALID UP TO ~ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Thermal Conductivity- Ceramabond
-    k_ceramabond = 13; % this is just in the range of data I've found about similar mixtures of sodium silicate with BN and diamond
-
-    % Density- Ceramabond
-    rho_ceramabond = 1950; % lower bound from Aremco datasheet %2A-SS-03 PROBE
-
-    % Heat Capacity- Ceramabond
-    cp_ceramabond = (50 + (T-300)*25)*(122.0632/1000);
-
-    % Thermal Diffusivity- Ceramabond
-    alpha_ceramabond = k_ceramabond/(rho_ceramabond*cp_ceramabond);
-
-
-    %ALUMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%% %2A-SS-03 PROBE
-    %Thermal Conductivity- Alumel Not needed right now, but may be needed
-    %later
-    if T>= 100 && T < 400
-        k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3; %2A-SS-03 PROBE
-    elseif T >= 400 && T < 773
-        k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3;
-    elseif T >= 773
-        k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %out of COMSOL'S RANGE
-    end
-    
-    % % Heat Capacity- Alumel Not needed right now, but may be needed later
-    if T >=100 && T < 410
-        cp_Alumel = -120.397194+4.83234846*T^1-0.0141451249*T^2+0.0000151245324*T^3; %2A-SS-03 PROBE
-    elseif T >=410 && T < 450
-        cp_Alumel = 4215.99923-16.6533325*T^1+0.018666665*T^2;
-    elseif T >= 450
-        cp_Alumel = 4215.99923-16.6533325*(T)^1+0.018666665*(T)^2; %out of COMSOL'S RANGE
-    end
-    
-    % Thermal Diffusivity- Alumel
-    if T >= 100 && T < 175
-        alpha_Alumel = 2.777243E-5-3.26281E-7*T^1+1.773714E-9*T^2-3.253333E-12*T^3;
-    elseif T >=175 && T < 422
-        alpha_Alumel = 9.912174E-6-2.568489E-8*T^1+8.732857E-11*T^2-1.005653E-13*T^3; %2A-SS-03 PROBE
-    elseif T >=422 && T < 450
-        alpha_Alumel = -0.00007507129+0.0000003614333*T^1-0.0000000003952381*T^2;
-    elseif T >= 450
-        alpha_Alumel = -0.00007507129+0.0000003614333*(T)^1-0.0000000003952381*(T)^2; %out of COMSOL'S RANGE
-    end
-    
-    % Density- Alumel
-    rho_Alumel = 8600; %Not needed right now, but may be needed later
-    
-    %CHROMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%
-    %Thermal Conductivity- Chromel Not needed right now, but may be needed
-    %later
-    if T >= 100 && T < 450 %2A-SS-03 PROBE
-        k_Chromel = 13.1709-0.02474581*T^1+2.79175E-4*T^2-6.862022E-7*T^3+6.09438E-10*T^4; %100 to 450 K
-    elseif T >= 450
-        k_Chromel = 13.1709-0.02474581*(T)^1+2.79175E-4*(T)^2-6.862022E-7*(T)^3+6.09438E-10*(T)^4; %out of COMSOL'S RANGE
-    end
-    
-    % Heat Capacity- Chromel- Not needed right now, but may be later %2A-SS-03 PROBE
-    if T >= 100 && T < 450
-        cp_Chromel = -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4;
-    elseif T >= 450
-        cp_Chromel = -169.134351+5.88577506*(T)^1-0.0235877058*(T)^2+0.0000447834022*(T)^3-0.0000000321153924*(T)^4; %out of COMSOL'S RANGE
-    end
-    
-    
-    % Thermal Diffusivity- Chromel
-    if T >= 100 && T < 175
-        alpha_Chromel = 3.466E-5-6.301667E-7*T^1+5.119333E-9*T^2-1.893333E-11*T^3+2.666667E-14*T^4; %2A-SS-03 PROBE
-    elseif T >= 175 && T < 450
-        alpha_Chromel = 6.607453E-6-1.986064E-8*T^1+6.038939E-11*T^2-5.155141E-14*T^3;
-    elseif T >= 450
-        alpha_Chromel = 6.607453E-6-1.986064E-8*(T)^1+6.038939E-11*(T)^2-5.155141E-14*(T)^3; %out of COMSOL'S RANGE
-    end
-    
-    % Density- Chromel
-    rho_Chromel = 8670; %Not needed right now, but may be later %2A-SS-03 PROBE
-
-    %NICHROME: VALID UP TO 1400 K %%%%%
-    %Thermal Conductivity- Nichrome Not needed right now, but may be needed
-    %later
-    if T>= 290 && T < 570
-        k_Nichrome = 15; % https://www.kanthal.com/en/products/datasheets/material-datasheets/wire/resistance-heating-wire-and-resistance-wire/nikrothal-80/
-    elseif T >= 570 && T < 1235
-        k_Nichrome = 0.0177*T + 5.0852; % excel linear fit to data from Kanthal %2A-SS-03 PROBE
-    elseif T >= 1235
-        k_Nichrome = 2.579 + 0.019*T; % https://doi.org/10.1016/j.tca.2009.04.015
-    end
-    
-    % Heat Capacity- Nichrome Not needed right now, but may be needed later %2A-SS-03 PROBE
-    if T >=290 && T < 1370
-        cp_Nichrome = 0.4699 - 0.0002*T + (4e-7)*(T^2) - (1e-10)*(T^3); % Excel 3rd order fit to Kanthal
-    end
-
-    % Density- Nichrome
-    rho_Nichrome = 8300; %Not needed right now, but may be needed later %2A-SS-03 PROBE
-    
-    % Thermal Diffusivity- Nichrome
-    alpha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome); %2A-SS-03 PROBE
-    
-    
-    %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    k_air = 1E-11*(T^3) - 5E-8*(T^2) + 1E-4*T + .0003; %Made from data from engineeringtoolbox.com 
-    density_air = 355.1*T^-1.001; %Made from data from engineersedge.com
-    cp_air = 1E-10*T^4 - 6E-07*T^3 + 0.001*T^2 - 0.3867*T + 1050; %Made from data from engineeringtoolbox.com
-    
-    alpha_air = k_air/(density_air*cp_air); %2A-SS-03 PROBE
-    % 
-    % R=1;
-    % 
-    % k_~ = R*k_~ + (1-R)*k_air;
-    % alpha_~ = R*alpha_~ + (1-R)*alpha_air;
-
-    % probably do a similar volume weighted average like below for the
-    % alumina and ceramabond, assuming the ceramabond fills whatever volume
-    % is left inside the sheath besides the alumina and wires
-    k_insulation = (k_Alumina*(V_alumina) + k_ceramabond*(V_ceramabond))/V_i;   % Use if separated into probe layers
-    alpha_insulation = (alpha_Alumina*(V_alumina) + alpha_ceramabond*(V_ceramabond))/V_i;
-    rho_insulation = (rho_Alumina*(V_alumina) + rho_ceramabond*(V_ceramabond))/V_i; %2A-SS-03 PROBE
-    cp_insulation = (cp_Alumina*(V_alumina) + cp_ceramabond*(V_ceramabond))/V_i;
-    
-    %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_insulation*V_A)/(V_tc+V_h+V_A);
-    rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_insulation*V_A)/(V_tc+V_h+V_A);
-    cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_insulation*V_A)/(V_tc+V_h+V_A);
-    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire); %2A-SS-03 PROBE
-
-    %%%%% 4/20/26 Calibration %%%%%
-    k_insulation = -6.989289e-02*(T-273.15) + 4.797234e+01;
-    alpha_insulation = -1.481888e-06*(T-273.15) + 7.866033e-04; %2A-SS-03 PROBE
-    k_eff_wire = -6.628096e-01*(T-273.15) + 2.154873e+03;
-    alpha_eff_wire =  2.216541e-07*(T-273.15) + 2.705504e-04;
-
-    
-    bias_k_insulation = 0;
-    k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE
-    
-    if MC == 1
-        kprobe = MonteCarloProp(k_insulation_uncertainty,bias_k_insulation,k_insulation); %2A-SS-03 PROBE
-    end
-    %k_probe = kprobe;
-    
-    alphaprobe = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_insulation*V_i+alpha_SS316*V_s+2.074e-5*V_A)/V_total; %Volume-based weighted average of wires, insluation, and sheath. This is how Hollar describes it 
-    
-    alpha_wires_ins = (alpha_Chromel*(V_tc/2+V_h)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_insulation*V_i)/V_total; %Weighted avg thermal diff. of wires, insulation 
-    %pCp_probe = (A_alumel*(rho_Alumel*cp_Alumel)+A_chromel*(rho_Chromel*cp_Chromel)+A_~*(rho_~*cp_~)+A_ni*(rho_Ni*cp_Ni))/A_total;
-    %alphaprobe = k_probe/pCp_probe; %2A-SS-03 PROBE
-    
-    bias_alphaprobe = 0;
-    alphaprobe_uncertainty = .05; %LOOK INTO THIS ONE %2A-SS-03 PROBE
-    
-    if MC == 1
-        alphaprobe = MonteCarloProp(alphaprobe_uncertainty,bias_alphaprobe,alphaprobe); %2A-SS-03 PROBE
-    end
-    %alpha_probe = alphaprobe;
-    
-    k_sheath = k_SS316;
-    alpha_sheath = alpha_SS316;
-
-    %%%%% 4/20/26 Calibration %%%%%
-    k_sheath = 4.706374e-03*(T-273.15) + 1.836468e+01;
-    alpha_sheath = 1.827733e-09*(T-273.15) + 2.745513e-06; %2A-SS-03 PROBE
-
-    bias_k_sheath = 0;
-    k_sheath_uncertainty = .05; %2A-SS-03 PROBE
-    
-    bias_alpha_sheath = 0;
-    alpha_sheath_uncertainty = .05; %2A-SS-03 PROBE
-    
-    if MC == 1
-        k_sheath = MonteCarloProp(k_sheath_uncertainty,bias_k_sheath,k_sheath); %2A-SS-03 PROBE
-    end
-    
-    if MC == 1
-        alpha_sheath = MonteCarloProp(alpha_sheath_uncertainty,bias_alpha_sheath,alpha_sheath); %2A-SS-03 PROBE
-    end
-    
-    
-    % Total Radiative Emissivity- Steel316
-    if T < 660
-        emissivity_probe = 0.38;
-    elseif T >= 660 && T < 1138
-        emissivity_probe = 0.0005*T + 0.0569; %2A-SS-03 PROBE
-    elseif T >= 1075
-        emissivity_probe = 0.6;
-    end
-    bias_emissitivy_probe = 0;
-    uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
-
-    %%%%% 4/20/26 Calibration %%%%%
-    emissivity_probe = 1.710418e-04*(T-273.15) + 4.051501e-01; %2A-SS-03 PROBE
-    
-    if MC == 1 %2A-SS-03 PROBE
-        emissivity_probe = MonteCarloProp(uncertainty_emissitivy_probe,bias_emissitivy_probe,emissivity_probe);
-    end
+%Heat Capacity- Nickel %Not needed right now, but may be needed later
+if T >= 293 && T < 633
+     cp_Nickel = 292.88+0.50208*T^1;
+elseif T >= 633 && T < 1726
+     cp_Nickel = 418.4+0.1284488*T^1;
 end
 
-if strcmp(probe,"2A-SS-04")
-   disp("PROBE "+ probe +" PROPERTIES NOT YET DEFINED")
-   return
+% Thermal Diffusivity- Nickel
+if T >= 293 && T < 633
+    alpha_Nickel = 3.044717E-5-5.149323E-8*T^1+3.129624E-11*T^2;
+elseif T >= 633 && T < 676
+    alpha_Nickel = 4.81462E-5-1.036816E-7*T^1+7.54384E-11*T^2;
+elseif T >= 676 && T <= 1273
+    alpha_Nickel = 1.087891E-5+2.600264E-9*T^1-2.279477E-13*T^2;
 end
 
-if strcmp(probe,"3A-IN718-01") %3A-IN718-01 PROBE
-    % Properties not yet defined are replaced with ~
-    %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
-    %r_2 = ; % middle of wires %Not needed right now, but may be needed later %3A-IN718-01 PROBE
-    %r_3 = 0.35e-3; % outside of wires
-    r_3 = 0.35e-3; % outside of wires
-    %r_4 = 1e-3; % inside radius of sheath
-    r_4 = 3e-7; % inside radius of sheath
-    %r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
-    r_5 = .001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
-    r_heating_wire = 0.0001143; % radius of heating wires
-    r_TC_wire = 0.0001143; % radius of thermocouple wires %3A-IN718-01 PROBE
-    L = 0.1016; % Length of the sensing region of probe
-    
-    % Areas for each material %Not needed right now, but may be needed later
-    %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
-    %A_chromel = pi*(r_TC_wire^2);%1 chromel wire
-    %A_nichrome = 2*pi*(r_heating_wire^2);% 2 nichrome wires %3A-IN718-01 PROBE
-    %A_magnesium_oxide = ;
-    %A_IN718 = ;
-    %A_total = ;
-    
-    % Relevant Volumes
-    V_tc = 2*pi*(r_TC_wire^2)*L/2; % Thermocouple volume
-    V_h = 2*pi*(r_heating_wire^2)*L; % Heating element volume (2 lengths of heating wire
-    V_i = pi*(r_4^2)*L-V_tc-V_h; % Insulation
-    V_A = pi*(r_3^2)*L-V_tc-V_h; % Insulation inside outer wire radius %3A-IN718-01 PROBE
-    V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
-    V_total = V_tc+V_h+V_i+V_s; % Total Probe Volume    
-    
-    %Probe Materials%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    %Inconel 718: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Thermal Conductivity- IN718
-    if T >= 293 && T < 800
-        k_IN718 = 5.291 + 0.0152*T + 1.382e-6*(T^2); % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
-    elseif T >= 800 && T < 1173
-        k_IN718 = 18.34 + ((T-800)/(1173-800))*(22.72-18.34); % linearly interpolating between ranges based on Table 2 from Agazhanov
-    elseif T >= 1173 && T <= 1375
-        k_IN718 = 11.75 + 0.011*T - 9.327e-7*(T^2); % A Sh Agazhanov et al %3A-IN718-01 PROBE
-    end
-    
-    %Density- Inconel 718 %Not needed right now, but may be needed
-    %later
-    %rho_IN718 = ~; % ~ to ~ K %3A-IN718-01 PROBE
-    
-    %Heat Capacity- Inconel 718 %Not needed right now, but may be needed later
-    if T >= 293 && T < 800
-         cp_IN718 = (0.362 + 2.118e-4*T)*1e3; % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
-    elseif T >= 800 && T < 900
-         cp_IN718 = (-0.946 + 0.295e-2*T - 1.379e-6*(T^2))*1e3; %3A-IN718-01 PROBE
-    elseif T >= 900 && T < 1070
-        cp_IN718 = (0.595)*1e3; % grabbing a rough middle point for this range from Figures 1 & 2
-    elseif T >= 1070 && T <= 1361
-         cp_IN718 = (0.639 - 3.355e-6*T)*1e3;
-    end
-    
-    %Thermal Diffusivity- Inconel 718
-    if T >= 293 && T < 980
-        alpha_IN718 = (1.901 + 0.0034*T - 4.475e-7*(T^2))*1e-6;  % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
-    elseif T >= 980 && T < 1173
-        alpha_IN718 = (4.75)*1e-6; % rough middle point for range from Figure 4 %3A-IN718-01 PROBE
-    elseif T >= 1173 && T <= 1375
-        alpha_IN718 = (2.233 + 0.0021*T - 1.85e-8*(T^2))*1e-6;
-    end
+% Total Radiative Emissivity- Nickel200, Nickel200 or Nickel Oxide?
+if T < 473
+    emissivity_Nickel = 0.35;    %0.35
+elseif T >=473 && T < 1144
+    %     emissivity_Nickel = 0.0007*T + 0.0316; %Why is this equation commented
+    %     out, could we still use it?
+    emissivity_Nickel = 0.86; %max emissivity of Nickel Oxide found in literature
+elseif T >= 1144
+    emissivity_Nickel = 0.86;
+end
 
-    
-    %Magnesium Oxide: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Thermal Conductivity- Magnesium Oxide
-    if T < 400
-        k_Magnesium_Oxide = 40; %3A-IN718-01 PROBE
-    elseif T >= 400 && T <= 1300
-        k_Magnesium_Oxide = -3e-8*(T^3) + 0.0001*(T^2) - 0.1274*T + 65.823; %excel 3rd order polynomial fit to Table 2 data from https://pmc.ncbi.nlm.nih.gov/articles/PMC4887202/
-    end
-    
-    % Porous Magnesium_Oxide
-    phi = 0/100;   % =48 Volume fraction of voids (modelling cracked insulation), 7.38 correction from old files
-    k_Magnesium_Oxide = k_Magnesium_Oxide*exp((-1.5*phi)/(1-phi));   %3A-IN718-01 PROBE
-    
-    % Density- Magnesium_Oxide
-    rho_Magnesium_Oxide = 3580; %AZoM max %3A-IN718-01 PROBE
-    
-    % Heat Capacity- Magnesium_Oxide
-    if T >= 293 && T < 3105 %3A-IN718-01 PROBE
-        cp_Magnesium_Oxide = (47.25995 + 5.681621*T - 0.872665*(T^2) + 0.1043*(T^3) + (-1.053955/(T^2)))*(40.3044/1000); % https://webbook.nist.gov/cgi/cbook.cgi?ID=C1309484&Mask=2&Type=JANAFS&Plot=on#JANAFS
-    end
-    
-    % Thermal Diffusivity- Magnesium_Oxide
-    alpha_Magnesium_Oxide = k_Magnesium_Oxide/(rho_Magnesium_Oxide*cp_Magnesium_Oxide); %3A-IN718-01 PROBE
-    
-    
-    %ALUMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%%
-    %Thermal Conductivity- Alumel Not needed right now, but may be needed
-    %later
-    if T>= 100 && T < 400
-        k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3; %3A-IN718-01 PROBE
-    elseif T >= 400 && T < 773
-        k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3;
-    elseif T >= 773
-        k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %out of COMSOL'S RANGE
-    end
-    
-    % % Heat Capacity- Alumel Not needed right now, but may be needed later
-    if T >=100 && T < 410
-        cp_Alumel = -120.397194+4.83234846*T^1-0.0141451249*T^2+0.0000151245324*T^3; %3A-IN718-01 PROBE
-    elseif T >=410 && T < 450
-        cp_Alumel = 4215.99923-16.6533325*T^1+0.018666665*T^2;
-    elseif T >= 450
-        cp_Alumel = 4215.99923-16.6533325*(T)^1+0.018666665*(T)^2; %out of COMSOL'S RANGE
-    end
-    
-    % Thermal Diffusivity- Alumel
-    if T >= 100 && T < 175
-        alpha_Alumel = 2.777243E-5-3.26281E-7*T^1+1.773714E-9*T^2-3.253333E-12*T^3;
-    elseif T >=175 && T < 422
-        alpha_Alumel = 9.912174E-6-2.568489E-8*T^1+8.732857E-11*T^2-1.005653E-13*T^3; %3A-IN718-01 PROBE
-    elseif T >=422 && T < 450
-        alpha_Alumel = -0.00007507129+0.0000003614333*T^1-0.0000000003952381*T^2;
-    elseif T >= 450
-        alpha_Alumel = -0.00007507129+0.0000003614333*(T)^1-0.0000000003952381*(T)^2; %out of COMSOL'S RANGE
-    end
-    
-    % Density- Alumel
-    rho_Alumel = 8600; %Not needed right now, but may be needed later %3A-IN718-01 PROBE
-    
-    %CHROMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%
-    %Thermal Conductivity- Chromel Not needed right now, but may be needed
-    %later
-    if T >= 100 && T < 450
-        k_Chromel = 13.1709-0.02474581*T^1+2.79175E-4*T^2-6.862022E-7*T^3+6.09438E-10*T^4; %100 to 450 K %3A-IN718-01 PROBE
-    elseif T >= 450
-        k_Chromel = 13.1709-0.02474581*(T)^1+2.79175E-4*(T)^2-6.862022E-7*(T)^3+6.09438E-10*(T)^4; %out of COMSOL'S RANGE
-    end
-    
-    % Heat Capacity- Chromel- Not needed right now, but may be later
-    if T >= 100 && T < 450 %3A-IN718-01 PROBE
-        cp_Chromel = -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4;
-    elseif T >= 450
-        cp_Chromel = -169.134351+5.88577506*(T)^1-0.0235877058*(T)^2+0.0000447834022*(T)^3-0.0000000321153924*(T)^4; %out of COMSOL'S RANGE
-    end
-    
-    
-    % Thermal Diffusivity- Chromel
-    if T >= 100 && T < 175 %3A-IN718-01 PROBE
-        alpha_Chromel = 3.466E-5-6.301667E-7*T^1+5.119333E-9*T^2-1.893333E-11*T^3+2.666667E-14*T^4;
-    elseif T >= 175 && T < 450
-        alpha_Chromel = 6.607453E-6-1.986064E-8*T^1+6.038939E-11*T^2-5.155141E-14*T^3;
-    elseif T >= 450
-        alpha_Chromel = 6.607453E-6-1.986064E-8*(T)^1+6.038939E-11*(T)^2-5.155141E-14*(T)^3; %out of COMSOL'S RANGE
-    end
-    
-    % Density- Chromel
-    rho_Chromel = 8670; %Not needed right now, but may be later %3A-IN718-01 PROBE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALUMINA: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thermal Conductivity- Alumina
+if T >= 293 && T < 298
+    k_Alumina = 37.1754;
+elseif T >= 298 && T < 300
+    k_Alumina = ((36.9601-37.1754)/(300-298))*(T-298)+37.1754;
+elseif T >= 300 && T < 373
+    k_Alumina = ((30.2503-36.9601)/(373-300))*(T-300)+36.9601;
+elseif T >= 373 && T < 400
+    k_Alumina = ((27.209-30.2503)/(400-373))*(T-373)+30.2503;
+elseif T >= 400 && T < 473
+    k_Alumina = ((22.5099-27.209)/(473-400))*(T-400)+27.209;
+elseif T >= 473 && T < 500
+    k_Alumina = ((20.93-22.5099)/(500-473))*(T-473)+22.5099;
+elseif T >= 500 && T < 600
+    k_Alumina = ((16.3045-20.93)/(600-500))*(T-500)+20.93;
+elseif T >= 600 && T < 673
+    k_Alumina = ((13.1378-16.3045)/(673-600))*(T-600)+16.3045;
+elseif T >= 673 && T < 700
+    k_Alumina = ((12.558-13.1378)/(700-673))*(T-673)+13.1378;
+elseif T >= 700 && T < 873
+    k_Alumina = ((9.1211-12.558)/(873-700))*(T-700)+12.558;
+elseif T >= 873
+    k_Alumina = ((9.1211-12.558)/(873-700))*(T-700)+12.558; %because I don't know what it would be. placeholder for now
+end
 
-    %NICHROME: VALID UP TO 1400 K %%%%%
-    %Thermal Conductivity- Nichrome Not needed right now, but may be needed
-    %later
-    if T>= 290 && T < 570 %3A-IN718-01 PROBE
-        k_Nichrome = 15; % https://www.kanthal.com/en/products/datasheets/material-datasheets/wire/resistance-heating-wire-and-resistance-wire/nikrothal-80/
-    elseif T >= 570 && T < 1100
-        k_Nichrome = 0.0177*T + 5.0852; % excel linear fit to data from Kanthal
-    elseif T >= 1370
-        k_Nichrome = 2.579 + 0.019*T; % https://doi.org/10.1016/j.tca.2009.04.015
-    end
-    
-    % Heat Capacity- Nichrome Not needed right now, but may be needed later %3A-IN718-01 PROBE
-    if T >=290 && T < 1370
-        cp_Nichrome = (0.4699 - 0.0002*T + (4e-7)*(T^2) - (1e-10)*(T^3))/1000; % Excel 3rd order fit to Kanthal
-    end
+% Porous Alumina
+phi = 0/100;   % =48 Volume fraction of voids (modelling cracked insulation), 7.38 correction from old files
+k_Alumina = k_Alumina*exp((-1.5*phi)/(1-phi));  % (Z. Zivcoca et al, 2009)
 
-    % Density- Nichrome
-    rho_Nichrome = 8300; %Not needed right now, but may be needed later %3A-IN718-01 PROBE
-    
-    % Thermal Diffusivity- Nichrome
-    alpha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome); %3A-IN718-01 PROBE
-    
-    
-    %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
-    k_air = 1E-11*(T^3) - 5E-8*(T^2) + 1E-4*T + .0003; %Made from data from engineeringtoolbox.com %3A-IN718-01 PROBE
-    density_air = 355.1*T^-1.001; %Made from data from engineersedge.com
-    cp_air = 1E-10*T^4 - 6E-07*T^3 + 0.001*T^2 - 0.3867*T + 1050; %Made from data from engineeringtoolbox.com
-    
-    alpha_air = k_air/(density_air*cp_air); %3A-IN718-01 PROBE
-    % 
-    % R=1;
-    % 
-    % k_Magnesium_Oxide = R*k_Magnesium_Oxide + (1-R)*k_air;
-    % alpha_Magnesium_Oxide = R*alpha_Magnesium_Oxide + (1-R)*alpha_air;
-    
-    %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
-    rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
-    cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
-    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire); %/4 is added %3A-IN718-01 PROBE
-    
-    k_insulation = k_Magnesium_Oxide;   % Use if separated into probe layers
-    alpha_insulation = alpha_Magnesium_Oxide; %3A-IN718-01 PROBE
-    
-    bias_k_insulation = 0;
-    k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE %3A-IN718-01 PROBE
-    
-    if MC == 1
-        kprobe = MonteCarloProp(k_insulation_uncertainty,bias_k_insulation,k_insulation); %3A-IN718-01 PROBE
-    end
-    %k_probe = kprobe;
-    
-    alphaprobe = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_Magnesium_Oxide*V_i+alpha_IN718*V_s+2.074e-5*V_A)/V_total; %Volume-based weighted average of wires, insluation, and sheath. This is how Hollar describes it 
-    
-    alpha_wires_ins = (alpha_Chromel*(V_tc/2+V_h)+ alpha_Alumel*(V_tc/2)+ alpha_Nichrome*(V_h) +alpha_Magnesium_Oxide*V_i)/V_total; %Weighted avg thermal diff. of wires, insulation 
-    %pCp_probe = (A_alumel*(rho_Alumel*cp_Alumel)+A_chromel*(rho_Chromel*cp_Chromel)+A_Magnesium_Oxide*(rho_Magnesium_Oxide*cp_Magnesium_Oxide)+A_ni*(rho_Ni*cp_Ni))/A_total;
-    %alphaprobe = k_probe/pCp_probe; %3A-IN718-01 PROBE
-    
-    bias_alphaprobe = 0;
-    alphaprobe_uncertainty = .05; %LOOK INTO THIS ONE %3A-IN718-01 PROBE
-    
-    if MC == 1
-        alphaprobe = MonteCarloProp(alphaprobe_uncertainty,bias_alphaprobe,alphaprobe); %3A-IN718-01 PROBE
-    end
-    %alpha_probe = alphaprobe;
-    
-    k_sheath = k_IN718;
-    alpha_sheath = alpha_IN718; %3A-IN718-01 PROBE
-    
-    bias_k_sheath = 0;
-    k_sheath_uncertainty = .05; %3A-IN718-01 PROBE
-    
-    bias_alpha_sheath = 0;
-    alpha_sheath_uncertainty = .05; %3A-IN718-01 PROBE
-    
-    if MC == 1
-        k_sheath = MonteCarloProp(k_sheath_uncertainty,bias_k_sheath,k_sheath); %3A-IN718-01 PROBE
-    end
-    
-    if MC == 1
-        alpha_sheath = MonteCarloProp(alpha_sheath_uncertainty,bias_alpha_sheath,alpha_sheath); %3A-IN718-01 PROBE
-    end
-    
-    
-    % Total Radiative Emissivity- IN718
-    % if T < 600
-    %     emissivity_probe = 0.2;
-    % elseif T >= 600 && T < 1200
-    %     emissivity_probe = 0.2 + ((T-600)/(1200-600))*(0.5-0.2); % Linearly interpolating between min and max of Keller at al.'s data, doi.org/10.1016/j.nucengdes.2015.02.018 
-    % elseif T >= 1200
-    %     emissivity_probe = 0.5;
-        if T < 660
-        emissivity_probe = 0.38;
-    elseif T >= 660 && T < 1138
-        emissivity_probe = 0.0005*T + 0.0569; %3A-IN718-01 PROBE
-    elseif T >= 1075
-        emissivity_probe = 0.6;
-    end
-    bias_emissitivy_probe = 0;
-    uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
-    
-    if MC == 1 %3A-IN718-01 PROBE
-        emissivity_probe = MonteCarloProp(uncertainty_emissitivy_probe,bias_emissitivy_probe,emissivity_probe);
-    end
+% Density- Alumina
+rho_Alumina = 3900;
+
+% Heat Capacity- Alumina
+if T >= 293 && T < 298
+    cp_Alumina = 782.218;
+elseif T >= 298 && T < 300
+    cp_Alumina = ((785.025-782.218)/(300-298))*(T-298)+782.218;
+elseif T >= 300 && T < 373
+    cp_Alumina = ((901.3683-785.025)/(373-300))*(T-300)+785.025;
+elseif T >= 373 && T < 400
+    cp_Alumina = ((942.03-901.3683)/(400-373))*(T-373)+901.3683;
+elseif T >= 400 && T < 473
+    cp_Alumina = ((1016.802-942.03)/(473-400))*(T-400)+942.03;
+elseif T >= 473 && T < 500
+    cp_Alumina = ((1046.7-1016.802)/(500-473))*(T-473)+1016.802;
+elseif T >= 500 && T < 600
+    cp_Alumina = ((1109.502-1046.7)/(600-500))*(T-500)+1046.7;
+elseif T >= 600 && T < 673
+    cp_Alumina = ((1148.873-1109.502)/(673-600))*(T-600)+1109.502;
+elseif T >= 673 && T < 700
+    cp_Alumina = ((1151.37-1148.873)/(700-673))*(T-673)+1148.873;
+elseif T >= 700 && T < 873
+    cp_Alumina = ((1214.92-1151.37)/(873-700))*(T-700)+1151.37;
+elseif T >= 873
+    cp_Alumina = ((1214.92-1151.37)/(873-700))*(T-700)+1151.37; %because I don't know what it would be. placeholder for now
+end
+
+% Thermal Diffusivity- Alumina
+alpha_Alumina = k_Alumina/(rho_Alumina*cp_Alumina);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%ALUMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%%
+%Thermal Conductivity- Alumel Not needed right now, but may be needed
+%later
+if T>= 100 && T < 400
+    k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3;
+elseif T >= 400 && T < 773
+    k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3;
+elseif T >= 773
+    k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %out of COMSOL'S RANGE
+end
+
+% % Heat Capacity- Alumel Not needed right now, but may be needed later
+if T >=100 && T < 410
+    cp_Alumel = -120.397194+4.83234846*T^1-0.0141451249*T^2+0.0000151245324*T^3;
+elseif T >=410 && T < 450
+    cp_Alumel = 4215.99923-16.6533325*T^1+0.018666665*T^2;
+elseif T >= 450
+    cp_Alumel = 4215.99923-16.6533325*(T)^1+0.018666665*(T)^2; %out of COMSOL'S RANGE
+end
+
+% Thermal Diffusivity- Alumel
+if T >= 100 && T < 175
+    alpha_Alumel = 2.777243E-5-3.26281E-7*T^1+1.773714E-9*T^2-3.253333E-12*T^3;
+elseif T >=175 && T < 422
+    alpha_Alumel = 9.912174E-6-2.568489E-8*T^1+8.732857E-11*T^2-1.005653E-13*T^3;
+elseif T >=422 && T < 450
+    alpha_Alumel = -0.00007507129+0.0000003614333*T^1-0.0000000003952381*T^2;
+elseif T >= 450
+    alpha_Alumel = -0.00007507129+0.0000003614333*(T)^1-0.0000000003952381*(T)^2; %out of COMSOL'S RANGE
+end
+
+% Density- Alumel
+rho_Alumel = 8600; %Not needed right now, but may be needed later
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%CHROMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%
+%Thermal Conductivity- Chromel Not needed right now, but may be needed
+%later
+k_Chromel = 0.0191*T + 11.851;
+
+% Heat Capacity- Chromel- Not needed right now, but may be later
+if T >= 100 && T < 450
+    cp_Chromel = -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4;
+elseif T >= 450
+    cp_Chromel = -169.134351+5.88577506*(T)^1-0.0235877058*(T)^2+0.0000447834022*(T)^3-0.0000000321153924*(T)^4; %out of COMSOL'S RANGE
 end
 
 
-%Sample Properties%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thermal Diffusivity- Chromel
+if T >= 100 && T < 175
+    alpha_Chromel = 3.466E-5-6.301667E-7*T^1+5.119333E-9*T^2-1.893333E-11*T^3+2.666667E-14*T^4;
+elseif T >= 175 && T < 450
+    alpha_Chromel = 6.607453E-6-1.986064E-8*T^1+6.038939E-11*T^2-5.155141E-14*T^3;
+elseif T >= 450
+    alpha_Chromel = 6.607453E-6-1.986064E-8*(T)^1+6.038939E-11*(T)^2-5.155141E-14*(T)^3; %out of COMSOL'S RANGE
+end
+
+% Density- Chromel
+rho_Chromel = 8670; %Not needed right now, but may be later
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+k_air = 1E-11*(T^3) - 5E-8*(T^2) + 1E-4*T + .0003; %Made from data from engineeringtoolbox.com
+density_air = 355.1*T^-1.001; %Made from data from engineersedge.com
+cp_air = 1E-10*T^4 - 6E-07*T^3 + 0.001*T^2 - 0.3867*T + 1050; %Made from data from engineeringtoolbox.com
+
+alpha_air = k_air/(density_air*cp_air);
+% 
+% R=1;
+% 
+% k_Alumina = R*k_Alumina + (1-R)*k_air;
+% alpha_Alumina = R*alpha_Alumina + (1-R)*alpha_air;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Stainless Steel 316: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Thermal Conductivity- Stainless Steel 316
+if T >= 4 && T < 9
+    k_SS316 = -0.9611905+0.5776587*T^1-0.08547619*T^2+0.004722222*T^3;
+elseif T >= 9 && T < 135
+    k_SS316 = -0.575597+0.1484296*T^1+1.184549E-5*T^2-6.696619E-6*T^3+2.25279E-8*T^4;
+elseif T >= 135 && T < 1220
+    k_SS316 = 7.956002+0.02084122*T^1-4.706772E-6*T^2+6.271478E-10*T^3-1.240772E-12*T^4;
+end
+
+% Density- Stainless Steel 316
+if T >= 4 && T < 114
+    rho_SS316 = 8042.496-0.01245121*T^1+3.834401E-5*T^2-7.363868E-6*T^3;
+elseif T >= 114 && T < 1273
+    rho_SS316 = 8058.746-0.1963973*T^1-4.830884E-4*T^2+4.114383E-7*T^3-1.337946E-10*T^4;
+end
+
+% Specific Heat- Steel316
+if T >= 4 && T < 18
+    cp_SS316 = 0.363452365+0.26377074*T^1+0.0493134608*T^2-0.0038147097*T^3+1.19554913E-4*T^4;
+elseif T >= 18 && T < 50
+    cp_SS316 = -14.0795868+2.9024659*T^1-0.153359541*T^2+0.004588802*T^3-3.66629778E-5*T^4;
+elseif T >= 50 && T < 140
+    cp_SS316 = -20.5016084-0.832746541*T^1+0.0955618906*T^2-7.74522415E-4*T^3+1.944414E-6*T^4;
+elseif T >= 140 && T < 300
+    cp_SS316 = -75.5829977+5.00692586*T^1-0.0164947547*T^2+2.02748649E-5*T^3;
+elseif T >= 300 && T < 1500
+    cp_SS316 = 235.650788+1.30084242*T^1-0.00189052617*T^2+1.34841366E-6*T^3-3.43379416E-10*T^4;
+end
+
+% Thermal Diffusivity- Steel316
+alpha_SS316 = k_SS316/(rho_SS316*cp_SS316);
+
+% Total Radiative Emissivity- Steel316
+if T < 660
+    emissivity_SS316 = 0.38;
+elseif T >= 660 && T < 1138
+    emissivity_SS316 = 0.0005*T + 0.0569;
+elseif T >= 1075
+    emissivity_SS316 = 0.6;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Ceramabond: VALID UP TO ~ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thermal Conductivity- Ceramabond
+k_ceramabond = 13; % this is just in the range of data I've found about similar mixtures of sodium silicate with BN and diamond
+
+% Density- Ceramabond
+rho_ceramabond = 1950; % lower bound from Aremco datasheet
+
+% Heat Capacity- Ceramabond
+cp_ceramabond = (50 + (T-300)*25)*(122.0632/1000);
+
+% Thermal Diffusivity- Ceramabond
+alpha_ceramabond = k_ceramabond/(rho_ceramabond*cp_ceramabond);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%NICHROME: VALID UP TO 1400 K %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Thermal Conductivity- Nichrome Not needed right now, but may be needed
+%later
+if T>= 290 && T < 570
+    k_Nichrome = 15; % https://www.kanthal.com/en/products/datasheets/material-datasheets/wire/resistance-heating-wire-and-resistance-wire/nikrothal-80/
+elseif T >= 570 && T < 1235
+    k_Nichrome = 0.0177*T + 5.0852; % excel linear fit to data from Kanthal
+elseif T >= 1235
+    k_Nichrome = 2.579 + 0.019*T; % https://doi.org/10.1016/j.tca.2009.04.015
+end
+
+% Heat Capacity- Nichrome Not needed right now, but may be needed later
+if T >=290 && T < 1370
+    cp_Nichrome = 0.4699 - 0.0002*T + (4e-7)*(T^2) - (1e-10)*(T^3); % Excel 3rd order fit to Kanthal
+end
+
+% Density- Nichrome
+rho_Nichrome = 8300; %Not needed right now, but may be needed later
+
+% Thermal Diffusivity- Nichrome
+alpha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Inconel 718: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thermal Conductivity- IN718
+if T >= 293 && T < 800
+    k_IN718 = 5.291 + 0.0152*T + 1.382e-6*(T^2); % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
+elseif T >= 800 && T < 1173
+    k_IN718 = 18.34 + ((T-800)/(1173-800))*(22.72-18.34); % linearly interpolating between ranges based on Table 2 from Agazhanov
+elseif T >= 1173 && T <= 1375
+    k_IN718 = 11.75 + 0.011*T - 9.327e-7*(T^2); % A Sh Agazhanov et al
+end
+
+%Density- Inconel 718 %Not needed right now, but may be needed
+%later
+%rho_IN718 = ~; % ~ to ~ K
+
+%Heat Capacity- Inconel 718 %Not needed right now, but may be needed later
+if T >= 293 && T < 800
+     cp_IN718 = (0.362 + 2.118e-4*T)*1e3; % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
+elseif T >= 800 && T < 900
+     cp_IN718 = (-0.946 + 0.295e-2*T - 1.379e-6*(T^2))*1e3;
+elseif T >= 900 && T < 1070
+    cp_IN718 = (0.595)*1e3; % grabbing a rough middle point for this range from Figures 1 & 2
+elseif T >= 1070 && T <= 1361
+     cp_IN718 = (0.639 - 3.355e-6*T)*1e3;
+end
+
+%Thermal Diffusivity- Inconel 718
+if T >= 293 && T < 980
+    alpha_IN718 = (1.901 + 0.0034*T - 4.475e-7*(T^2))*1e-6;  % A Sh Agazhanov et al 2019 J. Phys.: Conf. Ser. 1382 012175 doi:10.1088/1742-6596/1382/1/012175
+elseif T >= 980 && T < 1173
+    alpha_IN718 = (4.75)*1e-6; % rough middle point for range from Figure 4
+elseif T >= 1173 && T <= 1375
+    alpha_IN718 = (2.233 + 0.0021*T - 1.85e-8*(T^2))*1e-6;
+end
+
+% Total Radiative Emissivity- IN718
+% if T < 600
+%     emissivity_IN718 = 0.2;
+% elseif T >= 600 && T < 1200
+%     emissivity_IN718 = 0.2 + ((T-600)/(1200-600))*(0.5-0.2); % Linearly interpolating between min and max of Keller at al.'s data, doi.org/10.1016/j.nucengdes.2015.02.018 
+% elseif T >= 1200
+%     emissivity_IN718 = 0.5;
+if T < 660
+    emissivity_IN718 = 0.38;
+elseif T >= 660 && T < 1138
+    emissivity_IN718 = 0.0005*T + 0.0569;
+elseif T >= 1075
+    emissivity_IN718 = 0.6;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Magnesium Oxide: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thermal Conductivity- Magnesium Oxide
+if T < 400
+    k_Magnesium_Oxide = 40;
+elseif T >= 400 && T <= 1300
+    k_Magnesium_Oxide = -3e-8*(T^3) + 0.0001*(T^2) - 0.1274*T + 65.823; %excel 3rd order polynomial fit to Table 2 data from https://pmc.ncbi.nlm.nih.gov/articles/PMC4887202/
+end
+
+% Porous Magnesium_Oxide
+phi = 0/100;   % =48 Volume fraction of voids (modelling cracked insulation), 7.38 correction from old files
+k_Magnesium_Oxide = k_Magnesium_Oxide*exp((-1.5*phi)/(1-phi));  
+
+% Density- Magnesium_Oxide
+rho_Magnesium_Oxide = 3580; %AZoM max
+
+% Heat Capacity- Magnesium_Oxide
+if T >= 293 && T < 3105
+    cp_Magnesium_Oxide = (47.25995 + 5.681621*T - 0.872665*(T^2) + 0.1043*(T^3) + (-1.053955/(T^2)))*(40.3044/1000); % https://webbook.nist.gov/cgi/cbook.cgi?ID=C1309484&Mask=2&Type=JANAFS&Plot=on#JANAFS
+end
+
+% Thermal Diffusivity- Magnesium_Oxide
+alpha_Magnesium_Oxide = k_Magnesium_Oxide/(rho_Magnesium_Oxide*cp_Magnesium_Oxide);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Inconel625%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Valid to who know's where. This section needs work.
+if T >= 293 && T < 1093
+    k_Inconel625 = 0.2435*(T) + 339.27;
+end
+
+% Density- Inconel625
+rho_Inconel625 = 8440;
+
+% Heat Capacity- Inconel625
+if T >= 293 && T < 1093
+    cp_Inconel625 = 0.0163*(T) + 4.23;
+end
+
+% Thermal Diffusivity- Inconel625
+if T >= 293 && T < 1093
+    alpha_Inconel625 = k_Inconel625/(rho_Inconel625 * cp_Inconel625);
+end
+
+% Total Radiative Emissivity- Nickel200
+if T < 473
+    emissivity_Inconel625 = 0.35;
+elseif T >=473 && T < 1144
+    %     emissivity_Nickel200 = 0.0007*T + 0.0316;
+    emissivity_Inconel625 = 0; %not sure
+elseif T >= 1144
+    emissivity_Inconel625 = 0; %not sure
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Samples
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Water%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(sample,'H2O')
     if T >= 273 && T < 533
@@ -924,9 +411,11 @@ if strcmp(sample,'H2O')
     alpha_sample = alpha_Water;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Argon%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% From NIST (https://webbook.nist.gov/cgi/cbook.cgi?ID=7440-37-1)
-if strcmp(sample,'Ar')% Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
+if strcmp(sample,'Ar')
+    % From NIST (https://webbook.nist.gov/cgi/cbook.cgi?ID=7440-37-1)
+    % Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
     if T >= 273 && T < 473
         k_Argon = -1.3127E-08*T^2 + 5.3488E-05*T + 3.1611E-03;
     elseif T >= 473 && T < 673 
@@ -936,14 +425,6 @@ if strcmp(sample,'Ar')% Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Cond
     end
 
     k_sample = k_Argon;
-
-        % Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
-        bias_k_sample = 0;
-        uncertainty_k_sample = 0.02*k_sample;
-        
-        if MC == 1
-            k_sample = MonteCarloProp(uncertainty_k_sample,bias_k_sample,k_sample);
-        end
 
     % Heat Capacity- Argon: Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]
     if T >= 273 && T < 473
@@ -955,14 +436,6 @@ if strcmp(sample,'Ar')% Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Cond
     end
 
     cp_sample = cp_Argon;
-
-        % Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
-        bias_cp_sample = 0;
-        uncertainty_cp_sample = 0.02*cp_sample;
-        
-        if MC == 1
-            cp_sample = MonteCarloProp(uncertainty_cp_sample,bias_cp_sample,cp_sample);
-        end
 
     % Density- Argon: Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]
     if T >= 273 && T < 473
@@ -979,24 +452,26 @@ if strcmp(sample,'Ar')% Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Cond
 
     rho_sample = rho_Argon;
 
-        %Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]        
-        bias_rho_sample = 0;
-        uncertainty_rho_sample = 0.002*rho_sample;
-        
-        if MC == 1
-            rho_sample = MonteCarloProp(uncertainty_rho_sample,bias_rho_sample,rho_sample);
-        end
-
     % Thermal Diffusivity- Argon
     alpha_Argon = k_Argon/(rho_Argon*cp_Argon);
-
     alpha_sample = alpha_Argon;
+
+    % Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
+    bias_k_sample = 0;
+    uncertainty_k_sample = 0.02*k_sample;
+    % Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
+    bias_cp_sample = 0;
+    uncertainty_cp_sample = 0.02*cp_sample;
+    %Tegeler, Ch.; Span, R.; Wagner, W., A New Equation of State for Argon Covering the Fluid Region for Temperatures from the Melting Line to 700 K at Pressures up to 1000 MPa, J. Phys. Chem. Ref. Data, 1999, 28, 3, 779-850, https://doi.org/10.1063/1.556037 . [all data]        
+    bias_rho_sample = 0;
+    uncertainty_rho_sample = 0.002*rho_sample;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Toluene%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 360k (87C)
-% Thermal Conductivity- Toluene
 if strcmp(sample, 'Toluene')
+    %VALID UP TO 360k (87C)
+    % Thermal Conductivity- Toluene
     if T >= 230 && T < 360
         k_Toluene = 0.2205-3.0E-4*T^1; % 230 to 360
     elseif T >= 360
@@ -1005,22 +480,22 @@ if strcmp(sample, 'Toluene')
 
     k_sample = k_Toluene;
 
-%     Heat Capacity and Density not needed right now, but may be later. 
-%     % Heat Capacity- Toluene
-%     if T >= 179 && T < 505
-%         cp_Toluene = 1377.31548+2.58418568*T^1-0.0272810691*T^2+9.87628598E-5*T^3-1.20802791E-8*T^4-3.3656506E-10*T^5+3.59255687E-13*T^6;
-%     elseif T >= 505 && T < 565
-%         cp_Toluene = 6310522.18-48043.826*T^1+137.240472*T^2-0.174290378*T^3+8.30421074E-5*T^4;
-%     elseif T >= 565
-%         cp_Toluene = 0; %because I don't know what it would be. placeholder for now
-%     end
-% 
-%     % Density- Toluene
-%     if T >= 263 && T < 383
-%         rho_Toluene = 1065.619-0.4713105*T^1-7.132867E-4*T^2; % 263 to 383
-%     elseif T >= 383
-%         rho_Toluene = 0; %because I don't know what it would be. placeholder for now
-%     end
+    % Heat Capacity and Density not needed right now, but may be later. 
+    % % Heat Capacity- Toluene
+    % if T >= 179 && T < 505
+    %     cp_Toluene = 1377.31548+2.58418568*T^1-0.0272810691*T^2+9.87628598E-5*T^3-1.20802791E-8*T^4-3.3656506E-10*T^5+3.59255687E-13*T^6;
+    % elseif T >= 505 && T < 565
+    %     cp_Toluene = 6310522.18-48043.826*T^1+137.240472*T^2-0.174290378*T^3+8.30421074E-5*T^4;
+    % elseif T >= 565
+    %     cp_Toluene = 0; %because I don't know what it would be. placeholder for now
+    % end
+    % 
+    % % Density- Toluene
+    % if T >= 263 && T < 383
+    %     rho_Toluene = 1065.619-0.4713105*T^1-7.132867E-4*T^2; % 263 to 383
+    % elseif T >= 383
+    %     rho_Toluene = 0; %because I don't know what it would be. placeholder for now
+    % end
 
     % Thermal Diffusivity- Toluene
     if T >= 263 && T < 383
@@ -1032,13 +507,14 @@ if strcmp(sample, 'Toluene')
     alpha_sample = alpha_Toluene;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %NaNO3%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 690K (417C)
-% Thermal Conductivity- NaNO3
 if strcmp(sample,'NaNO3')
-if T < 590
-    T = 590;
-end
+    %VALID UP TO 690K (417C)
+    % Thermal Conductivity- NaNO3
+    if T < 590
+        T = 590;
+    end
 
     if T < 590
         k_NaNO3 = 0;
@@ -1073,37 +549,38 @@ end
     % Density- NaNO3
     rho_NaNO3 = (1847.4-1878.6)/(360-320) * (T-(320+273)) + 1878.6;
 
-%     if T < 590
-%         rho_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         rho_NaNO3_COMSOL = 2334.418-0.7672727*T^1;
-%     elseif T >= 690
-%         rho_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
+    % if T < 590
+    %     rho_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     rho_NaNO3_COMSOL = 2334.418-0.7672727*T^1;
+    % elseif T >= 690
+    %     rho_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
 
     rho_sample = rho_NaNO3;
 
     % Thermal Diffusivity- NaNO3
     alpha_NaNO3 = k_NaNO3/(rho_NaNO3*cp_NaNO3);
-%     if T < 590
-%         alpha_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         alpha_NaNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
-%     elseif T >= 690
-%         alpha_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
+    % if T < 590
+    %     alpha_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     alpha_NaNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
+    % elseif T >= 690
+    %     alpha_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
 
     alpha_sample = alpha_NaNO3;
 
 end
 
-%NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 690K (417C)
-% Thermal Conductivity- NaNO3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(sample,'NaNO3-KNO3')
-% if T < 590
-%     T = 590;
-% end
+    %VALID UP TO 690K (417C)
+    % Thermal Conductivity- NaNO3
+    % if T < 590
+    %     T = 590;
+    % end
 
     % if T < 590
     %     k_NaNO3_KNO3 = 0;
@@ -1146,37 +623,200 @@ if strcmp(sample,'NaNO3-KNO3')
     cp_sample = cp_NaNO3_KNO3;
 
     % Density- NaNO3_KNO3
-    rho_NaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+    if T < 498.15
+        rho_NaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+                                           %mixtures in a range of 59-61 wt% NaNO3.
+    elseif T >= 498.15
+        rho_NaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
                                            %mixtures in a range of 59-61 wt% NaNO3. 
-
-%     if T < 590
-%         rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         rho_NaNO3_KNO3_COMSOL = 2334.418-0.7672727*T^1;
-%     elseif T >= 690
-%         rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
+    end
 
     rho_sample = rho_NaNO3_KNO3;
 
     % Thermal Diffusivity- NaNO3_KNO3
     alpha_NaNO3_KNO3 = k_NaNO3_KNO3/(rho_NaNO3_KNO3*cp_NaNO3_KNO3);
-%     if T < 590
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
-%     elseif T >= 690
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
+    % if T < 590
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
+    % elseif T >= 690
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
 
     alpha_sample = alpha_NaNO3_KNO3;
 
 end
 
-%1npSiO2-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 690K (417C)
-% Thermal Conductivity- NaNO3
-if strcmp(sample,'1npNaNO3-KNO3')
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%0.5%np-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if strcmp(sample,'0_5npNaNO3-KNO3-T1')
+    %VALID UP TO 690K (417C)
+    % Thermal Conductivity- NaNO3
+    % if T < 590
+    %     T = 590;
+    % end
+
+    % if T < 590
+    %     k_NaNO3_KNO3 = 0;
+    % elseif T>=590 && T < 625
+    %     k_NaNO3_KNO3 = (.513-.517)/(625-600) * (T-600) + .517;
+    % elseif T>=625 && T < 650
+    %     k_NaNO3_KNO3 = (.510-.513)/(650-625) * (T-625) + .513;
+    % elseif T>=650 && T < 675
+    %     k_NaNO3_KNO3 = (.507-.510)/(675-650) * (T-650) + .510;
+    % elseif T>=675 && T < 700
+    %     k_NaNO3_KNO3 = (.503-.507)/(700-675) * (T-675) + .507;
+    % elseif T >= 700
+    %     k_NaNO3_KNO3 = (.503-.507)/(700-675) * (T-675) + .507; %because I don't know what it would be. placeholder for now
+    % end
+
+    k_NaNO3_KNO3 = -0.0002001993*T + 0.5535004504;
+
+    k_sample = k_NaNO3_KNO3;
+
+    %Not sure the purpose of the COMSOL values are
+    %     if T < 590
+    %         k_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    %     elseif T >= 590 && T < 740
+    %         k_NaNO3_COMSOL = 0.4058875+2.624227E-4*T^1;
+    %     elseif T >= 740
+    %         k_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    %     end
+
+    % Heat Capacity- NaNO3
+    %cp_NaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
+    % Heat Capacity- 1npNaNO3
+    %cp_1npNaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
+    if T < 585.15
+        cp_NaNO3_KNO3 = 1.31192E-03*(T-273.15) + 1139.51; % Joohyun 2024
+    elseif T >= 585.15
+        cp_NaNO3_KNO3 = 3.88350E-05*(T-273.15) + 1542.22;
+    end
+    
+    % cp_NaNO3_KNO3_COMSOL = 1821.38432;
+    cp_sample = cp_NaNO3_KNO3;
+
+    % Density- NaNO3_KNO3
+    if T < 498.15
+        rho_NaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+                                           %mixtures in a range of 59-61 wt% NaNO3.
+    elseif T >= 498.15
+        rho_NaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+                                           %mixtures in a range of 59-61 wt% NaNO3. 
+    end
+
+    % if T < 590
+    %     rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     rho_NaNO3_KNO3_COMSOL = 2334.418-0.7672727*T^1;
+    % elseif T >= 690
+    %     rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
+
+    rho_sample = rho_NaNO3_KNO3;
+
+    % Thermal Diffusivity- NaNO3_KNO3
+    alpha_NaNO3_KNO3 = k_NaNO3_KNO3/(rho_NaNO3_KNO3*cp_NaNO3_KNO3);
+    % if T < 590
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
+    % elseif T >= 690
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
+
+    alpha_sample = alpha_NaNO3_KNO3;
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%0.5%np-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if strcmp(sample,'0_5npNaNO3-KNO3-T2')
+    %VALID UP TO 690K (417C)
+    % Thermal Conductivity- NaNO3
+    % if T < 590
+    %     T = 590;
+    % end
+
+    % if T < 590
+    %     k_NaNO3_KNO3 = 0;
+    % elseif T>=590 && T < 625
+    %     k_NaNO3_KNO3 = (.513-.517)/(625-600) * (T-600) + .517;
+    % elseif T>=625 && T < 650
+    %     k_NaNO3_KNO3 = (.510-.513)/(650-625) * (T-625) + .513;
+    % elseif T>=650 && T < 675
+    %     k_NaNO3_KNO3 = (.507-.510)/(675-650) * (T-650) + .510;
+    % elseif T>=675 && T < 700
+    %     k_NaNO3_KNO3 = (.503-.507)/(700-675) * (T-675) + .507;
+    % elseif T >= 700
+    %     k_NaNO3_KNO3 = (.503-.507)/(700-675) * (T-675) + .507; %because I don't know what it would be. placeholder for now
+    % end
+
+    k_NaNO3_KNO3 = -0.0002001993*T + 0.5535004504;
+
+    k_sample = k_NaNO3_KNO3;
+
+    %Not sure the purpose of the COMSOL values are
+    %     if T < 590
+    %         k_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    %     elseif T >= 590 && T < 740
+    %         k_NaNO3_COMSOL = 0.4058875+2.624227E-4*T^1;
+    %     elseif T >= 740
+    %         k_NaNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    %     end
+
+    % Heat Capacity- NaNO3
+    %cp_NaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
+    % Heat Capacity- 1npNaNO3
+    %cp_1npNaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
+    if T < 585.15
+        cp_NaNO3_KNO3 = 1.31192E-03*(T-273.15) + 1139.51; % Joohyun 2024
+    elseif T >= 585.15
+        cp_NaNO3_KNO3 = 3.88350E-05*(T-273.15) + 1542.22;
+    end
+    
+    % cp_NaNO3_KNO3_COMSOL = 1821.38432;
+    cp_sample = cp_NaNO3_KNO3;
+
+    % Density- NaNO3_KNO3
+    if T < 498.15
+        rho_NaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+                                           %mixtures in a range of 59-61 wt% NaNO3.
+    elseif T >= 498.15
+        rho_NaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+                                           %mixtures in a range of 59-61 wt% NaNO3. 
+    end
+
+
+    % if T < 590
+    %     rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     rho_NaNO3_KNO3_COMSOL = 2334.418-0.7672727*T^1;
+    % elseif T >= 690
+    %     rho_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
+
+    rho_sample = rho_NaNO3_KNO3;
+
+    % Thermal Diffusivity- NaNO3_KNO3
+    alpha_NaNO3_KNO3 = k_NaNO3_KNO3/(rho_NaNO3_KNO3*cp_NaNO3_KNO3);
+    % if T < 590
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
+    % elseif T >= 690
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
+
+    alpha_sample = alpha_NaNO3_KNO3;
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%1npSiO2-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if strcmp(sample,'1npNaNO3-KNO3-T1')
+    %VALID UP TO 690K (417C)
+    % Thermal Conductivity- NaNO3
 
     k_1npNaNO3_KNO3 = -0.0002001993*T + 0.5535004504;
 
@@ -1195,28 +835,82 @@ if strcmp(sample,'1npNaNO3-KNO3')
     cp_sample = cp_1npNaNO3_KNO3;
 
     % Density- NaNO3_KNO3
-    rho_1npNaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+    if T < 498.15
+        rho_1npNaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+                                           %mixtures in a range of 59-61 wt% NaNO3.
+    elseif T >= 498.15
+        rho_1npNaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
                                            %mixtures in a range of 59-61 wt% NaNO3. 
+    end
+
 
     rho_sample = rho_1npNaNO3_KNO3;
 
     % Thermal Diffusivity- NaNO3_KNO3
     alpha_1npNaNO3_KNO3 = k_1npNaNO3_KNO3/(rho_1npNaNO3_KNO3*cp_1npNaNO3_KNO3);
-%     if T < 590
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     elseif T >= 590 && T < 690
-%         alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
-%     elseif T >= 690
-%         alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
-%     end
+    % if T < 590
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
+    % elseif T >= 690
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
 
     alpha_sample = alpha_1npNaNO3_KNO3;
 
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%1npSiO2-NaNO3-KNO3 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if strcmp(sample,'1npNaNO3-KNO3-T2')
+    %VALID UP TO 690K (417C)
+    % Thermal Conductivity- NaNO3
+    k_1npNaNO3_KNO3 = -0.0002001993*T + 0.5535004504;
+
+    k_sample = k_1npNaNO3_KNO3;
+
+
+
+    % Heat Capacity- 1npNaNO3
+    %cp_1npNaNO3_KNO3 = 1540.4+3.0924E-02*(T-273.15);  %Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3 mixtures in a range of 59-61 wt% NaNO3.
+    if T < 593.15
+        cp_1npNaNO3_KNO3 = 2.29435E-03*(T-273.15) + 1072.02; % Joohyun 2024
+    elseif T >= 593.15
+        cp_1npNaNO3_KNO3 = 2.23927E-03*(T-273.15) + 819.466;
+    end
+    % cp_NaNO3_KNO3_COMSOL = 1821.38432;
+    cp_sample = cp_1npNaNO3_KNO3;
+
+    % Density- NaNO3_KNO3
+    if T < 498.15
+        rho_1npNaNO3_KNO3 = -0.51151382*(T-273.15) + 2270.22748425; % Schinke 1960, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+                                           %mixtures in a range of 59-61 wt% NaNO3.
+    elseif T >= 498.15
+        rho_1npNaNO3_KNO3 = 2106.0-6.6795E-01*(T-273.15);  % Janz extrap. 1972, from Bonk, A., & Bauer, T. (2021). Report on thermo-physical properties of binary NaNO3-KNO3
+                                           %mixtures in a range of 59-61 wt% NaNO3. 
+    end
+
+
+    rho_sample = rho_1npNaNO3_KNO3;
+
+    % Thermal Diffusivity- NaNO3_KNO3
+    alpha_1npNaNO3_KNO3 = k_1npNaNO3_KNO3/(rho_1npNaNO3_KNO3*cp_1npNaNO3_KNO3);
+    % if T < 590
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % elseif T >= 590 && T < 690
+    %     alpha_NaNO3_KNO3_COMSOL = 1.007969E-7+6.976789E-11*T^1+6.217128E-14*T^2;
+    % elseif T >= 690
+    %     alpha_NaNO3_KNO3_COMSOL = 0; %because I don't know what it would be. placeholder for now
+    % end
+
+    alpha_sample = alpha_1npNaNO3_KNO3;
+
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Propylene Glycol%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Thermal Conductivity
 if strcmp(sample,'PropyleneGlycol')
+    %Thermal Conductivity
     if T >= 294 && T <= 354
         k_PropyleneGlycol = 0.1549 + (1e-4)*T;
     else
@@ -1249,9 +943,10 @@ if strcmp(sample,'PropyleneGlycol')
     alpha_sample = alpha_PropyleneGlycol;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Potassium Nitrate (KNO3)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Thermal Conductivity
 if strcmp(sample,'KNO3')
+    %Thermal Conductivity
     if T >= 610 && T <= 710
         k_KNO3 = .4303-.000422*(T-610.15);
     else
@@ -1281,59 +976,51 @@ if strcmp(sample,'KNO3')
 
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %FLiNaK%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 910K (636C)
 if strcmp(sample,'FLiNaK')
+    %VALID UP TO 910K (636C)
     % Thermal Conductivity- FLiNaK
     %     k_FLiNaK = 0.0006*T + 0.2852;
     k_LiF = 1.9 - 0.0004*T; %1118.5-1900K
     k_KF = 0.86 - 0.00025*T; %1129.15-1800K
     k_NaF = 1.3 - 0.00028*T; %1268.15-1800K
     k_FLiNaK = .115*k_NaF + .42*k_KF + .465*k_LiF; %k_FLiNaK weighted by molar composition of eutectic
-    bias_kFLiNaK = 0;
-    uncertainty_kFLiNaK = 0.05; %Defintely needs to be looked into.
-    if MC == 1
-        k_FLiNaK = MonteCarloProp(uncertainty_kFLiNaK,bias_kFLiNaK,k_FLiNaK);
-    end
 
     k_sample = k_FLiNaK;
 
     % Heat Capacity- Flinak
     %cp_FLiNaK = 0.0108*T + 1896.1;%Don't know where this came from
     cp_FLiNaK = (40.3 + (4.39e-2)*T)/.0412911; %Rogers et al
-    u_cp_FLiNaK = .02;
-
-    if MC == 1
-        cp_FLiNaK = MonteCarloProp(u_cp_FLiNaK,bias_kFLiNaK,cp_FLiNaK);
-    end
 
     cp_sample = cp_FLiNaK;
 
     % Density- Flinak
     %rho_FLiNaK = -0.6141*T + 2585.7; %Not sure where this came from
     rho_FLiNaK = (2.5793 - T*(6.24e-4))*1000; %Cibulkova et al
-    u_rho_FLiNaK = .01; %Cibulkova et al
-
-    if MC == 1
-        rho_FLiNaK = MonteCarloProp(u_rho_FLiNaK,bias_kFLiNaK,rho_FLiNaK);
-    end
 
     rho_sample = rho_FLiNaK;
 
     % Thermal Diffusivity- Flinak
     alpha_FLiNaK= k_FLiNaK/(rho_FLiNaK*cp_FLiNaK);
-    bias_alphaFLiNaK = 0;
-    uncertainty_alphaFLiNaK = 0.05; %CHECK THIS VALUE
-    if MC == 1
-        alpha_FLiNaK = MonteCarloProp(uncertainty_alphaFLiNaK,bias_alphaFLiNaK,alpha_FLiNaK);
-    end
+
 
     alpha_sample = alpha_FLiNaK;
+
+    bias_k_sample = 0;
+    uncertainty_k_sample = 0.02*k_sample;
+    bias_cp_sample = 0;
+    uncertainty_cp_sample = 0.02;
+    bias_rho_sample = 0;
+    uncertainty_rho_sample = 0.01; %Cibulkova et al
+    bias_alpha_sample = 0;
+    uncertainty_alpha_sample = 0.05; %CHECK THIS VALUE
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Flibe%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 1070 (796C)
 if strcmp(sample,'FLiBe')
+    %VALID UP TO 1070 (796C)
     % Thermal Conductivity- Flibe
     %     k_FLiBe = 0.0003*T + 0.8721;
     k_LiF = 1.88 - (3.99e-4)*T; %1118.5-1900K Gheribi et al
@@ -1381,9 +1068,10 @@ if strcmp(sample,'FLiBe')
     alpha_sample = alpha_FLiBe;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %FMgNaK%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 1070K (796C)
 if strcmp(sample,'FMgNaK')
+    %VALID UP TO 1070K (796C)
     % Thermal Conductivity- FMgNaK
     Reference_correlation_NaF = 1.3 - 0.00028*T; %1268.15-1800K
     Reference_correlation_KF = 0.86 - 0.00025*T; %1129.15-1800K
@@ -1422,9 +1110,10 @@ if strcmp(sample,'FMgNaK')
     alpha_sample = alpha_FMgNaK;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %LiCl-KCl%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 1023K (750C)
 if strcmp(sample,'LiCl-KCl')
+    %VALID UP TO 1023K (750C)
     % Thermal Conductivity- LiCl-KCl
     k_LiCl = 0.8821 + (-2.9e-4)*T; % Nagasaka et al.
     u_k_LiCl = .2*k_LiCl; %Nagasaka et al
@@ -1478,9 +1167,10 @@ if strcmp(sample,'LiCl-KCl')
     alpha_sample = alpha_LiCl_KCl;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %NaCl-KCl%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 1023K (750C)
 if strcmp(sample,'NaCl-KCl')
+    %VALID UP TO 1023K (750C)
     % Thermal Conductivity- NaCl-KCl
     k_NaCl = 0.7121 + (-1.8e-4)*(T); % Nagasaka et al. Valid for 1170-1441K
     u_k_NaCl = .08*k_NaCl; %Nagasaka et al
@@ -1533,9 +1223,10 @@ if strcmp(sample,'NaCl-KCl')
     alpha_sample = alpha_NaCl_KCl;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %LiF-NaF 60-40%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO ?
 if strcmp(sample,'LiF-NaF')
+    %VALID UP TO ?
     % Thermal Conductivity- LiF-NaF
     k_LiF = 1.88 - (3.99e-4)*T; %Gheribi et al
     u_k_LiF = .20*k_LiF;
@@ -1585,9 +1276,10 @@ if strcmp(sample,'LiF-NaF')
     alpha_sample = alpha_LiF_NaF;
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %LiCl-NaCl%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 1023K (750C)
 if strcmp(sample,'LiCl-NaCl')
+    %VALID UP TO 1023K (750C)
     % Thermal Conductivity- LiCl-KCl
     k_LiCl = 0.882 + (-2.9e-4)*(T); % Nagasaka et al. Valid for 967-1321K
     u_k_LiCl = .2*k_LiCl; %Nagasaka et al
@@ -1646,6 +1338,7 @@ if strcmp(sample,'LiCl-NaCl')
 
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %KCl-ZnCl2%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(sample,'KCl-ZnCl')
     %Thermal Conductivity
@@ -1694,338 +1387,383 @@ if strcmp(sample,'KCl-ZnCl')
 
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Scatter and Index of Refraction%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 index_of_refraction = 1.462 - (1.4e-4)*T; %Solar salts (citation needed)
 scatter = 0;
 
-%Crucible Properties%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+h_convection = 10; %just an assumption. Don't know if there's a better way to measure this.Study done on 1/18/23 denoted that this parameter does not affect our results in any appreciable way
+
+Flux_decay = 0; % Decay constant
+decay_point = 0; % Decay point
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Probe Geometry and Effective Properties
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%STAINLESS STEEL 316 (SOLID/POLISHED/OXIDIZED): VALID UP TO 1220K (947C)
-if strcmp(crucible,'Steel316')
-    % Thermal Conductivity- Steel316
-    if T >= 4 && T < 9
-        k_Steel316 = -0.9611905+0.5776587*T^1-0.08547619*T^2+0.004722222*T^3;
-    elseif T >= 9 && T < 135
-        k_Steel316 = -0.575597+0.1484296*T^1+1.184549E-5*T^2-6.696619E-6*T^3+2.25279E-8*T^4;
-    elseif T >= 135 && T < 1220
-        k_Steel316 = 7.956002+0.02084122*T^1-4.706772E-6*T^2+6.271478E-10*T^3-1.240772E-12*T^4;
-    end
-
-    k_crucible = k_Steel316;
-
-    % Density- Steel316
-    if T >= 4 && T < 114
-        rho_Steel316 = 8042.496-0.01245121*T^1+3.834401E-5*T^2-7.363868E-6*T^3;
-    elseif T >= 114 && T < 1273
-        rho_Steel316 = 8058.746-0.1963973*T^1-4.830884E-4*T^2+4.114383E-7*T^3-1.337946E-10*T^4;
-    end
-
-    % Specific Heat- Steel316
-    if T >= 4 && T < 18
-        cp_Steel316 = 0.363452365+0.26377074*T^1+0.0493134608*T^2-0.0038147097*T^3+1.19554913E-4*T^4;
-    elseif T >= 18 && T < 50
-        cp_Steel316 = -14.0795868+2.9024659*T^1-0.153359541*T^2+0.004588802*T^3-3.66629778E-5*T^4;
-    elseif T >= 50 && T < 140
-        cp_Steel316 = -20.5016084-0.832746541*T^1+0.0955618906*T^2-7.74522415E-4*T^3+1.944414E-6*T^4;
-    elseif T >= 140 && T < 300
-        cp_Steel316 = -75.5829977+5.00692586*T^1-0.0164947547*T^2+2.02748649E-5*T^3;
-    elseif T >= 300 && T < 1500
-        cp_Steel316 = 235.650788+1.30084242*T^1-0.00189052617*T^2+1.34841366E-6*T^3-3.43379416E-10*T^4;
-    end
-
-    % Thermal Diffusivity- Steel316
-    alpha_Steel316 = k_Steel316/(rho_Steel316*cp_Steel316);
-
-    alpha_crucible = alpha_Steel316;
-
-    % Total Radiative Emissivity- Steel316
-    if T < 660
-        emissivity_Steel316 = 0.38;
-    elseif T >= 660 && T < 1138
-        emissivity_Steel316 = 0.0005*T + 0.0569;
-    elseif T >= 1075
-        emissivity_Steel316 = 0.6;
-    end
+% INL Probe
+if strcmp(probe,"INL")
+    % Geometry
+    %r_1 = .297315E-3; % inside radius up to wires %Not needed right now, but may be needed later
+    %r_2 = .391629E-3; % middle of wires %Not needed right now, but may be needed later
+    %r_3 = .485942E-3; % outside of wires
+    r_3 = .485942E-3; % outside of wires
+    r_4 = 0.8293E-3; % inside radius of sheath
+    % r_5 = 1.323831E-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    r_5 = 1.388E-3; % outside radius of the probe, used in semi-infinite
+    %layer and sheath layer (meters)
+    r_heating_wire = .094313E-3; % radius of heating wires
+    r_TC_wire = .094313E-3; % radius of thermocouple wires
+    L = 0.1; % Length of the sensing region of probe
     
-    emissivity_crucible = emissivity_Steel316;
+    % Areas for each material %Not needed right now, but may be needed later
+    %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
+    %A_chromel = 3*pi*(r_heating_wire^2);%3 chromel wires
+    %A_alumina = pi*r_4^2 - A_alumel - A_chromel;
+    %A_nickel = pi*(r_5^2 - r_4^2);
+    %A_total = pi*r_5^2;
+    
+    % Relevant Volumes
+    V_tc = 2*pi*(r_TC_wire^2)*L/2; % Thermocouple volume
+    V_h = 2*pi*(r_heating_wire^2)*L; % Heating element volume (2 lengths of heating wire
+    V_i = pi*(r_4^2)*L-V_tc-V_h; % Insulation
+    V_A = pi*(r_3^2)*L-V_tc-V_h; % Insulation inside outer wire radius
+    V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
+    V_total = V_tc+V_h+V_i+V_s; % Total Probe Volume
+    % Pre-10-19-24:
+    % r_6 = r_4 - (r_4-r_3)/200000; % Radius of insulation minus something happening in the core???
+    % V_tc = pi*(r_TC_wire^2)*L/2; % Thermocouple volume
+    % V_h = pi*(r_heating_wire^2)*L; % Heating element volume
+    % V_i = pi*(r_6^2)*L-2*V_tc-2*V_h; % Insulation
+    % V_A = pi*(r_4^2)*L - V_i;
+    % V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
+    % V_total = 2*V_tc+2*V_h+V_i+V_s; % Total Probe Volume
+    %V_total_check = pi*(r_5^2)*L; %Not needed right now, but may be needed later
+    
+    %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    alpha_eff_wire = (alpha_Chromel*(V_tc/2+2*V_h)+ alpha_Alumel*V_tc/2+alpha_Alumina*V_A)/(V_tc+V_h+V_A);
+    rho_eff_wire = (rho_Chromel*(V_tc/2+2*V_h)+ rho_Alumel*V_tc/2+rho_Alumina*V_A)/(V_tc+V_h+V_A);
+    cp_eff_wire = (cp_Chromel*(V_tc/2+2*V_h)+ cp_Alumel*V_tc/2+cp_Alumina*V_A)/(V_tc+V_h+V_A);
+    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire); %/4 is added
+    
+    k_insulation = k_Alumina;   % Use if separated into probe layers
+    alpha_insulation = alpha_Alumina;
+    k_sheath = k_Nickel;
+    alpha_sheath = alpha_Nickel;
+    emissivity_probe = emissivity_Nickel;
 
-    %%%%% 4/20/26 Calibration %%%%%
-    k_crucible = 4.530813e-04*(T-273.15) + 1.920861e+01;
-    alpha_crucible = 7.905145e-11*(T-273.15) + 4.993449e-06;
-    emissivity_crucible = -1.632123e-04*(T-273.15) + 5.949082e-01;
-
+    RthInsShth = 0.4;              % 0-30s
+    Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085;
 end
 
-%NICKEL 200%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%VALID UP TO 1273K (1000C)
-% Thermal Conductivity- Nickel200
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Probe 2A-SS-03
+if strcmp(probe,"2A-SS-03")
+    %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
+    %r_2 = ; % middle of wires %Not needed right now, but may be needed later
+    r_3 = 0.735e-3; % outside of wires
+    r_4 = 1.02e-3; % inside radius of sheath
+    r_5 = 1.375e-3; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    r_heating_wire = 0.15e-3; % radius of heating wires
+    r_TC_wire = 0.15e-3; % radius of thermocouple wires
+    r_alumina_outer = 0.9525e-3; % outside radius of alumina core
+    r_alumina_bore = 0.1905e-3; % radius of inside bores of alumina core
+    L = 145e-3; % Length of the sensing region of probe
+
+    % %%%%% 4/20/26 Calibration %%%%
+    % r_3 = 5.007360e-07*(T-273.15) + 6.240707e-04;
+    % r_4 = -6.526157e-08*(T-273.15) + 9.572718e-04;
+    % r_5 = 1.118932e-07*(T-273.15) + 1.268171e-03;
+
+    % Areas for each material %Not needed right now, but may be needed later
+    %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
+    %A_chromel = pi*(r_TC_wire^2);%1 chromel wire
+    %A_nichrome = 2*pi*(r_heating_wire^2);% 2 nichrome wires
+    %A_~ = ;
+    %A_SS316 = ;
+    %A_total = ;
+    
+    % Relevant Volumes
+    V_tc = 2*pi*(r_TC_wire^2)*L/2; % Thermocouple volume
+    V_h = 2*pi*(r_heating_wire^2)*L; % Heating element volume (2 lengths of heating wire
+    V_i = pi*(r_4^2)*L-V_tc-V_h; % Insulation
+    V_alumina = pi*(r_alumina_outer^2)*L - 4*pi*(r_alumina_bore^2)*L; % Volume of alumina
+    V_ceramabond = V_i - V_alumina; % Assumes ceramabond fills volume inside the sheath besides wires and alumina
+    V_A = pi*(r_3^2)*L-V_tc-V_h; % Insulation inside outer wire radius
+    V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
+    V_total = V_tc+V_h+V_i+V_s; % Total Probe Volume    
+
+    % volume weighted average like below for the alumina and ceramabond,
+    % assuming the ceramabond fills whatever volume is left inside the
+    % sheath besides the alumina and wires
+    k_insulation = (k_Alumina*(V_alumina) + k_ceramabond*(V_ceramabond))/V_i;   % Use if separated into probe layers
+    alpha_insulation = (alpha_Alumina*(V_alumina) + alpha_ceramabond*(V_ceramabond))/V_i;
+    rho_insulation = (rho_Alumina*(V_alumina) + rho_ceramabond*(V_ceramabond))/V_i;
+    cp_insulation = (cp_Alumina*(V_alumina) + cp_ceramabond*(V_ceramabond))/V_i;
+    
+    %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_insulation*V_A)/(V_tc+V_h+V_A);
+    rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_insulation*V_A)/(V_tc+V_h+V_A);
+    cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_insulation*V_A)/(V_tc+V_h+V_A);
+    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire);
+    
+    k_sheath = k_SS316;
+    alpha_sheath = alpha_SS316;
+    emissivity_probe = emissivity_SS316;
+
+    RthInsShth = 0;
+    Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085; % Copied from INL probe
+
+    % %%%%% 4/20/26 Calibration %%%%%
+    % k_sheath = 4.706374e-03*(T-273.15) + 1.836468e+01;
+    % alpha_sheath = 1.827733e-09*(T-273.15) + 2.745513e-06;
+    % k_insulation = -6.989289e-02*(T-273.15) + 4.797234e+01;
+    % alpha_insulation = -1.481888e-06*(T-273.15) + 7.866033e-04;
+    % k_eff_wire = -6.628096e-01*(T-273.15) + 2.154873e+03;
+    % alpha_eff_wire =  2.216541e-07*(T-273.15) + 2.705504e-04;
+    % emissivity_probe = 1.710418e-04*(T-273.15) + 4.051501e-01;
+    % Flux_decay = -8.406179e-06*(T-273.15) + 4.592408e-03;
+    % RthInsShth = -2.112376e-05*(T-273.15) + 5.340992e-01;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Probe 2A-SS-04
+if strcmp(probe,"2A-SS-04")
+   disp("PROBE "+ probe +" PROPERTIES NOT YET DEFINED")
+   return
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Probe 3A-IN718-01 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if strcmp(probe,"3A-IN718-01")
+    % Properties not yet defined are replaced with ~
+    %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
+    %r_2 = ; % middle of wires %Not needed right now, but may be needed later
+    %r_3 = 0.35e-3; % outside of wires
+    r_3 = 0.35e-3; % outside of wires
+    %r_4 = 1e-3; % inside radius of sheath
+    r_4 = 3e-7; % inside radius of sheath
+    %r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    r_5 = .001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    r_heating_wire = 0.0001143; % radius of heating wires
+    r_TC_wire = 0.0001143; % radius of thermocouple wires
+    L = 0.1016; % Length of the sensing region of probe
+    
+    % Areas for each material %Not needed right now, but may be needed later
+    %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
+    %A_chromel = pi*(r_TC_wire^2);%1 chromel wire
+    %A_nichrome = 2*pi*(r_heating_wire^2);% 2 nichrome wires
+    %A_magnesium_oxide = ;
+    %A_IN718 = ;
+    %A_total = ;
+    
+    % Relevant Volumes
+    V_tc = 2*pi*(r_TC_wire^2)*L/2; % Thermocouple volume
+    V_h = 2*pi*(r_heating_wire^2)*L; % Heating element volume (2 lengths of heating wire
+    V_i = pi*(r_4^2)*L-V_tc-V_h; % Insulation
+    V_A = pi*(r_3^2)*L-V_tc-V_h; % Insulation inside outer wire radius
+    V_s = pi*(r_5^2)*L-pi*(r_4^2)*L; % Sheath Volume
+    V_total = V_tc+V_h+V_i+V_s; % Total Probe Volume    
+    
+    %Lumped Probe Properties: TC to Insulation (Sheath excluded)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    alpha_eff_wire = (alpha_Chromel*(V_tc/2)+ alpha_Alumel*(V_tc/2)+alpha_Nichrome*(V_h) + alpha_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
+    rho_eff_wire = (rho_Chromel*(V_tc/2) + rho_Alumel*(V_tc/2) + rho_Nichrome*(V_h) + rho_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
+    cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
+    k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire); %/4 is added
+    
+    k_insulation = k_Magnesium_Oxide;   % Use if separated into probe layers
+    alpha_insulation = alpha_Magnesium_Oxide;
+    k_sheath = k_IN718;
+    alpha_sheath = alpha_IN718;
+    emissivity_probe = emissivity_IN718;
+
+    RthInsShth = 0;
+    Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085; % Copied from INL probe
+end
+
+rwires = r_3;
+rsheath_inner = r_4;
+rsheath = r_5;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Crucible Geometry and Property Assignment
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+rcrucible = 0.0127;
+rsample =  0.00209;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%STAINLESS STEEL 316 (SOLID/POLISHED/OXIDIZED) %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if strcmp(crucible,'Steel316')
+
+    k_crucible = k_SS316;
+    alpha_crucible = alpha_SS316;
+    emissivity_crucible = emissivity_SS316;
+
+    % %%%%% 4/20/26 Calibration %%%%%
+    % k_crucible = 4.530813e-04*(T-273.15) + 1.920861e+01;
+    % alpha_crucible = 7.905145e-11*(T-273.15) + 4.993449e-06;
+    % emissivity_crucible = -1.632123e-04*(T-273.15) + 5.949082e-01;
+    % rsample = -8.893576e-07*(T-273.15) + 2.087011e-03;
+    % rcrucible = -2.280921e-05*(T-273.15) + 2.279899e-02;
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NICKEL 200 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(crucible,'Nickel200')
-    if T >= 173 && T < 673
-        k_Nickel200 = 76.12158+0.02717507*T^1-2.126458E-4*T^2+1.876168E-7*T^3;
-        bias_kNickel200 = 0;
-        uncertainty_kNickel200 = 0.05; %CHECK THIS
-    elseif T >= 673 && T <= 1273
-        k_Nickel200 = 40.623+0.02201643*T^1-3.571429E-7*T^2;
-        bias_kNickel200 = 0;
-        uncertainty_kNickel200 = 0.05; %CHECK THIS
-    end
-
-    if MC == 1
-        k_Nickel200 = MonteCarloProp(uncertainty_kNickel200,bias_kNickel200,k_Nickel200);
-    end
-
-    k_crucible = k_Nickel200;
-
-    %Density and Heat Capacity aren't need right now, but might be later.
-    % Density- Nickel200
-    %rho_Nickel200 = 8964.214-0.1681755*T^1-3.536041E-4*T^2+2.01714E-7*T^3-4.919056E-11*T^4; % 73 to 1373 K
-
-    % Heat Capacity- Nickel200
-    %     if T >= 293 && T < 633
-    %         cp_Nickel200 = 292.88+0.50208*T^1;
-    %     elseif T >= 633 && T < 1726
-    %         cp_Nickel200 = 418.4+0.1284488*T^1;
-    %     end
-
-    % Thermal Diffusivity- Nickel200
-    if T >= 293 && T < 633
-        alpha_Nickel200 = 3.044717E-5-5.149323E-8*T^1+3.129624E-11*T^2;
-        bias_alpha_Nickel200 = 0;
-        uncertainty_alpha_Nickel200 = 0.05;
-    elseif T >= 633 && T < 676
-        alpha_Nickel200 = 4.81462E-5-1.036816E-7*T^1+7.54384E-11*T^2;
-        bias_alpha_Nickel200 = 0;
-        uncertainty_alpha_Nickel200 = 0.05; %CHECK THIS
-    elseif T >= 676 && T <= 1273
-        alpha_Nickel200 = 1.087891E-5+2.600264E-9*T^1-2.279477E-13*T^2;
-        bias_alpha_Nickel200 = 0;
-        uncertainty_alpha_Nickel200 = 0.05;
-    end
-
-    if MC == 1
-        alpha_Nickel200 = MonteCarloProp(uncertainty_alpha_Nickel200,bias_alpha_Nickel200,alpha_Nickel200);
-    end
-
-    alpha_crucible = alpha_Nickel200;
-
-    % Total Radiative Emissivity- Nickel200
-    if T < 473
-        emissivity_Nickel200 = 0.35;   
-        bias_emissivity_Nickel200 = 0;
-        uncertainty_emissivity_Nickel200 = 0.05; %CHECK THIS
-    elseif T >=473 && T < 1144
-        %     emissivity_Nickel200 = 0.0007*T + 0.0316; %Why are we not using this
-        %     equation?
-        emissivity_Nickel200 = 0.86; %max emissivity of Nickel Oxide found in literature
-        bias_emissivity_Nickel200 = 0;
-        uncertainty_emissivity_Nickel200 = 0.05; %CHECK THIS
-    elseif T >= 1144
-        emissivity_Nickel200 = 0.86;
-        bias_emissivity_Nickel200 = 0;
-        uncertainty_emissivity_Nickel200 = 0.05; %CHECK THIS
-    end
-
-    if MC == 1
-        emissivity_Nickel200 = MonteCarloProp(uncertainty_emissivity_Nickel200,bias_emissivity_Nickel200,emissivity_Nickel200);
-    end
-
-    emissivity_crucible = emissivity_Nickel200;
-
+    k_crucible = k_Nickel;
+    alpha_crucible = alpha_Nickel;
+    emissivity_crucible = emissivity_Nickel;
 end
 
-%Inconel625%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Valid to who know's where. This section needs work.
-%change1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Inconel625 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(crucible,'Inconel625')
-    if T >= 295 && T < 1500
-        %k_Inconel625 = 0.0175*T + 5.0231; %https://link.springer.com/article/10.1007/s10765-019-2490-8/tables/3
-        k_Inconel625 = 0.0175*T + 5.0231; %https://link.springer.com/article/10.1007/s10765-019-2490-8/tables/3
-        bias_kInconel625 = 0; %Assumption. This value needs to be looked up.
-        uncertainty_kInconel625 = .05; %Assumption for now. Update before real use.
-    end
-
-    if MC == 1
-        k_Inconel625 = MonteCarloProp(uncertainty_kInconel625,bias_kInconel625,k_Inconel625);
-    end
 
     k_crucible = k_Inconel625;
-
-    % Density- Inconel625
-    rho_Inconel625 = 8440; %Verified at https://www.hightempmetals.com/techdata/hitempInconel625data.php
-
-
-    % Heat Capacity- Inconel625
-    if T >= 295 && T < 1093
-        %cp_Inconel625 = 0.0163*(T) + 4.23; %Old equation
-        cp_Inconel625 = 0.2071*(T) + 364.8;% J/kg*K edited equation based on table at https://link.springer.com/article/10.1007/s10765-019-2490-8/tables/3
-    end
-    % Thermal Diffusivity- Nickel200
-
-    if T >= 295 && T < 1093
-    %if T >= 0
-        alpha_Inconel625 = k_Inconel625/(rho_Inconel625 * cp_Inconel625);
-    end
-
     alpha_crucible = alpha_Inconel625;
-
-    % Total Radiative Emissivity- Nickel200
-    if T < 473
-        %emissivity_Inconel625 = .35;
-        emissivity_Inconel625 = .9;
-    elseif T >=473 && T < 1144
-        %     emissivity_Nickel200 = 0.0007*T + 0.0316;
-        %emissivity_Inconel625 = 0; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
-        emissivity_Inconel625 = .13; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
-    elseif T >= 1144
-        %emissivity_Inconel625 = 0; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
-        emissivity_Inconel625 = .13; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
-    end
-
     emissivity_crucible = emissivity_Inconel625;
 end
 
-%Other Parameters%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Thermal Contact Resistance: Probe - Sample - Crucible
+% if strcmp(probe,'INL')
+%     RthProbeSample = 1e-8; %Where did this come from?
+% end
+% 
+% if strcmp(probe,"2A-SS-03")
+%     RthProbeSample = 1e-8; %Where did this come from?
+% end
+% 
+% if strcmp(probe,"2A-SS-04")
+%     if strcmp(sample,'Ar')
+%         RthProbeSample = 1e-8; %Where did this come from?
+%     else
+%         RthProbeSample = 1e-8; %Where did this come from?
+%     end
+% end
+% 
+% if strcmp(probe,"3A-IN718-01")
+%     if strcmp(sample,'Ar')
+%         RthProbeSample = 1e-8; %Where did this come from?
+%     else
+%         RthProbeSample = 1e-8; %Where did this come from?
+%     end
+% end
+% 
+% if strcmp(crucible,'Steel316')
+%     if strcmp(sample,'Ar')
+%         RthSampleCrucible = 0.0;
+%     else
+%         RthSampleCrucible = 0;
+%     end
+% end
+% 
+% if strcmp(crucible,'Nickel 200')
+%     if strcmp(sample,'Ar')
+%         RthSampleCrucible = 0.0;
+%     else
+%         RthSampleCrucible = 0;
+%     end
+% end
+% 
+% if strcmp(crucible,'Inconel 625')
+%     if strcmp(sample,'Ar')
+%         RthSampleCrucible = 0.0;
+%     else
+%         RthSampleCrucible = 0;
+%     end
+% end
 
-%Voltage%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Voltage = .923*Volt; %According to Brian, the long wires carrying the power to the probe drops some voltage. We should remeasure this.
-bias_voltage = .01; %We need to figure out where this came from
-uncertainty_voltage = 2*VoltSTD/Voltage;
-%uncertainty_voltage = .0009; %Also need to figure this out. This may be from the multimeter.
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Monte Carlo Analysis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if MC == 1
+    
+    % Uncertainties and Biases
+    bias_k_insulation = 0;
+    k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE
+    
+    bias_k_sheath = 0;
+    k_sheath_uncertainty = .05;
+    
+    bias_alpha_sheath = 0;
+    alpha_sheath_uncertainty = .05;
+
+    bias_voltage = .01; %We need to figure out where this came from
+    uncertainty_voltage = 2*VoltSTD/Voltage;
+    %uncertainty_voltage = .0009; %Also need to figure this out. This may be from the multimeter.
+
+    bias_resistance = 0.00003*Resistance+(0.00003*100); %From the Keysight Specification sheet. Is this really bias, or is it the uncertainty?
+    uncertainty_resistance = 0; %Might also want to check on this.
+    
+    bias_rwires = 7.9e-6;
+    uncertainty_rwires = 1.07218e-5/rwires;% This value definitely should be checked.
+
+    bias_rsheath_inner = 7.9e-6;
+    uncertainty_rsheath_inner = 3.55448E-18; %Check this
+
+    bias_rsheath = 7.9e-6;
+    uncertainty_rsheath = 3.55448E-18; %Check this
+
+    bias_rsample = 0.000005;
+    uncertainty_rsample = 6.22093e-5/rsample; %Check this
+
+    bias_rcrucible = 5e-6;
+    uncertainty_rcrucible = 1.58114e-5/rcrucible;
+
+    bias_k_crucible = 0; %Assumption. This value needs to be looked up.
+    uncertainty_k_crucible = .05; %Assumption for now. Update before real use.
+
+    bias_length = 0.000005;
+    uncertainty_length = 0;%Check this
+
+    bias_h = 0;
+    uncertainty_h = 0.05; %Definitely good to re-evaluate.
+
+    bias_RthInsShth = 0;
+    uncertainty_RthInsShth = 0.05; %Check This
+
+    % bias_RthProbeSample = 0;
+    % uncertainty_RthProbeSample = 0.05; %Check This
+
+    % bias_RthSampleCrucible = 0;
+    % uncertainty_RthSampleCrucible = 0.05; %Check This
+
+    uncertainty_current = CurrentSTD*2/Current;
+    bias_current = 0;
+
+    bias_emissitivy_probe = 0;
+    uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
+
+    % MonteCarloProp
+    k_sheath = MonteCarloProp(k_sheath_uncertainty,bias_k_sheath,k_sheath);
+    alpha_sheath = MonteCarloProp(alpha_sheath_uncertainty,bias_alpha_sheath,alpha_sheath);
+    k_insulation = MonteCarloProp(k_insulation_uncertainty,bias_k_insulation,k_insulation);
     Voltage = MonteCarloProp(uncertainty_voltage, bias_voltage, Voltage);
-end
-
-%Resistance (electrical of the the heating wire)%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%We need to change this to be a function of temperature.
-%Resistance = 4.2;%Should be a function of temp. What Brian initially measured
-%Resistance = 0.0019*T + 3.7947; %Linear Fit of the resistance 
-Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085;
-bias_resistance = 0.00003*Resistance+(0.00003*100); %From the Keysight Specification sheet. Is this really bias, or is it the uncertainty?
-uncertainty_resistance = 0; %Might also want to check on this.
-
-if MC == 1
     Resistance = MonteCarloProp(uncertainty_resistance,bias_resistance,Resistance);
-end
-
-%Wire Outer Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rwires = r_3;    %0.000485942;
-
-bias_rwires = 7.9e-6;
-uncertainty_rwires = 1.07218e-5/rwires;% This value definitely should be checked.
-
-
-if MC == 1
     rwires = MonteCarloProp(uncertainty_rwires,bias_rwires,rwires);
-end
-
-%Sheath Inner Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%rsheath_inner = r_4;
-rsheath_inner = .0003; %random value that seems to create good results - not sure why
-bias_rsheath_inner = 7.9e-6;
-uncertainty_rsheath_inner = 3.55448E-18; %Check this
-
-if MC == 1
     rsheath_inner = MonteCarloProp(uncertainty_rsheath_inner,bias_rsheath_inner,rsheath_inner);
-end
-
-%Sheath Outer Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rsheath = r_5;  %0.001323831;
-bias_rsheath = 7.9e-6;
-uncertainty_rsheath = 3.55448E-18; %Check this
-
-if MC == 1
     rsheath = MonteCarloProp(uncertainty_rsheath,bias_rsheath,rsheath);
-end
-
-%Sample Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rsample =  0.00209; % Nickel Crucible 2
-
-%%%%% 4/20/26 Calibration - 2A-SS-03 & SS316 %%%%%
-rsample = -8.893576e-07*(T-273.15) + 2.087011e-03;
-
-bias_rsample = 0.000005;
-uncertainty_rsample = 6.22093e-5/rsample; %Check this
-
-if MC == 1
     rsample = MonteCarloProp(uncertainty_rsample,bias_rsample,rsample);
-end
-
-%Crucible Radius%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rcrucible = 0.0127;
-
-%%%%% 4/20/26 Calibration - 2A-SS-03 & SS316 %%%%%
-rcrucible = -2.280921e-05*(T-273.15) + 2.279899e-02;
-
-bias_rcrucible = 5e-6;
-uncertainty_rcrucible = 1.58114e-5/rcrucible;
-
-if MC == 1
     rcrucible = MonteCarloProp(uncertainty_rcrucible,bias_rcrucible,rcrucible);
-end
-
-%Length of Probe%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-L = 0.1;
-bias_length = 0.000005;
-uncertainty_length = 0;%Check this
-
-if MC == 1
+    k_crucible = MonteCarloProp(uncertainty_k_crucible,bias_k_crucible,k_crucible);
     L = MonteCarloProp(uncertainty_length,bias_length,L);
-end
-
-%Convection Coefficient%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-h_convection = 10; %just an assumption. Don't know if there's a better way to measure this.Study done on 1/18/23 denoted that this parameter does not affect our results in any appreciable way
-bias_h = 0;
-uncertainty_h = 0.05; %Definitely good to re-evaluate.
-if MC == 1
     h_convection = MonteCarloProp(uncertainty_h,bias_h,h_convection);
-end
-
-%Contact Resistance Insulation to Sheath%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-RthInsShth = 0.4;              % 0-30s
-
-%%%%% 4/20/26 Calibration %%%%%
-% 2A-SS-03 & SS316 Crucible
-RthInsShth = -2.112376e-05*(T-273.15) + 5.340992e-01;
-
-
-bias_RthInsShth = 0;
-uncertainty_RthInsShth = 0.05; %Check This
-if MC == 1
     RthInsShth = MonteCarloProp(uncertainty_RthInsShth,bias_RthInsShth,RthInsShth);
-end
-
-%Contact Resistance Probe to Sample%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-RthProbeSample = 1e-8; %Where did this come from?
-bias_RthProbeSample = 0;
-uncertainty_RthProbeSample = 0.05; %Check This
-if MC == 1
-    RthProbeSample = MonteCarloProp(uncertainty_RthProbeSample,bias_RthProbeSample,RthProbeSample);
-end
-
-%Contact Resistance Sample to Crucible%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-RthSampleCrucible = 1e-8; %Where did this come from?
-bias_RthSampleCrucible = 0;
-uncertainty_RthSampleCrucible = 0.05; %Check this
-if MC == 1
-    RthSampleCrucible = MonteCarloProp(uncertainty_RthSampleCrucible,bias_RthSampleCrucible,RthSampleCrucible);
-end
-
-%Electrical Current%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-uncertainty_current = CurrentSTD*2/Current;
-bias_current = 0;
-if MC ==1
+    % RthProbeSample = MonteCarloProp(uncertainty_RthProbeSample,bias_RthProbeSample,RthProbeSample);
+    % RthSampleCrucible = MonteCarloProp(uncertainty_RthSampleCrucible,bias_RthSampleCrucible,RthSampleCrucible);
     Current = MonteCarloProp(uncertainty_current,bias_current,Current);
+    k_sample = MonteCarloProp(uncertainty_k_sample,bias_k_sample,k_sample);
+    cp_sample = MonteCarloProp(uncertainty_cp_sample,bias_cp_sample,cp_sample);
+    rho_sample = MonteCarloProp(uncertainty_rho_sample,bias_rho_sample,rho_sample);
+    alpha_sample = MonteCarloProp(uncertainty_alpha_sample,bias_alpha_sample,alpha_sample);
+    emissivity_probe = MonteCarloProp(uncertainty_emissitivy_probe,bias_emissitivy_probe,emissivity_probe);
 end
 
-% Fitted CALIBRATRATION Properties %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Flux_decay = 0; % Decay constant
-%%%%% 4/20/26 Calibration %%%%%
-Flux_decay = -8.406179e-06*(T-273.15) + 4.592408e-03;
-decay_point = 0; % Decay point
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
