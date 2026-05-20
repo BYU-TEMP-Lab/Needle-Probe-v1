@@ -150,13 +150,13 @@ rho_Alumel = 8600; %Not needed right now, but may be needed later
 %CHROMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%
 %Thermal Conductivity- Chromel Not needed right now, but may be needed
 %later
-k_Chromel = 0.0191*T + 11.851;
+k_Chromel = 0.0191*T + 11.851; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 1, Table 157, Curve 6
 
 % Heat Capacity- Chromel- Not needed right now, but may be later
-if T >= 100 && T < 450
+if T >= 100 && T < 300
     cp_Chromel = -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4;
-elseif T >= 450
-    cp_Chromel = -169.134351+5.88577506*(T)^1-0.0235877058*(T)^2+0.0000447834022*(T)^3-0.0000000321153924*(T)^4; %out of COMSOL'S RANGE
+elseif T >= 300
+    cp_Chromel = 0.1779*T + 373.46; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 4, Table 100, Curve 9
 end
 
 
@@ -166,7 +166,7 @@ if T >= 100 && T < 175
 elseif T >= 175 && T < 450
     alpha_Chromel = 6.607453E-6-1.986064E-8*T^1+6.038939E-11*T^2-5.155141E-14*T^3;
 elseif T >= 450
-    alpha_Chromel = 6.607453E-6-1.986064E-8*(T)^1+6.038939E-11*(T)^2-5.155141E-14*(T)^3; %out of COMSOL'S RANGE
+    alpha_Chromel = 0.000005; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 10, Figure 119
 end
 
 % Density- Chromel
