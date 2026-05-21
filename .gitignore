@@ -19,6 +19,8 @@ MATLAB_Data_Analysis/From_NonCOMSOL_Computer/Analysis_Results/**
 *.egg-info
 .venv
 build
+.automation/
+
 
 # Environments
 .venv/

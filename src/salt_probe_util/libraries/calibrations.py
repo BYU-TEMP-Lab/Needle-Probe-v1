@@ -12,9 +12,8 @@ class Calibration:
         self.date = self.data["date"]
         self.sample = self.data["sample"]
 
+        # name to be displayed in GUI
         self.name = f"{self.probe} - {self.crucible} - {self.sample} - {self.date}"
-
-
 
     def read_json(self):
         # .is_file() is more specific than .exists() (it ensures it's not a folder)
@@ -33,7 +32,7 @@ class Calibration:
 
 # 1. Setup the directory path relative to this file
 # Adjust .parent count depending on exactly where this code lives
-CAL_DIR = Path(__file__).resolve().parent.parent / "config" / "calibration_data"
+CAL_DIR = Path(__file__).resolve().parent / "calibration_data"
 
 # initialize the dictionary
 options = {}

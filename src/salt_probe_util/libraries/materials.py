@@ -86,7 +86,7 @@ Alumina = Material("Alumina",
 # From NIST (https://webbook.nist.gov/cgi/cbook.cgi?ID=7440-37-1)
 # Eric W. Lemmon, Ian H. Bell, Marcia L. Huber, and Mark O. McLinden, "Thermophysical Properties of Fluid Systems" in NIST Chemistry WebBook, NIST Standard Reference Database Number 69, Eds. P.J. Linstrom and W.G. Mallard, National Institute of Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303, (retrieved January 8, 2026).
 
-argon_data_path = Path(__file__).parent.parent / "config" / "raw_material_data" / "argon nist fluid properties - 0-1700C - 1 atm.txt"
+argon_data_path = Path(__file__).parent / "raw_material_data" / "argon nist fluid properties - 0-1700C - 1 atm.txt"
 k_Argon, cp_Argon, rho_Argon = load_nist_fluid_properties(argon_data_path)
 
 Argon = Material(

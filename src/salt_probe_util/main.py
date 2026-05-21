@@ -1,23 +1,40 @@
 import glob, subprocess, time, os, sys, warnings, json, itertools, numpy as np, pandas as pd
 from .bootstrap import setup_logging
-setup_logging()  # Apply custom warning format
 
 from concurrent.futures import ProcessPoolExecutor
 
 from .GUI.GUI_main import SimulationOptions
-from .process_data import get_files_data
+from .process_raw_data import get_folder_data
 from .optimizer import get_solved_values
 from .build_model import prepare_folder_for_optim
+from .plotting import plot_initial_model_vs_data, plot_solved_parameters_vs_temperature
+from .calibration import export_probe_calibration
 
-# import .libraries.materials, .libraries.probes, .optim as optim
-# from .libraries.materials import options as material_options
-# from .libraries.probes import options as probe_options
-# from .libraries.crucibles import options as crucibles_options
+# add uncertainty of thermocouple??? +/- 2.2 C
 
-# Generate simulation options dictionaries
 def main():
+    # Overview of main workflow:
+    # 1. Get selections from user via GUI
+        # probe/crucible
+        # sample material
+        # physics model
+        # k measurement, calibration, or sensitivity analysis
+            # If k measurement or sensitivity analysis: ask user to select calibration
+            # If k measurement or calibration: ask user to select data folder
+    # 2. If sensitity analysis, run sensitivity analysis and save results (including user selections and warnings), then exit.
+    # 3. If k measurement or calibration - read in data from experimental data files 
+        # If calibration, calculate initial model parameters at ambient temperature for each file (multi-threaded)
+    # 4. Plot initial model vs experimental data for inspection
+    # 5. For each file, solve for properties at ambient temperature and store results (including user selections and warnings) (multi-threaded)
+        # Results may need to be fitted to a temperature curve
+    
+          
+    # ==============================================================================================
+    # 1. get user selections
+    # ==============================================================================================
 
-    # get user selections
+    # initialize logging????
+
     main_GUI = SimulationOptions()
     main_GUI.mainloop()   # waits here until window closes
 
@@ -25,13 +42,26 @@ def main():
         print("User closed the window without proceeding. Exiting program.")
         exit(0)
     else:
-        user_selections = main_GUI.get_selections_dict()
-    # else:
-    #     selections = main_GUI.get_selections_dict()
-    #     print(selections)
+        UI = main_GUI.get_selections_dict()
+
+    task_mode = UI.get("task_mode")
+
+    # ==============================================================================================
+    # 2. If sensitivity analysis, run sensitivity analysis and save results (including user selections and warnings), then exit.
+    # ==============================================================================================
+    if task_mode == "Sensitivity Analysis":
+            print("Running sensitivity analysis...")
+            print("Sensitivity analysis is not yet implemented. Exiting program.")
+            exit(0)
+
+    # ==============================================================================================
+    # 3. If k measurement or calibration - read in data from experimental data files 
+        # If calibration, calculate initial model parameters at ambient temperature for each file
+        # If k measurement, calculate initial sample parameters at ambient temperature for each file
+    # ==============================================================================================
 
     # read in data from experimental data files
-    folder_data = get_files_data(main_GUI.test_folder_path)
+    folder_data = get_folder_data(main_GUI.test_folder_path, generate_plots=True) # main_GUI.generate_plots_var.get())
 
     # end program if no readable files
     if not folder_data:
@@ -39,15 +69,55 @@ def main():
         return
     
     # solve and store properties for each file in folder_data at ambient temperature (multi-threading requires pickling, which doesn't like nested functions)
-    # Note that this means we assume constant properties during optimization at each temperature, and that the ambient temperature is representative of the entire test
+    # Note that this means we assume constant properties as well as heat flux during optimization at each temperature, and that the ambient temperature is representative of the entire test
     prepared_folder_data = prepare_folder_for_optim(folder_data, main_GUI)
     
+    model_name = UI.get("simulation_name")
+    calibration = UI.get("calibration")
+    convection_coefficient = UI.get("convection_coeff")
+    params = get_model_params(
+        task_mode, 
+        model_name, 
+        calibration, 
+        folder_data, 
+        convection_coefficient
+    )
+
+    # ==============================================================================================
+    # 4. Plot initial model vs experimental data for inspection
+    # ==============================================================================================
+    # plot initial model vs experimental data for inspection
+    try:
+        plot_initial_model_vs_data(prepared_folder_data, show=False)
+    except Exception as e:
+        print(f"Warning: plotting initial models failed: {e}")
+    
+    # ==============================================================================================
+    # 5. For each file, solve for properties at ambient temperature and store results (including user selections and warnings) (multi-threaded)
+        # Results may need to be fitted to a temperature curve
+    # ==============================================================================================
     # set up multi-threading for running optimization
     with ProcessPoolExecutor() as executor:
         print("Beginning multi-threaded optimization...")
         folder_solved_values = list(executor.map(
             get_solved_values, 
             prepared_folder_data))
+
+    if getattr(main_GUI, "run_calibration_var", None) is not None and main_GUI.run_calibration_var.get():
+        try:
+            out_csv = export_probe_calibration(prepared_folder_data, folder_solved_values)
+            print(f"Saved probe calibration CSV: {out_csv}")
+        except Exception as e:
+            print(f"Warning: exporting probe calibration failed: {e}")
+
+        if getattr(main_GUI, "save_summary_plots_var", None) is not None and main_GUI.save_summary_plots_var.get():
+            try:
+                plot_solved_parameters_vs_temperature(folder_solved_values, show=False)
+            except Exception as e:
+                print(f"Warning: solved-parameter summary plot failed: {e}")
+
+    if getattr(main_GUI, "save_fit_plots_var", None) is not None and not main_GUI.save_fit_plots_var.get():
+        print("Fit plots were requested off in the GUI, but per-file fit plots are created by the optimizer after convergence.")
 
     # Process results...
     print(f"Processed {len(folder_solved_values)} files.")

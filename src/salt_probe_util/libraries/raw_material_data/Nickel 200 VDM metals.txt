@@ -1,0 +1,16 @@
+http://vdm-metals.com/fileadmin/user_upload/Downloads/Data_Sheets/Data_Sheet_VDM_Nickel_200_201.pdf
+Temperature (C)	Density (kg/m3)	Cp (J/g*K)	Therm. Cond. (W/m*K)	Phase
+-200.0000	NaN	 0.15000	 79.0000	solid
+-100.0000	NaN	 0.35500	 75.0000	solid
+0.0000	NaN	 0.42600	 72.0000	solid
+20.0000	 8890.0	 0.45600	 71.0000	solid
+100.0000	NaN	 0.47500	 67.0000	solid
+200.0000	NaN	 0.50000	 62.0000	solid
+300.0000	NaN	 0.57000	 57.0000	solid
+400.0000	NaN	 0.53000	 56.0000	solid
+500.0000	NaN	 0.52500	 58.0000	solid
+600.0000	NaN	 0.53500	 60.0000	solid
+700.0000	NaN	 0.55000	 62.0000	solid
+800.0000	NaN	 0.56500	 64.0000	solid
+900.0000	NaN	 0.58000	 67.0000	solid
+1000.0000	NaN	 0.59000	 69.0000	solid

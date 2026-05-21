@@ -83,9 +83,32 @@ class SimulationOptions(tk.Tk):
         self.adv_settings = None
         ttk.Button(self.form_frame, text="Advanced Settings", command=self.open_advanced_settings).grid(row=9, column=0, columnspan=2, pady=10)
 
+        # --- Calibration / Plotting Options ---
+        self.run_calibration_var = tk.BooleanVar(value=False)
+        self.save_fit_plots_var = tk.BooleanVar(value=True)
+        self.save_summary_plots_var = tk.BooleanVar(value=True)
+
+        ttk.Checkbutton(
+            self.form_frame,
+            text="Run calibration + save probe properties",
+            variable=self.run_calibration_var,
+        ).grid(row=10, column=0, columnspan=2, sticky="w", padx=10, pady=(8, 2))
+
+        ttk.Checkbutton(
+            self.form_frame,
+            text="Save fitted model plots",
+            variable=self.save_fit_plots_var,
+        ).grid(row=11, column=0, columnspan=2, sticky="w", padx=10, pady=2)
+
+        ttk.Checkbutton(
+            self.form_frame,
+            text="Save solved-parameter summary plot",
+            variable=self.save_summary_plots_var,
+        ).grid(row=12, column=0, columnspan=2, sticky="w", padx=10, pady=2)
+
         # --- Proceed Button ---
         self.proceed_button = ttk.Button(self.form_frame, text="Proceed", state="disabled", command=self.proceed)
-        self.proceed_button.grid(row=10, column=0, columnspan=2, pady=15)
+        self.proceed_button.grid(row=13, column=0, columnspan=2, pady=15)
         self.test_folder_path = None
 
         # --- Initialize Calibration Menu ---
@@ -167,6 +190,11 @@ class SimulationOptions(tk.Tk):
 
 
     def check_for_calibration(self):
+        if not self.run_calibration_var.get():
+            self.calibration = None
+            self.perf_calibration = 0
+            return True
+
         # initialize variable to store calibrated values if then exist
         self.calibration = None
         self.perf_calibration = 0 
@@ -339,8 +367,39 @@ class SimulationOptions(tk.Tk):
             "chi2 tolerance": self.chi2_tol,
             "convection coefficient": self.convection_coeff,
             "perform new calibration": self.perf_calibration,
+            "run calibration": self.run_calibration_var.get(),
+            "save fit plots": self.save_fit_plots_var.get(),
+            "save summary plots": self.save_summary_plots_var.get(),
             "calibration data": self.calibration,
             "test data folder": self.test_folder_path
         }
         
         return selections_dict
+
+if __name__ == "__main__":
+    main_GUI = SimulationOptions()
+    main_GUI.mainloop()   # waits here until window closes
+    if getattr(main_GUI, "user_cancelled", True): # default to True if the attribute doesn't exist
+        print("User closed the window without proceeding. Exiting program.")
+        exit(0)
+    else:
+        user_selections = main_GUI.get_selections_dict()
+    
+    print("User selections:")
+    for key, value in user_selections.items():
+        print(f" - {key}: {value}")
+
+    # Overview of main workflow:
+    # 1. Get selections from user via GUI
+        # probe/crucible
+        # sample material
+        # physics model
+        # k measurement, calibration, or sensitivity analysis
+            # If k measurement or sensitivity analysis: ask user to select calibration
+            # If k measurement or calibration: ask user to select data folder
+    # 2. If sensitity analysis, run sensitivity analysis and save results (including user selections and warnings), then exit.
+    # 3. If k measurement or calibration - read in data from experimental data files 
+        # If calibration, calculate initial model parameters at ambient temperature for each file (multi-threaded)
+    # 4. Plot initial model vs experimental data for inspection
+    # 5. For each file, solve for properties at ambient temperature and store results (including user selections and warnings) (multi-threaded)
+        # Results may need to be fitted to a temperature curve

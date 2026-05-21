@@ -127,16 +127,15 @@ def generate_INL_probe():
         cp_alm = materials_dict["Alumel"].cp_func
         rho_alm = materials_dict["Alumel"].rho_func
         rho_chr = materials_dict["Chromel"].rho_func
-
         def k_func(T):
-            return (k_chr+k_alm) / 2
+            return (k_chr(T) + k_alm(T)) / 2
         def rho_func(T):
-            return (rho_chr+rho_alm) / 2
+            return (rho_chr(T) + rho_alm(T)) / 2
         def cp_func(T):
-            return (cp_alm*rho_alm + cp_chr*rho_chr) / (rho_alm + rho_chr)
-        
+            return (cp_alm(T) * rho_alm(T) + cp_chr(T) * rho_chr(T)) / (rho_alm(T) + rho_chr(T))
+
         return {"k_func": k_func, "rho_func": rho_func, "cp_func": cp_func}
-    
+
     # generate thermocouple material (average of two materials)
     tc_dict = build_tc_funcs()
 
