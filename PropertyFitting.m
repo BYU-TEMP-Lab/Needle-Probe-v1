@@ -16,7 +16,7 @@ cp = off; %Makes the program fit for specific heat instead of thermal diffusivit
 rhocp = off; %Fits for rho*Cp, use if no known density data exists. Will overwrite cp;
 
 raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
-iplotfit = on; %Shows the plot during the fitting process. Keep off to increase speed.
+iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
 manual_delay = off; %Adds in a manual delay that helps to see the fitting process. Significantly increases runtime.
 chi2plots = off; %show plots from the chi2 error analysis
 

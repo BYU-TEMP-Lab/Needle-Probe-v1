@@ -156,7 +156,7 @@ k_Chromel = 0.0191*T + 11.851; % Thermophysical properties of matter, ISBN: 0306
 if T >= 100 && T < 300
     cp_Chromel = -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4;
 elseif T >= 300
-    cp_Chromel = 0.1779*T + 373.46; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 4, Table 100, Curve 9
+    cp_Chromel = 0.1786*T + 375.07; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 4, Table 100, Curve 9
 end
 
 
@@ -257,7 +257,7 @@ end
 
 % Heat Capacity- Nichrome Not needed right now, but may be needed later
 if T >=290 && T < 1370
-    cp_Nichrome = 0.4699 - 0.0002*T + (4e-7)*(T^2) - (1e-10)*(T^3); % Excel 3rd order fit to Kanthal
+    cp_Nichrome = -1E-07*T^3 + 0.0003*T^2 + 0.0499*T + 456.95; % Excel 3rd order fit to Kanthal
 end
 
 % Density- Nichrome
@@ -348,11 +348,12 @@ if T >= 293 && T < 1093
 end
 
 % Density- Inconel625
-rho_Inconel625 = 8440;
+rho_Inconel625 = 8440; %Verified at https://www.hightempmetals.com/techdata/hitempInconel625data.php
 
 % Heat Capacity- Inconel625
 if T >= 293 && T < 1093
-    cp_Inconel625 = 0.0163*(T) + 4.23;
+    %cp_Inconel625 = 0.0163*(T) + 4.23; %Old equation
+    cp_Inconel625 = 0.2071*(T) + 364.8; % J/kg*K edited equation based on table at https://link.springer.com/article/10.1007/s10765-019-2490-8/tables/3
 end
 
 % Thermal Diffusivity- Inconel625
@@ -362,12 +363,14 @@ end
 
 % Total Radiative Emissivity- Nickel200
 if T < 473
-    emissivity_Inconel625 = 0.35;
+    % emissivity_Inconel625 = 0.35;
+    emissivity_Inconel625 = 0.9;
 elseif T >=473 && T < 1144
-    %     emissivity_Nickel200 = 0.0007*T + 0.0316;
-    emissivity_Inconel625 = 0; %not sure
+    %emissivity_Inconel625 = 0;
+    emissivity_Inconel625 = .13; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
 elseif T >= 1144
-    emissivity_Inconel625 = 0; %not sure
+    %emissivity_Inconel625 = 0;
+    emissivity_Inconel625 = .13; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
