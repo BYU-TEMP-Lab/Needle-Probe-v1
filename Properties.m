@@ -113,64 +113,69 @@ alpha_Alumina = k_Alumina/(rho_Alumina*cp_Alumina);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ALUMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%%
-%Thermal Conductivity- Alumel Not needed right now, but may be needed
-%later
+%Thermal Conductivity- Alumel Not needed right now, but may be needed later
 if T>= 100 && T < 400
-    k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3;
+    k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3; % COMSOL
 elseif T >= 400 && T < 773
-    k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3;
+    k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; % COMSOL
 elseif T >= 773
     k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %out of COMSOL'S RANGE
-end
-
-% % Heat Capacity- Alumel Not needed right now, but may be needed later
-if T >=100 && T < 410
-    cp_Alumel = -120.397194+4.83234846*T^1-0.0141451249*T^2+0.0000151245324*T^3;
-elseif T >=410 && T < 450
-    cp_Alumel = 4215.99923-16.6533325*T^1+0.018666665*T^2;
-elseif T >= 450
-    cp_Alumel = 4215.99923-16.6533325*(T)^1+0.018666665*(T)^2; %out of COMSOL'S RANGE
-end
-
-% Thermal Diffusivity- Alumel
-if T >= 100 && T < 175
-    alpha_Alumel = 2.777243E-5-3.26281E-7*T^1+1.773714E-9*T^2-3.253333E-12*T^3;
-elseif T >=175 && T < 422
-    alpha_Alumel = 9.912174E-6-2.568489E-8*T^1+8.732857E-11*T^2-1.005653E-13*T^3;
-elseif T >=422 && T < 450
-    alpha_Alumel = -0.00007507129+0.0000003614333*T^1-0.0000000003952381*T^2;
-elseif T >= 450
-    alpha_Alumel = -0.00007507129+0.0000003614333*(T)^1-0.0000000003952381*(T)^2; %out of COMSOL'S RANGE
 end
 
 % Density- Alumel
 rho_Alumel = 8600; %Not needed right now, but may be needed later
 
+% % Heat Capacity- Alumel Not needed right now, but may be needed later
+if T >=293 && T < 360
+    cp_Alumel = 0.325*T + 387.17; % Linear extension from first 3 points of data from https://doi.org/10.1007/BF01563713
+elseif T >=360 && T < 760
+    cp_Alumel = 1E-06*T^3 - 0.0021*T^2 + 1.4178*T + 217.16; % 3rd order fit to data from https://doi.org/10.1007/BF01563713
+elseif T >= 760
+    cp_Alumel = 0.15*T + 459; % Linear extension from last 3 data points from https://doi.org/10.1007/BF01563713
+end
+
+% Thermal Diffusivity- Alumel
+% if T >= 100 && T < 175
+%     alpha_Alumel = 2.777243E-5-3.26281E-7*T^1+1.773714E-9*T^2-3.253333E-12*T^3; % COMSOL?
+% elseif T >=175 && T < 422
+%     alpha_Alumel = 9.912174E-6-2.568489E-8*T^1+8.732857E-11*T^2-1.005653E-13*T^3; % COMSOL?
+% elseif T >=422 && T < 450
+%     alpha_Alumel = -0.00007507129+0.0000003614333*T^1-0.0000000003952381*T^2; % COMSOL?
+% elseif T >= 450
+%     alpha_Alumel = -0.00007507129+0.0000003614333*(T)^1-0.0000000003952381*(T)^2; %out of COMSOL'S RANGE
+% end
+alpha_Alumel = k_Alumel/(rho_Alumel*cp_Alumel);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHROMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%
-%Thermal Conductivity- Chromel Not needed right now, but may be needed
-%later
+%Thermal Conductivity- Chromel Not needed right now, but may be needed later
 k_Chromel = 0.0191*T + 11.851; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 1, Table 157, Curve 6
 
+% Density- Chromel
+rho_Chromel = 8670; %Not needed right now, but may be later
+
 % Heat Capacity- Chromel- Not needed right now, but may be later
-if T >= 100 && T < 300
-    cp_Chromel = -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4;
-elseif T >= 300
-    cp_Chromel = 0.1786*T + 375.07; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 4, Table 100, Curve 9
+if T >= 293 && T < 360
+    % cp_Chromel =
+    % -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4; % COMSOL
+    cp_Chromel = 0.675*T + 188.83; % Linear extension from first 3 data points from https://doi.org/10.1007/BF01563713
+elseif T >= 360 && T <= 760
+    % cp_Chromel = 0.1786*T + 375.07; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 4, Table 100, Curve 9
+    cp_Chromel = -7E-09*T^4 + 2E-05*T^3 - 0.0173*T^2 + 7.5011*T - 746.92; % 4th order fit to data from https://doi.org/10.1007/BF01563713
+elseif T > 760
+    cp_Chromel = 0.15*T + 414; % Linear extension from last 3 data points from https://doi.org/10.1007/BF01563713
 end
 
 
 % Thermal Diffusivity- Chromel
-if T >= 100 && T < 175
-    alpha_Chromel = 3.466E-5-6.301667E-7*T^1+5.119333E-9*T^2-1.893333E-11*T^3+2.666667E-14*T^4;
-elseif T >= 175 && T < 450
-    alpha_Chromel = 6.607453E-6-1.986064E-8*T^1+6.038939E-11*T^2-5.155141E-14*T^3;
-elseif T >= 450
-    alpha_Chromel = 0.000005; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 10, Figure 119
-end
-
-% Density- Chromel
-rho_Chromel = 8670; %Not needed right now, but may be later
+% if T >= 100 && T < 175
+%     alpha_Chromel = 3.466E-5-6.301667E-7*T^1+5.119333E-9*T^2-1.893333E-11*T^3+2.666667E-14*T^4; % COMSOL?
+% elseif T >= 175 && T < 450
+%     alpha_Chromel = 6.607453E-6-1.986064E-8*T^1+6.038939E-11*T^2-5.155141E-14*T^3; % COMSOL?
+% elseif T >= 450
+%     alpha_Chromel = 0.000005; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 10, Figure 119
+% end
+alpha_Chromel = k_Chromel/(rho_Chromel*cp_Chromel);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Air%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
