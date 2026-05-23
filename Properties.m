@@ -339,7 +339,7 @@ rho_Magnesium_Oxide = 3580; %AZoM max
 
 % Heat Capacity- Magnesium_Oxide
 if T >= 293 && T < 3105
-    cp_Magnesium_Oxide = (47.25995 + 5.681621*T - 0.872665*(T^2) + 0.1043*(T^3) + (-1.053955/(T^2)))*(40.3044/1000); % https://webbook.nist.gov/cgi/cbook.cgi?ID=C1309484&Mask=2&Type=JANAFS&Plot=on#JANAFS
+    cp_Magnesium_Oxide = (47.25995 + 5.681621*(T/1000) + (-0.872665)*((T/1000)^2) + 0.1043*((T/1000)^3) + (-1.053955/((T/1000)^2)))*(1/40.3044)*(1000); % https://webbook.nist.gov/cgi/cbook.cgi?ID=C1309484&Mask=2&Type=JANAFS&Plot=on#JANAFS
 end
 
 % Thermal Diffusivity- Magnesium_Oxide
@@ -1550,12 +1550,9 @@ if strcmp(probe,"3A-IN718-01")
     %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
     %r_2 = ; % middle of wires %Not needed right now, but may be needed later
-    %r_3 = 0.35e-3; % outside of wires
     r_3 = 0.35e-3; % outside of wires
-    %r_4 = 1e-3; % inside radius of sheath
-    r_4 = 3e-7; % inside radius of sheath
-    %r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
-    r_5 = .001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
+    r_4 = 1e-3; % inside radius of sheath
+    r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
     r_heating_wire = 0.0001143; % radius of heating wires
     r_TC_wire = 0.0001143; % radius of thermocouple wires
     L = 0.1016; % Length of the sensing region of probe

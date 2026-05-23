@@ -1,6 +1,6 @@
 % 1. Define the folder and what files to look for
 % Use '.' for the current folder, or put a full path like 'C:\Data\'
-folderPath = '.'; 
+folderPath = uigetdir('', 'Select the folder containing the data');
 filePattern = fullfile(folderPath, '*.txt'); % Looks for all text files
 files = dir(filePattern);
 
