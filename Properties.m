@@ -1587,6 +1587,28 @@ if strcmp(probe,"3A-IN718-01")
 
     RthInsShth = 0;
     Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085; % Copied from INL probe
+    
+    % % 5/23/26 Calibration Average
+    % k_eff_wire = 3.487713e+01;
+    % alpha_eff_wire = 8.041063e-06;
+    % k_insulation = 3.313878e+01;
+    % alpha_insulation = 8.343316e-06;
+    % RthInsShth = 6.325400e-03;
+    % k_sheath = 3.439218e+00;
+    % alpha_sheath = 3.800000e-06;
+    % emissivity_probe = 4.835886e-01;
+    % Flux_decay = 5.733333e-04;
+    
+    % % 5/23/26 Calibration Linear
+    % k_eff_wire =  -3.387324e-02*(T-273.15) + 4.462170e+01;
+    % alpha_eff_wire = -2.534879e-08*(T-273.15) + 1.533334e-05;
+    % k_insulation = -8.183172e-02*(T-273.15) + 5.667993e+01;
+    % alpha_insulation = -4.669751e-08*(T-273.15) + 2.177715e-05;
+    % RthInsShth = -3.362870e-06*(T-273.15) + 7.292822e-03;
+    % k_sheath = -8.046921e-03*(T-273.15) + 5.754137e+00;
+    % alpha_sheath = 6.652115e-09*(T-273.15) + 1.886336e-06;
+    % emissivity_probe = -7.311536e-04*(T-273.15) + 6.939251e-01;
+    % Flux_decay = -1.584946e-06*(T-273.15) + 1.029287e-03;
 end
 
 rwires = r_3;
@@ -1631,6 +1653,16 @@ if strcmp(crucible,'Inconel625')
     k_crucible = k_Inconel625;
     alpha_crucible = alpha_Inconel625;
     emissivity_crucible = emissivity_Inconel625;
+
+    % % 5/23/26 Calibration Average
+    % k_crucible = 3.675811e+02;
+    % alpha_crucible = 9.010000e-05;
+    % emissivity_crucible = 4.119612e-01;
+    
+    % % 5/23/26 Calibration Linear
+    % k_crucible = 8.061092e-01*(T-273.15) + 1.356816e+02;
+    % alpha_crucible = -1.245406e-07*(T-273.15) + 1.259275e-04;
+    % emissivity_crucible = -1.973514e-03*(T-273.15) + 9.796969e-01;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

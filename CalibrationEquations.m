@@ -1,33 +1,30 @@
-% 1. Pick the folder (You won't see files here, just folders)
-targetDir = uigetdir('', 'Select the folder containing the data');
-
-if targetDir == 0
-    error('User cancelled folder selection.');
-end
-
-% 2. Define the pattern (using wildcards to be safe)
-% If files are in a subfolder, you'd need: fullfile(targetDir, 'SubfolderName', 'pattern')
-file_pattern = fullfile(targetDir, '*fminsearch*');
-%file_sought = "*fminsearch.txt";
-file_sought = "*Ar 3A-IN718-01 Inconel625 05,11,26,11-22_fminsearch*";
-file_info = dir(file_sought);
-if isempty(file_info)
-    error('File not found! Check the filename and your current folder: %s', pwd);
-end
-fullfile = dir(file_sought);
-SolvedPropTable = readtable(fullfile.name);
+[file_sought,file_location] = uigetfile('.txt', 'Select the output fminsearch file.');
+cd(file_location)
+SolvedPropTable = readtable(file_sought);
 SolvedPropTable = sortrows(SolvedPropTable,"Temp__C_","ascend");
 
+show_figs = 'off';
 
 vars = SolvedPropTable.Properties.VariableNames;
 T_range = linspace(0, 800, 100);
-fileID = fopen('calibration_fits.txt','w');
 fittype = menu("Choose fit order:",'average','linear','quadratic','cubic','fourth-order');
+if fittype == 1
+    fit_type = "average";
+elseif fittype == 2
+    fit_type = "linear";
+elseif fittype == 3
+    fit_type = "quadratic";
+elseif fittype == 4
+    fit_type = "cubic";
+elseif fittype == 5
+    fit_type = "fourth-order";
+end
 
+fileID = fopen("calibration_fits_"+fit_type+".txt",'w');
 
 for i = 3:width(SolvedPropTable)
      colName = vars{i};
-     figure('Visible','on');
+     figure('Visible',show_figs);
      hold on
      scatter(SolvedPropTable,"Temp__C_",colName)
     if fittype == 1
