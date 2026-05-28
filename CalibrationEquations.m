@@ -3,7 +3,7 @@ cd(file_location)
 SolvedPropTable = readtable(file_sought);
 SolvedPropTable = sortrows(SolvedPropTable,"Temp__C_","ascend");
 
-show_figs = 'off';
+show_figs = 'on';
 
 vars = SolvedPropTable.Properties.VariableNames;
 T_range = linspace(0, 800, 100);

@@ -1550,11 +1550,15 @@ if strcmp(probe,"3A-IN718-01")
     %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
     %r_2 = ; % middle of wires %Not needed right now, but may be needed later
-    r_3 = 0.35e-3; % outside of wires
-    r_4 = 1e-3; % inside radius of sheath
+    % r_3 = 0.35e-3; % outside of wires - XRay
+    r_3 = (1.1939/2)/1000; % CT scan
+    % r_4 = 1e-3; % inside radius of sheath - XRay
+    r_4 = (1.5475/2)/1000; % CT scan
     r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
-    r_heating_wire = 0.0001143; % radius of heating wires
-    r_TC_wire = 0.0001143; % radius of thermocouple wires
+    % r_heating_wire = 0.0001143; % radius of heating wires - XRay
+    r_heating_wire = (0.3134/2)/1000; % CT scan
+    % r_TC_wire = 0.0001143; % radius of thermocouple wires
+    r_TC_wire = (0.3134/2)/1000; % CT scan
     L = 0.1016; % Length of the sensing region of probe
     
     % Areas for each material %Not needed right now, but may be needed later
@@ -1587,28 +1591,17 @@ if strcmp(probe,"3A-IN718-01")
 
     RthInsShth = 0;
     Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085; % Copied from INL probe
-    
-    % % 5/23/26 Calibration Average
-    % k_eff_wire = 3.487713e+01;
-    % alpha_eff_wire = 8.041063e-06;
-    % k_insulation = 3.313878e+01;
-    % alpha_insulation = 8.343316e-06;
-    % RthInsShth = 6.325400e-03;
-    % k_sheath = 3.439218e+00;
-    % alpha_sheath = 3.800000e-06;
-    % emissivity_probe = 4.835886e-01;
-    % Flux_decay = 5.733333e-04;
-    
-    % % 5/23/26 Calibration Linear
-    % k_eff_wire =  -3.387324e-02*(T-273.15) + 4.462170e+01;
-    % alpha_eff_wire = -2.534879e-08*(T-273.15) + 1.533334e-05;
-    % k_insulation = -8.183172e-02*(T-273.15) + 5.667993e+01;
-    % alpha_insulation = -4.669751e-08*(T-273.15) + 2.177715e-05;
-    % RthInsShth = -3.362870e-06*(T-273.15) + 7.292822e-03;
-    % k_sheath = -8.046921e-03*(T-273.15) + 5.754137e+00;
-    % alpha_sheath = 6.652115e-09*(T-273.15) + 1.886336e-06;
-    % emissivity_probe = -7.311536e-04*(T-273.15) + 6.939251e-01;
-    % Flux_decay = -1.584946e-06*(T-273.15) + 1.029287e-03;
+
+    % 5/28/26 Calibration Linear
+    k_eff_wire = -2.223921e-02*(T-273.15) + 2.846898e+01;
+    alpha_eff_wire = -2.006346e-08*(T-273.15) + 1.253490e-05;
+    k_insulation = -3.581154e-02*(T-273.15) + 3.074021e+01;
+    alpha_insulation = -2.475506e-08*(T-273.15) + 1.428309e-05;
+    RthInsShth = 2.757247e-04*(T-273.15) + 6.157494e-02;
+    k_sheath = 1.209348e-02*(T-273.15) + 6.682153e+00;
+    alpha_sheath = 3.625011e-09*(T-273.15) + 3.690499e-06;
+    emissivity_probe = 2.048526e-04*(T-273.15) + 3.545243e-01;
+    Flux_decay = 0;
 end
 
 rwires = r_3;
@@ -1654,15 +1647,11 @@ if strcmp(crucible,'Inconel625')
     alpha_crucible = alpha_Inconel625;
     emissivity_crucible = emissivity_Inconel625;
 
-    % % 5/23/26 Calibration Average
-    % k_crucible = 3.675811e+02;
-    % alpha_crucible = 9.010000e-05;
-    % emissivity_crucible = 4.119612e-01;
-    
-    % % 5/23/26 Calibration Linear
-    % k_crucible = 8.061092e-01*(T-273.15) + 1.356816e+02;
-    % alpha_crucible = -1.245406e-07*(T-273.15) + 1.259275e-04;
-    % emissivity_crucible = -1.973514e-03*(T-273.15) + 9.796969e-01;
+    % 5/28/26 Calibration Linear
+    k_crucible = 2.434738e-01*(T-273.15) + 4.057945e+02;
+    alpha_crucible = 1.036513e-08*(T-273.15) + 1.143182e-04;
+    emissivity_crucible = -1.633000e-03*(T-273.15) + 7.541332e-01;
+
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

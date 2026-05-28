@@ -21,7 +21,7 @@ manual_delay = off; %Adds in a manual delay that helps to see the fitting proces
 chi2plots = off; %show plots from the chi2 error analysis
 
 MC_iterations = 250; %The numbers of iterations to run as part of the Monte Carlo Analysis
-timewindow = [0.5 60]; % [1 50]; % (15 s) Sets the time interval to be analyzed, in seconds. Set beginning to 0 to start from the beginning
+timewindow = [0.1 60]; % [1 50]; % (15 s) Sets the time interval to be analyzed, in seconds. Set beginning to 0 to start from the beginning
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iterations = 0;
@@ -401,47 +401,46 @@ for n = 3:numel(names)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if global_fitting == 0
             %%%%%%%%%% fminsearch fitting
-            Sstart=NeedleProbeModel(Time,par_vector,cp,IV);
-            close all;
+            % Sstart=NeedleProbeModel(Time,par_vector,cp,IV);
+            % close all;
+            % 
+            % foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4 ...
+            %     );
 
-            foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4 ...
-                );
-
-            [fitresult, Chi2_value]=fminsearch('Chi2',par_vector(Ifitpar),foptions,par_vector(Ifixpar),Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,cp,IV);
+            % [fitresult, Chi2_value]=fminsearch('Chi2',par_vector(Ifitpar),foptions,par_vector(Ifixpar),Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,cp,IV);
 
             %[optimized_params, resnorm] = lsqcurvefit(objective_func, initial_params, x_data, y_data, [], [], options);
 
-            fitresult = abs(fitresult);
+            % fitresult = abs(fitresult);
+            
+            %%%%%%% fmincon fitting
+            Sstart=NeedleProbeModel(Time,par_vector,cp,IV);
+            close all;
 
-            %  % 1. Initial guess
-            % x0 = par_vector(Ifitpar);
-            % 
-            % % 2. Create an anonymous function to pass all your extra variables to 'Chi2'.
-            % %    MATLAB will optimize the variable 'x', while treating everything else as a constant.
-            % objFun = @(x) Chi2(x, par_vector(Ifixpar), Ifitpar, Ifixpar, Sstart, signal, manual_delay, iplotfit, cp, IV);
-            % 
-            % % 3. Define bounds (assuming 0 and 5000 apply to all variables)
-            % %    It is safest to make them the same size as your initial guess x0
-            % lb = zeros(size(x0));
-            % ub = 5000 * ones(size(x0));
-            % 
-            % if strcmp(sample,'Ar')
-            %     for i = 1:length(SolveList)
-            %         if SolveList(i) == 8
-            %             ub(i) = 0.1; % k_sample upper bound
-            %         end
-            %         if SolveList(i) == 26
-            %             ub(i) = 2; % rho upper bound
-            %         end
-            %         if SolveList(i) == 27
-            %             ub(i) = 600; % cp upper bound
-            %         end
-            %     end
-            % end
-            % 
-            % % 4. Call fmincon using strict positional arguments:
-            % %    fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
-            % [fitresult, Chi2_value] = fmincon(objFun, x0, [], [], [], [], lb, ub, [], foptions);
+            foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4);
+
+            % 1. Initial guess
+            x0 = par_vector(Ifitpar);
+
+            % 2. Create an anonymous function to pass all your extra variables to 'Chi2'.
+            %    MATLAB will optimize the variable 'x', while treating everything else as a constant.
+            objFun = @(x) Chi2(x, par_vector(Ifixpar), Ifitpar, Ifixpar, Sstart, signal, manual_delay, iplotfit, cp, IV);
+
+            % 3. Define bounds
+            lb = 0; % x0.*0.7;
+            ub = inf; % x0.*1.3;
+
+            % 3.5 Define specific bounds for certain properties
+            for i = 1:length(SolveList)
+                if SolveList(i) == 5 % thermal contact resistance
+                    lb(i) = 0;
+                    ub(i) = 1;
+                end
+            end
+
+            % 4. Call fmincon using strict positional arguments:
+            %    fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
+            [fitresult, Chi2_value] = fmincon(objFun, x0, [], [], [], [], lb, ub, [], foptions);
 
             clear Chi2
 
@@ -1008,9 +1007,9 @@ if Full_Analysis == 1
     if strcmp(sample,'Water') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
         plot(ave_temp, cp_Water)
     elseif strcmp(sample,'FliNaK') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
-        plot(ave_temp, cp_Water)
+        plot(ave_temp, cp_FliNaK)
     elseif strcmp(sample,'KNO3') && strcmp(Par2_label,'Cp sample [J/(Kg*K)]')
-        plot(ave_temp, cp_Water)
+        plot(ave_temp, cp_KNO3)
     end
     xlabel('Temperature [°C]')
     ylabel('Specific Heat [J/(Kg*K)]')

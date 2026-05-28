@@ -4,10 +4,10 @@ close all
 
 today = char(datetime('now','Format','MM-dd-yy,HH-mm'));
 
-probe = '2A-SS-03';
-crucible = 'Steel316';
+probe = '3A-IN718-01';
+crucible = 'Inconel625';
 sample = 'Ar';
-tvec = [0.001 70];
+tvec = [0.001 60];
 tempvec = [22 100 150 200 250 300 350 400 450 500 550 600 650 700];
 parwanted = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31];
 
@@ -46,7 +46,7 @@ for i = 1:length(tempvec)
         par_vector_varied = par_vector;
         par_vector_varied(k) = par_vector_varied(k)*0.95;
 
-        t = linspace(tbegin,tend,((tend-tbegin)/0.01));
+        t = linspace(tbegin,tend,((tend-tbegin)/0.001));
         t = t';
         IV = 1;
         cp = 1;
@@ -56,19 +56,26 @@ for i = 1:length(tempvec)
         dy = diff(f_initial(:))./diff(log(t(:)));
         dy_varied = diff(f_varied(:))./diff(log(t(:)));
 
+        % % Add this inside your parameter loop, replacing the diff() calculations
+        % delta_p = 0.05; % You are reducing by 5%
+        % X_p = (f_initial - f_varied) / delta_p;
+
         sensitivity = 100*(dy_varied-dy)./dy;
 
         figure(i)
         set(gcf, 'Position', [0,0,800,800])
         hold on
         semilogx(t(2:end),sensitivity,'Color',c(j,:),'LineStyle',s{j},'LineWidth',1.5)
+        Plot X_p
+        % semilogx(t, X_p, 'Color', c(j,:), 'LineStyle', s{j}, 'LineWidth', 1.5)
+        % ylabel('Scaled Sensitivity X_p (K)');
         hold on
         title(['SA for ', probe, ' with ', sample, ', in ', crucible, ' at ', int2str(avgTemp), '°C'])
         set(gca, 'XScale', 'log');
         xlabel('Time (s)');
-        ylabel('Relative Change of dT/dt (%)');
+        % ylabel('Relative Change of dT/dt (%)');
         legend(par_names(parwanted(1:j)),'Location','eastoutside')
-        pause
+        % pause
     end 
     % Define the custom folder and file name
     customFolder = ['SA_Plots/',today];
