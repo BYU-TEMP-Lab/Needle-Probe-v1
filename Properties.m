@@ -347,9 +347,8 @@ alpha_Magnesium_Oxide = k_Magnesium_Oxide/(rho_Magnesium_Oxide*cp_Magnesium_Oxid
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Inconel625%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Valid to who know's where. This section needs work.
 if T >= 293 && T < 1093
-    k_Inconel625 = 0.2435*(T) + 339.27;
+    k_Inconel625 = 0.0195*T + 2.3886; % Curve 70, Table 285, Thermophysical properties of matter, ISBN: 0306670208, Vol. 1 (not an exact match for composition, but similar in Ni and Cr %)
 end
 
 % Density- Inconel625
@@ -1557,10 +1556,21 @@ if strcmp(probe,"3A-IN718-01")
     r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
     % r_heating_wire = 0.0001143; % radius of heating wires - XRay
     r_heating_wire = (0.3134/2)/1000; % CT scan
-    % r_TC_wire = 0.0001143; % radius of thermocouple wires
+    % r_TC_wire = 0.0001143; % radius of thermocouple wires - XRay
     r_TC_wire = (0.3134/2)/1000; % CT scan
     L = 0.1016; % Length of the sensing region of probe
-    
+
+    % % 5/29/26 Calibration
+    % r_3 = 6.465833e-04;
+    % r_4 = 8.169492e-04;
+    % r_5 = 1.264551e-03;
+
+    % 5/29/26 Calibration, no flux decay
+    r_3 = 6.466667e-04;
+    r_4 = 8.234631e-04;
+    r_5 = 1.263392e-03;
+
+
     % Areas for each material %Not needed right now, but may be needed later
     %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
     %A_chromel = pi*(r_TC_wire^2);%1 chromel wire
@@ -1592,16 +1602,26 @@ if strcmp(probe,"3A-IN718-01")
     RthInsShth = 0;
     Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085; % Copied from INL probe
 
-    % 5/28/26 Calibration Linear
-    k_eff_wire = -2.223921e-02*(T-273.15) + 2.846898e+01;
-    alpha_eff_wire = -2.006346e-08*(T-273.15) + 1.253490e-05;
-    k_insulation = -3.581154e-02*(T-273.15) + 3.074021e+01;
-    alpha_insulation = -2.475506e-08*(T-273.15) + 1.428309e-05;
-    RthInsShth = 2.757247e-04*(T-273.15) + 6.157494e-02;
-    k_sheath = 1.209348e-02*(T-273.15) + 6.682153e+00;
-    alpha_sheath = 3.625011e-09*(T-273.15) + 3.690499e-06;
-    emissivity_probe = 2.048526e-04*(T-273.15) + 3.545243e-01;
-    Flux_decay = 0;
+    % % 5/29/26 Calibration
+    % k_eff_wire = -3.002542e-02*(T-273.15) + 3.160873e+01;
+    % alpha_eff_wire = -1.597666e-08*(T-273.15) + 1.081668e-05;
+    % k_insulation = -3.749316e-02*(T-273.15) + 3.154127e+01;
+    % alpha_insulation = -1.020418e-08*(T-273.15) + 8.147280e-06;
+    % RthInsShth = 1.852236e-01;
+    % k_sheath = 1.850312e-02*(T-273.15) + 8.309820e+00;
+    % alpha_sheath = 4.125000e-06;
+    % emissivity_probe = 2.005966e-04*(T-273.15) + 3.212576e-01;
+    % Flux_decay = 5.029625e-03;
+
+    % 5/29/26 Calibration, no flux decay
+    k_eff_wire = -3.068831e-02*(T-273.15) + 3.192088e+01;
+    alpha_eff_wire = -1.313822e-08*(T-273.15) + 1.036109e-05;
+    k_insulation = -3.809731e-02*(T-273.15) + 3.180934e+01;
+    alpha_insulation = -1.122505e-08*(T-273.15) + 8.497003e-06;
+    RthInsShth = 1.386436e-01;
+    k_sheath = 1.756867e-02*(T-273.15) + 8.826439e+00;
+    alpha_sheath = 1.690108e-24*(T-273.15) + 4.000000e-06;
+    emissivity_probe = 2.089209e-04*(T-273.15) + 3.245416e-01;
 end
 
 rwires = r_3;
@@ -1613,6 +1633,14 @@ rsheath = r_5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rcrucible = 0.0127;
 rsample =  0.00209;
+
+% % 5/29/26 calibration
+% rcrucible = 1.283271e-02;
+% rsample = 2.194458e-03;
+
+% 5/29/26 calibration, no flux decay
+rcrucible = 1.266750e-02;
+rsample = 2.180292e-03;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1647,10 +1675,15 @@ if strcmp(crucible,'Inconel625')
     alpha_crucible = alpha_Inconel625;
     emissivity_crucible = emissivity_Inconel625;
 
-    % 5/28/26 Calibration Linear
-    k_crucible = 2.434738e-01*(T-273.15) + 4.057945e+02;
-    alpha_crucible = 1.036513e-08*(T-273.15) + 1.143182e-04;
-    emissivity_crucible = -1.633000e-03*(T-273.15) + 7.541332e-01;
+    % % 5/29/26 Calibration
+    % k_crucible = 1.952477e-02*(T-273.15) + 7.710700e+00;
+    % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
+    % emissivity_crucible = 1.228685e-01;
+
+    % 5/29/26 Calibration, no flux decay
+    k_crucible = 1.951737e-02*(T-273.15) + 7.709643e+00;
+    alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
+    emissivity_crucible = 1.293887e-01;
 
 end
 

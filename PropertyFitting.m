@@ -21,7 +21,8 @@ manual_delay = off; %Adds in a manual delay that helps to see the fitting proces
 chi2plots = off; %show plots from the chi2 error analysis
 
 MC_iterations = 250; %The numbers of iterations to run as part of the Monte Carlo Analysis
-timewindow = [0.1 60]; % [1 50]; % (15 s) Sets the time interval to be analyzed, in seconds. Set beginning to 0 to start from the beginning
+
+timewindow = [0 60]; % [1 50]; % (15 s) 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iterations = 0;
@@ -50,6 +51,21 @@ end
 currentFOLDER = pwd;
 today = char(datetime('now','Format','MM,dd,yy,HH-mm'));
 
+m=menu('Probe Calibration or Sample Test?',...
+    'Probe Calibration', ...
+    'Sample Test', ...
+    'end');
+
+%Sets the time interval to be analyzed, in seconds. Set beginning to 0 to start from the beginning
+if m == 1
+    timewindow = [0 5]; % early and short to capture probe properties
+elseif m == 2
+    timewindow = [0.5 60]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+else
+    disp('No selection, program terminated')
+    return
+end
+
 m=menu('Probe:',...
     '2A-SS-03', ...
     '2A-SS-04', ...
@@ -63,6 +79,8 @@ elseif m == 2
     probe = '2A-SS-04';
 elseif m == 3
     probe = '3A-IN718-01';
+elseif m == 4
+    probe = 'INL';
 else
     disp('No probe selected, program terminated')
     return
@@ -427,12 +445,46 @@ for n = 3:numel(names)
             objFun = @(x) Chi2(x, par_vector(Ifixpar), Ifitpar, Ifixpar, Sstart, signal, manual_delay, iplotfit, cp, IV);
 
             % 3. Define bounds
-            lb = 0; % x0.*0.7;
-            ub = inf; % x0.*1.3;
+            lb =  x0.*0; %0.7;
+            ub =  x0.*inf; %1.3;
 
             % 3.5 Define specific bounds for certain properties
             for i = 1:length(SolveList)
+                if SolveList(i) == 1 || SolveList(i) == 2 % k eff wires and alpha eff wires
+                    % larger bounds for uncertainty in lumped properties,
+                    % +_50% of initial guess
+                    lb(i) = x0(i)*0.5;
+                    ub(i) = x0(i)*1.5;
+                end
                 if SolveList(i) == 5 % thermal contact resistance
+                    % set on range of 0 - 1, since initial guess is 0
+                    lb(i) = 0;
+                    ub(i) = 1;
+                end
+                if SolveList(i) == 3 || SolveList(i) == 4 ||...
+                SolveList(i) == 6 || SolveList(i) == 7 ||...
+                SolveList(i) == 10 || SolveList(i) == 11
+                % k sheath, alpha sheath, k crucible, alpha crucible, k insulation, alpha insulation
+                    % smaller bounds for uncertainty in material properties
+                    % (for 2A probes, insulation is actually lumped Alumina
+                    % and Ceramabond and should use larger bounds)
+                    lb(i) = x0(i)*0.9;
+                    ub(i) = x0(i)*1.1;
+                end
+                if SolveList(i) == 12 || SolveList(i) == 13 % probe and crucible emissivity
+                    % larger bounds on emissivity because of uncertainty
+                    % regarding impact of molten salt on exposed surfaces
+                    lb(i) = x0(i)*0.5;
+                    ub(i) = x0(i)*1.5;
+                end
+                if SolveList(i) == 19 || SolveList(i) == 20 || SolveList(i) == 21 || SolveList(i) == 22 || SolveList(i) == 23 % radii
+                    % smaller bounds on geometry due to measurement
+                    % uncertainty from X-Rays and CT scans
+                    lb(i) = x0(i)*0.9;
+                    ub(i) = x0(i)*1.1;
+                end
+                if SolveList(i) == 30 % flux decay factor
+                    % range of 0 - 1 because initial guess is 0
                     lb(i) = 0;
                     ub(i) = 1;
                 end
