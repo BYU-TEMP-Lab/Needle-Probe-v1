@@ -60,7 +60,7 @@ m=menu('Probe Calibration or Sample Test?',...
 if m == 1
     timewindow = [0 5]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.5 10]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [0.01 100]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
 else
     disp('No selection, program terminated')
     return
@@ -477,8 +477,8 @@ for n = 3:numel(names)
                 if SolveList(i) == 12 || SolveList(i) == 13 % probe and crucible emissivity
                     % larger bounds on emissivity because of uncertainty
                     % regarding impact of molten salt on exposed surfaces
-                    lb(i) = x0(i)*1;
-                    ub(i) = x0(i)*2;
+                    lb(i) = x0(i)*0.5;
+                    ub(i) = x0(i)*1.5;
                 end
                 if SolveList(i) == 19 || SolveList(i) == 20 || SolveList(i) == 21 || SolveList(i) == 22 || SolveList(i) == 23 % radii
                     % smaller bounds on geometry due to measurement
@@ -487,7 +487,7 @@ for n = 3:numel(names)
                     ub(i) = x0(i)*1.1;
                 end
                 if SolveList(i) == 30 % flux decay factor
-                    % range of 0 - 1 because initial guess is 0
+                    % range of 0 - 0.001 because initial guess is 0
                     lb(i) = 0;
                     ub(i) = 0.001;
                 end
