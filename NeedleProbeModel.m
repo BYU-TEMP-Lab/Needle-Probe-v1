@@ -19,7 +19,7 @@ else
 end
 
 %Transient, multilayered analytic model using the quadrupoles method
-%3 Layers: Probe(TC+insulation+wires+sheath), Sample, and Crucible
+%5 Layers: Inner Probe(TC+insulation+wires), Insulation, Sheath, Sample, and Crucible
 %Determine temperature v. time of needle probe
 
 t = extended_t;

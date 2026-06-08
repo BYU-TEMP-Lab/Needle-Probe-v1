@@ -365,21 +365,39 @@ if T >= 293 && T < 1093
     alpha_Inconel625 = k_Inconel625/(rho_Inconel625 * cp_Inconel625);
 end
 
-% Total Radiative Emissivity- Nickel200
+% Total Radiative Emissivity- Inconel 625
 if T < 473
-    % emissivity_Inconel625 = 0.35;
-    emissivity_Inconel625 = 0.9;
+    emissivity_Inconel625 = 0.31; % low value from https://ntrs.nasa.gov/citations/19860012189
 elseif T >=473 && T < 1144
-    %emissivity_Inconel625 = 0;
-    emissivity_Inconel625 = .13; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
+    emissivity_Inconel625 = 0.0001*T + 0.2545; % linear fit to average across all 5 samples, https://ntrs.nasa.gov/citations/19860012189
 elseif T >= 1144
-    %emissivity_Inconel625 = 0;
-    emissivity_Inconel625 = .13; %Guess based off of the combined results from Figure 5 in this paper: https://www.mdpi.com/1424-8220/24/18/5906
+    emissivity_Inconel625 = 0.38; % high value from https://ntrs.nasa.gov/citations/19860012189
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Samples
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MgCl2-NaCl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if strcmp(sample, 'MgNaCl')
+    % Thermal Conductivity
+    k_MgNaCl = -0.0003*(T-273.15) + 0.6774; % fit to https://advanced.onlinelibrary.wiley.com/doi/full/10.1002/adts.202200206
+    
+    % Heat Capacity
+    cp_MgNaCl = 1000; %https://pubs.acs.org/doi/full/10.1021/acsami.2c19272
+    
+    % Density
+    rho_MgNaCl = -0.0006*(T-273.15) + 2.1164; % Mathis Data, May 2026
+    
+    % Thermal Diffusivity
+    alpha_MgNaCl = k_MgNaCl/(rho_MgNaCl*cp_MgNaCl);
+
+    k_sample = k_MgNaCl;
+    cp_sample = cp_MgNaCl;
+    rho_sample = rho_MgNaCl;
+    alpha_sample = alpha_MgNaCl;
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Water%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -462,7 +480,9 @@ if strcmp(sample,'Ar')
     % Thermal Diffusivity- Argon
     alpha_Argon = k_Argon/(rho_Argon*cp_Argon);
     alpha_sample = alpha_Argon;
-
+    
+    bias_alpha_sample =0;
+    uncertainty_alpha_sample = 0.02*alpha_sample;
     % Lemmon, E.W.; Jacobsen, R.T., Viscosity and Thermal Conductivity Equations for Nitrogen, Oxygen, Argon, and Air, Int. J. Thermophys., 2004, 25, 1, 21-69, https://doi.org/10.1023/B:IJOT.0000022327.04529.f3 . [all data]
     bias_k_sample = 0;
     uncertainty_k_sample = 0.02*k_sample;
@@ -1565,10 +1585,20 @@ if strcmp(probe,"3A-IN718-01")
     % r_4 = 8.169492e-04;
     % r_5 = 1.264551e-03;
 
-    % 5/29/26 Calibration, no flux decay
-    r_3 = 6.466667e-04;
-    r_4 = 8.234631e-04;
-    r_5 = 1.263392e-03;
+    % % 5/29/26 Calibration, no flux decay
+    % r_3 = 6.466667e-04;
+    % r_4 = 8.234631e-04;
+    % r_5 = 1.263392e-03;
+
+    % % 6/1/26 Calibration, flux decay limited 1
+    % r_3 = 6.468750e-04;
+    % r_4 = 8.232404e-04;
+    % r_5 = 1.263517e-03;
+
+    % % 6/1/26 Calibration, flux decay limited 2
+    % r_3 = 6.481667e-04;
+    % r_4 = 8.237259e-04;
+    % r_5 = 1.262499e-03;
 
 
     % Areas for each material %Not needed right now, but may be needed later
@@ -1613,15 +1643,38 @@ if strcmp(probe,"3A-IN718-01")
     % emissivity_probe = 2.005966e-04*(T-273.15) + 3.212576e-01;
     % Flux_decay = 5.029625e-03;
 
-    % 5/29/26 Calibration, no flux decay
-    k_eff_wire = -3.068831e-02*(T-273.15) + 3.192088e+01;
-    alpha_eff_wire = -1.313822e-08*(T-273.15) + 1.036109e-05;
-    k_insulation = -3.809731e-02*(T-273.15) + 3.180934e+01;
-    alpha_insulation = -1.122505e-08*(T-273.15) + 8.497003e-06;
-    RthInsShth = 1.386436e-01;
-    k_sheath = 1.756867e-02*(T-273.15) + 8.826439e+00;
-    alpha_sheath = 1.690108e-24*(T-273.15) + 4.000000e-06;
-    emissivity_probe = 2.089209e-04*(T-273.15) + 3.245416e-01;
+    % % 5/29/26 Calibration, no flux decay
+    % k_eff_wire = -3.068831e-02*(T-273.15) + 3.192088e+01;
+    % alpha_eff_wire = -1.313822e-08*(T-273.15) + 1.036109e-05;
+    % k_insulation = -3.809731e-02*(T-273.15) + 3.180934e+01;
+    % alpha_insulation = -1.122505e-08*(T-273.15) + 8.497003e-06;
+    % RthInsShth = 1.386436e-01;
+    % k_sheath = 1.756867e-02*(T-273.15) + 8.826439e+00;
+    % alpha_sheath = 1.690108e-24*(T-273.15) + 4.000000e-06;
+    % emissivity_probe = 2.089209e-04*(T-273.15) + 3.245416e-01;
+    
+    % % 6/1/26 Calibration, flux decay limited 1
+    % k_eff_wire = -3.064098e-02*(T-273.15) + 3.188021e+01;
+    % alpha_eff_wire = -1.237358e-08*(T-273.15) + 1.010192e-05;
+    % k_insulation = -3.803002e-02*(T-273.15) + 3.177246e+01;
+    % alpha_insulation = -1.124845e-08*(T-273.15) + 8.484239e-06;
+    % RthInsShth = 1.354415e-01;
+    % k_sheath = 1.761093e-02*(T-273.15) + 8.784065e+00;
+    % alpha_sheath = 3.958333e-06;
+    % emissivity_probe = 3.990057e-01;
+    % Flux_decay = 3.804167e-04;
+
+    % % 6/1/26 Calibration, flux decay limited 2
+    % k_eff_wire = -3.077108e-02*(T-273.15) + 3.195555e+01;
+    % alpha_eff_wire = -1.308256e-08*(T-273.15) + 1.037902e-05;
+    % k_insulation = -3.807272e-02*(T-273.15) + 3.180443e+01;
+    % alpha_insulation = -1.119427e-08*(T-273.15) + 8.466923e-06;
+    % RthInsShth = 1.364093e-01;
+    % k_sheath = 1.731254e-02*(T-273.15) + 8.934393e+00;
+    % alpha_sheath = 4.000000e-06;
+    % emissivity_probe = 4.083372e-01;
+    % Flux_decay = 4.216667e-05;
+
 end
 
 rwires = r_3;
@@ -1638,9 +1691,17 @@ rsample =  0.00209;
 % rcrucible = 1.283271e-02;
 % rsample = 2.194458e-03;
 
-% 5/29/26 calibration, no flux decay
-rcrucible = 1.266750e-02;
-rsample = 2.180292e-03;
+% % 5/29/26 calibration, no flux decay
+% rcrucible = 1.266750e-02;
+% rsample = 2.180292e-03;
+
+% % 6/1/26 calibration, flux decay limited 1
+% rcrucible = 1.266300e-02;
+% rsample = 2.173750e-03;
+
+% % 6/1/26 calibration, flux decay limited 2
+% rcrucible = 1.272725e-02;
+% rsample = 2.178458e-03;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1680,10 +1741,20 @@ if strcmp(crucible,'Inconel625')
     % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
     % emissivity_crucible = 1.228685e-01;
 
-    % 5/29/26 Calibration, no flux decay
-    k_crucible = 1.951737e-02*(T-273.15) + 7.709643e+00;
-    alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
-    emissivity_crucible = 1.293887e-01;
+    % % 5/29/26 Calibration, no flux decay
+    % k_crucible = 1.951737e-02*(T-273.15) + 7.709643e+00;
+    % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
+    % emissivity_crucible = 1.293887e-01;
+
+    % % 6/1/26 Calibration, flux decay limited 1
+    % k_crucible = 1.949338e-02*(T-273.15) + 7.714343e+00;
+    % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
+    % emissivity_crucible = 1.331416e-01;
+
+    % % 6/1/26 Calibration, flux decay limited 2
+    % k_crucible = 1.949469e-02*(T-273.15) + 7.721190e+00;
+    % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
+    % emissivity_crucible = 1.289737e-01;
 
 end
 
@@ -1743,14 +1814,20 @@ end
 if MC == 1
     
     % Uncertainties and Biases
+    bias_k_eff_wire = 0;
+    uncertainty_k_eff_wire = 0.05; % need to propagate uncertainty through volume weight average equation
+
+    bias_alpha_eff_wire = 0;
+    uncertainty_alpha_eff_wire = 0.05; % need to propagate uncertainty through volume weight average equation
+
     bias_k_insulation = 0;
-    k_insulation_uncertainty = 0.05; %LOOK INTO THIS ONE
+    k_insulation_uncertainty = 0.06; %https://pmc.ncbi.nlm.nih.gov/articles/PMC4887202/
     
     bias_k_sheath = 0;
-    k_sheath_uncertainty = .05;
+    k_sheath_uncertainty = .05; % A Sh Agazhanov et al 2019
     
     bias_alpha_sheath = 0;
-    alpha_sheath_uncertainty = .05;
+    alpha_sheath_uncertainty = .05; % A Sh Agazhanov et al 2019
 
     bias_voltage = .01; %We need to figure out where this came from
     uncertainty_voltage = 2*VoltSTD/Voltage;
@@ -1774,14 +1851,14 @@ if MC == 1
     bias_rcrucible = 5e-6;
     uncertainty_rcrucible = 1.58114e-5/rcrucible;
 
-    bias_k_crucible = 0; %Assumption. This value needs to be looked up.
-    uncertainty_k_crucible = .05; %Assumption for now. Update before real use.
+    bias_k_crucible = 0;
+    uncertainty_k_crucible = 0.05; % <2%, but not the exact alloy, so 5% is probably good
 
     bias_length = 0.000005;
-    uncertainty_length = 0;%Check this
+    uncertainty_length = 0.05; % Check this
 
     bias_h = 0;
-    uncertainty_h = 0.05; %Definitely good to re-evaluate.
+    uncertainty_h = 0.05; % Definitely good to re-evaluate.
 
     bias_RthInsShth = 0;
     uncertainty_RthInsShth = 0.05; %Check This
@@ -1792,13 +1869,18 @@ if MC == 1
     % bias_RthSampleCrucible = 0;
     % uncertainty_RthSampleCrucible = 0.05; %Check This
 
-    uncertainty_current = CurrentSTD*2/Current;
     bias_current = 0;
+    uncertainty_current = CurrentSTD*2/Current;
 
     bias_emissitivy_probe = 0;
-    uncertainty_emissitivy_probe = .05; %LOOK INTO THIS
+    uncertainty_emissivity_probe = .05; % No uncertainty stated in Keller et al's data
+
+    bias_emissivity_crucible = 0;
+    uncertainty_emissivity_crucible = 0.05; % SOURCE?
 
     % MonteCarloProp
+    k_eff_wire = MonteCarloProp(uncertainty_k_eff_wire,bias_k_eff_wire,k_eff_wire);
+    alpha_eff_wire = MonteCarloProp(uncertainty_alpha_eff_wire,bias_alpha_eff_wire,alpha_eff_wire);
     k_sheath = MonteCarloProp(k_sheath_uncertainty,bias_k_sheath,k_sheath);
     alpha_sheath = MonteCarloProp(alpha_sheath_uncertainty,bias_alpha_sheath,alpha_sheath);
     k_insulation = MonteCarloProp(k_insulation_uncertainty,bias_k_insulation,k_insulation);
@@ -1820,7 +1902,8 @@ if MC == 1
     cp_sample = MonteCarloProp(uncertainty_cp_sample,bias_cp_sample,cp_sample);
     rho_sample = MonteCarloProp(uncertainty_rho_sample,bias_rho_sample,rho_sample);
     alpha_sample = MonteCarloProp(uncertainty_alpha_sample,bias_alpha_sample,alpha_sample);
-    emissivity_probe = MonteCarloProp(uncertainty_emissitivy_probe,bias_emissitivy_probe,emissivity_probe);
+    emissivity_probe = MonteCarloProp(uncertainty_emissivity_probe,bias_emissitivy_probe,emissivity_probe);
+    emissivity_crucible = MonteCarloProp(uncertainty_emissivity_crucible,bias_emissivity_crucible,emissivity_crucible);
 end
 
 

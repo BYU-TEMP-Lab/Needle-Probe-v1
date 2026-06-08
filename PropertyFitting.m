@@ -60,7 +60,7 @@ m=menu('Probe Calibration or Sample Test?',...
 if m == 1
     timewindow = [0 5]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.5 60]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [0.5 10]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
 else
     disp('No selection, program terminated')
     return
@@ -124,6 +124,7 @@ m=menu('Sample Material:',...
     'NaNO3-KNO3',...
     '1npNaNO3-KNO3',...
     'Ar',...
+    'MgNaCl',...
     'end');
 
 if m == 1
@@ -158,6 +159,8 @@ elseif m == 15
     sample = '1npNaNO3-KNO3';
 elseif m == 16
     sample = 'Ar';
+elseif m == 17
+    sample = 'MgNaCl';
 else
     disp('Cannot run data without a sample. Program terminated.')
     return
@@ -445,8 +448,8 @@ for n = 3:numel(names)
             objFun = @(x) Chi2(x, par_vector(Ifixpar), Ifitpar, Ifixpar, Sstart, signal, manual_delay, iplotfit, cp, IV);
 
             % 3. Define bounds
-            lb =  x0.*0; %0.7;
-            ub =  x0.*inf; %1.3;
+            lb =  x0.*0;
+            ub =  Inf(size(lb));
 
             % 3.5 Define specific bounds for certain properties
             for i = 1:length(SolveList)
@@ -474,8 +477,8 @@ for n = 3:numel(names)
                 if SolveList(i) == 12 || SolveList(i) == 13 % probe and crucible emissivity
                     % larger bounds on emissivity because of uncertainty
                     % regarding impact of molten salt on exposed surfaces
-                    lb(i) = x0(i)*0.5;
-                    ub(i) = x0(i)*1.5;
+                    lb(i) = x0(i)*1;
+                    ub(i) = x0(i)*2;
                 end
                 if SolveList(i) == 19 || SolveList(i) == 20 || SolveList(i) == 21 || SolveList(i) == 22 || SolveList(i) == 23 % radii
                     % smaller bounds on geometry due to measurement
@@ -486,7 +489,7 @@ for n = 3:numel(names)
                 if SolveList(i) == 30 % flux decay factor
                     % range of 0 - 1 because initial guess is 0
                     lb(i) = 0;
-                    ub(i) = 1;
+                    ub(i) = 0.001;
                 end
             end
 

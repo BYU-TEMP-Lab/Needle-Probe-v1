@@ -6,9 +6,9 @@ today = char(datetime('now','Format','MM-dd-yy,HH-mm'));
 
 probe = '3A-IN718-01';
 crucible = 'Inconel625';
-sample = 'Ar';
-tvec = [0.001 60];
-tempvec = [22 100 150 200 250 300 350 400 450 500 550 600 650 700];
+sample = 'MgNaCl';
+tvec = [0.0001 70];
+tempvec = [500 550 600 650 700 750 800];
 parwanted = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31];
 
 baseColors = lines(8); 
@@ -66,7 +66,8 @@ for i = 1:length(tempvec)
         set(gcf, 'Position', [0,0,800,800])
         hold on
         semilogx(t(2:end),sensitivity,'Color',c(j,:),'LineStyle',s{j},'LineWidth',1.5)
-        Plot X_p
+        % xlim([0.0001 60]);
+        % Plot X_p
         % semilogx(t, X_p, 'Color', c(j,:), 'LineStyle', s{j}, 'LineWidth', 1.5)
         % ylabel('Scaled Sensitivity X_p (K)');
         hold on
