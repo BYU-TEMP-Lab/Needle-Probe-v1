@@ -10,7 +10,7 @@ global_fitting = off; % Uses fminsearch when off
 
 Full_Analysis = off; %Makes the code do an entire analysis with Monte Carlo and chi2 error analyses and plots the results.
 
-MC = off; %Turns on Monte Carlo error analysis.
+MC = on; %Turns on Monte Carlo error analysis.
 
 cp = off; %Makes the program fit for specific heat instead of thermal diffusivity. Requires accurate density data.
 rhocp = off; %Fits for rho*Cp, use if no known density data exists. Will overwrite cp;
@@ -60,7 +60,7 @@ m=menu('Probe Calibration or Sample Test?',...
 if m == 1
     timewindow = [0 5]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.01 100]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [0.01 15]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
 else
     disp('No selection, program terminated')
     return

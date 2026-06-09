@@ -379,6 +379,16 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Scatter and Index of Refraction%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+index_of_refraction = 1.462 - (1.4e-4)*T; %Solar salts (citation needed)
+scatter = 0;
+
+h_convection = 10; %just an assumption. Don't know if there's a better way to measure this.Study done on 1/18/23 denoted that this parameter does not affect our results in any appreciable way
+
+Flux_decay = 0; % Decay constant
+decay_point = 0; % Decay point
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MgCl2-NaCl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(sample, 'MgNaCl')
     % Thermal Conductivity
@@ -393,10 +403,21 @@ if strcmp(sample, 'MgNaCl')
     % Thermal Diffusivity
     alpha_MgNaCl = k_MgNaCl/(rho_MgNaCl*cp_MgNaCl);
 
+    index_of_refraction = 1.565-0.00014421*(T-273.15); % https://doi.org/10.1016/0009-2614(84)85479-2
+
     k_sample = k_MgNaCl;
     cp_sample = cp_MgNaCl;
     rho_sample = rho_MgNaCl;
     alpha_sample = alpha_MgNaCl;
+    
+    uncertainty_k_sample = 0.05;
+    bias_k_sample = 0;
+    uncertainty_cp_sample = 0.05;
+    bias_cp_sample = 0;
+    uncertainty_rho_sample = 0.05;
+    bias_rho_sample = 0;
+    uncertainty_alpha_sample = 0.05;
+    bias_alpha_sample = 0;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1413,16 +1434,6 @@ if strcmp(sample,'KCl-ZnCl')
     alpha_sample = alpha_ZnCl2_KCl;
 
 end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Scatter and Index of Refraction%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-index_of_refraction = 1.462 - (1.4e-4)*T; %Solar salts (citation needed)
-scatter = 0;
-
-h_convection = 10; %just an assumption. Don't know if there's a better way to measure this.Study done on 1/18/23 denoted that this parameter does not affect our results in any appreciable way
-
-Flux_decay = 0; % Decay constant
-decay_point = 0; % Decay point
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Probe Geometry and Effective Properties
