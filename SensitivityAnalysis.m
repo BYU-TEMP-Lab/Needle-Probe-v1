@@ -7,7 +7,7 @@ today = char(datetime('now','Format','MM-dd-yy,HH-mm'));
 probe = '3A-IN718-01';
 crucible = 'Inconel625';
 sample = 'MgNaCl';
-tvec = [0.0001 10];
+tvec = [0.0001 60];
 tempvec = [500 550 600 700 800];
 parwanted = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31];
 
@@ -53,26 +53,27 @@ for i = 1:length(tempvec)
         f_initial = NeedleProbeModel(t,par_vector,cp,IV);
         f_varied = NeedleProbeModel(t,par_vector_varied,cp,IV);
 
-        dy = diff(f_initial(:))./diff(log(t(:)));
-        dy_varied = diff(f_varied(:))./diff(log(t(:)));
+        % dy = diff(f_initial(:))./diff(log(t(:)));
+        % dy_varied = diff(f_varied(:))./diff(log(t(:)));
 
-        % % Add this inside your parameter loop, replacing the diff() calculations
-        % delta_p = 0.05; % You are reducing by 5%
-        % X_p = (f_initial - f_varied) / delta_p;
+        % Add this inside your parameter loop, replacing the diff() calculations
+        delta_p = 0.05; % You are reducing by 5%
+        X_p = (f_initial - f_varied) / delta_p;
 
-        sensitivity = 100*(dy_varied-dy)./dy;
+        % sensitivity = 100*(dy_varied-dy)./dy;
 
         figure(i)
         set(gcf, 'Position', [0,0,800,800])
         hold on
-        semilogx(t(2:end),sensitivity,'Color',c(j,:),'LineStyle',s{j},'LineWidth',1.5)
+        % semilogx(t(2:end),sensitivity,'Color',c(j,:),'LineStyle',s{j},'LineWidth',1.5)
         % xlim([0.0001 60]);
         % Plot X_p
-        % semilogx(t, X_p, 'Color', c(j,:), 'LineStyle', s{j}, 'LineWidth', 1.5)
-        % ylabel('Scaled Sensitivity X_p (K)');
+        semilogx(t, X_p, 'Color', c(j,:), 'LineStyle', s{j}, 'LineWidth', 1.5)
+        ylabel('Scaled Sensitivity X_p (K)');
         hold on
         title(['SA for ', probe, ' with ', sample, ', in ', crucible, ' at ', int2str(avgTemp), '°C'])
         set(gca, 'XScale', 'log');
+        % set(gca, 'YScale', 'log');
         xlabel('Time (s)');
         % ylabel('Relative Change of dT/dt (%)');
         legend(par_names(parwanted(1:j)),'Location','eastoutside')

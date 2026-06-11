@@ -1,4 +1,7 @@
-MC_runs = readtable("MgNaCl 3A-IN718-01 Inconel625 06,08,26,14-24_fminsearch MC_runinfo_LABELLED.txt",VariableNamingRule="preserve");
+clear
+[file_sought,file_location] = uigetfile('.txt', 'Select the output fminsearch file.');
+cd(file_location)
+MC_runs = readtable(file_sought,VariableNamingRule="preserve");
 
 targetTemps = [500, 550, 600, 700, 800];
 numCols = width(MC_runs);

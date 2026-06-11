@@ -33,20 +33,20 @@ else
     MC_iteration_limit = 1;
 end
 
-if rhocp == 1
-    cp = 2;
-end
+% if rhocp == 1
+%     cp = 2;
+% end
 
-if cp == 1
-    Para2 = 'Cp';
-    Para2full = 'Specific Heat [J/(K*Kg)]';
-elseif cp == 2
-    Para2 = 'rho*Cp';
-    Para2full = 'Density*Specific Heat [J/(K*m^3)]';
-else
-    Para2 ='alpha';
-    Para2full = 'Thermal Diffusivity [m^2/s]';
-end
+% if cp == 1
+%     Para2 = 'Cp';
+%     Para2full = 'Specific Heat [J/(K*Kg)]';
+% elseif cp == 2
+%     Para2 = 'rho*Cp';
+%     Para2full = 'Density*Specific Heat [J/(K*m^3)]';
+% else
+%     Para2 ='alpha';
+%     Para2full = 'Thermal Diffusivity [m^2/s]';
+% end
 
 currentFOLDER = pwd;
 today = char(datetime('now','Format','MM,dd,yy,HH-mm'));
@@ -60,7 +60,7 @@ m=menu('Probe Calibration or Sample Test?',...
 if m == 1
     timewindow = [0 5]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.01 15]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [23 24]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
 else
     disp('No selection, program terminated')
     return
@@ -317,6 +317,21 @@ for p=1:length(SolveList)
 end
 fprintf(textfile, '%s', 'Chi2 Error');
 fprintf(textfile, '\n');
+
+MCruninfo = fopen([run_name, ' MC_runinfo.txt'],'at');
+fprintf(MCruninfo, '%s\t', 'Run');
+fprintf(MCruninfo, '%s\t', 'Voltage(V)');
+fprintf(MCruninfo, '%s\t', 'Temp(°C)');
+for p=1:length(SolveList)
+    fprintf(MCruninfo, '%s', [par_names(str2double(SolveListNames(p)),1),'(',par_names(str2double(SolveListNames(p)),2),')']);
+    fprintf(MCruninfo, '\t');
+end
+for p=1:length(par_names)
+    fprintf(MCruninfo, '%s', [par_names(p,1),'(',par_names(p,2),')']);
+    fprintf(MCruninfo, '\t');
+end
+fprintf(MCruninfo, '\n');
+
 cd(currentFOLDER)
 
 for n = 3:numel(names)
@@ -642,11 +657,9 @@ for n = 3:numel(names)
         cd(runfolder)
 
         MCruninfo = fopen([run_name, ' MC_runinfo.txt'],'at');
-        fprintf(MCruninfo, '%s', num2str(run));
-        fprintf(MCruninfo,'\t');
-        fprintf(MCruninfo, '%s', [num2str(aveTemp), '°C ', num2str(Voltage),'V ']);
-        fprintf(MCruninfo,'\t');
-
+        fprintf(MCruninfo, '%s\t', num2str(run));
+        fprintf(MCruninfo, '%s\t', num2str(aveTemp));
+        fprintf(MCruninfo, '%s\t', num2str(Voltage));
         for d=1:npar
             if any([2 4 6 14 20 21]==Ifitpar(d))
                 fprintf(MCruninfo,' %e',fitresult(d));
@@ -656,9 +669,7 @@ for n = 3:numel(names)
                 fprintf(MCruninfo,'\t');
             end
         end
-
-        fprintf(MCruninfo, '%s', num2str(par_vector));
-
+        fprintf(MCruninfo, '%g\t', par_vector);
         fprintf(MCruninfo, '\n');
         fclose(MCruninfo);
 
@@ -764,15 +775,6 @@ for n = 3:numel(names)
         fprintf(textfile, '\n');
         fclose(textfile);
 
-        %         Header = {'Sample', 'Crucible', 'Temperature', 'Voltage', 'k_start', 'k_end', [Para2, ' start'],[Para2, ' end'],'Chi2 Error'};
-
-
-        %         if ~exist(ExcelFile,'dir')
-        %             writecell(Header,ExcelFile,'Sheet',1);
-        %         end
-
-        %         nextLINE = {sample, crucible, aveTemp, Voltage, par_vector(3), fitresult(1), Para2start, fitresult(2), Chi2_error};
-        %         writecell(nextLINE,ExcelFile,'Sheet',1,'WriteMode','append');
         disp(['Temperature: ' num2str(fix(aveTemp)) ' ' 'Voltage: ' num2str(Voltage)]);
         cd(currentFOLDER)
     end
