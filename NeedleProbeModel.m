@@ -1,4 +1,4 @@
-function f=NeedleProbeModel(t,par_vector,cp,IV)
+function f=NeedleProbeModel(t,par_vector,IV)
 %Seeks to solve for Probe thermocouple temperature when the liquid sample is surrounded by a crucible
 
 % Adjust time vector if not starting at 0
@@ -193,12 +193,6 @@ f = f((original_start_index):end);
         I = par_vector(29);
         k = par_vector(30); % Power decay
         decay_point = par_vector(31); % Power time
-
-        if cp == 1
-            alphasample = ksample/(rhosample*cpsample);
-        elseif cp == 2
-            alphasample = ksample/rhocp;
-        end
 
         area_convection=2*pi*rcrucible*L;   %outer crucible surface area [m^2]
 

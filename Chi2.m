@@ -1,4 +1,4 @@
-function chi2=Chi2(fitparam,fixparam,Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,cp,IV)
+function chi2=Chi2(fitparam,fixparam,Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,IV)
 
 persistent counter chi2vec
 
@@ -18,7 +18,7 @@ end
 counter=counter+1; %counts number of iterations
 param(Ifitpar)=abs(fitparam); %variable fitting parameters
 param(Ifixpar)=abs(fixparam); %fixed parameters
-Sfit=NeedleProbeModel(Time,param,cp,IV);
+Sfit=NeedleProbeModel(Time,param,IV);
 
 % minTime = min(Time);
 % maxTime = max(Time);
@@ -52,14 +52,6 @@ chi2=sum(abs(abs(Sfit-dTemp).^2)./length(dTemp)); %chi2 to be minimized
 % end
 
 chi2vec=[chi2vec;chi2];
-
-% if cp == 1
-%     para2 = 'Cp';
-% elseif cp == 2
-%     para2 = 'rhoCp';
-% else
-%     para2 = 'alpha';
-% end
 
 i = size(Ifitpar,2);
 
