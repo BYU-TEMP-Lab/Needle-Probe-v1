@@ -1,4 +1,4 @@
-function [plotfolder, datafolderUSE, aveTemp_vector] = ExtractData(run_name,raw_plot,runfolder,timewindow)
+function [plotfolder, datafolderUSE, aveTemp_vector, chiplotfolder] = ExtractData(raw_plot,runfolder,timewindow)
 
 currentfolder = pwd;
 starttime = timewindow(1);%set to 0 to start at the beginning. Make sure values are a multiple of the sampling period. 
@@ -25,19 +25,18 @@ while m == 1
 end
 
 
-plot = [run_name ' Plots'];
+plot = 'Plots';
 plotfolder = [runfolder '\' plot];
 if ~exist(plotfolder, 'dir')
     mkdir(plotfolder);
 end
 
-rawplotfolder = [plotfolder '\raw data'];
-if ~exist(rawplotfolder, 'dir')
-    mkdir(rawplotfolder);
+chiplotfolder = [plotfolder '\Chi2Plots'];
+if ~exist(chiplotfolder, 'dir')
+    mkdir(chiplotfolder)
 end
 
-
-use =  [run_name ' Useable Data'];
+use =  'Useable Data';
 datafolderUSE = [runfolder '\' use];
 
 i = 1;

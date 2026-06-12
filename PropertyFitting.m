@@ -8,12 +8,12 @@ off = 0;
 
 global_fitting = off; % Uses fminsearch when off
 
-MC = on; %Turns on Monte Carlo error analysis.
+MC = off; %Turns on Monte Carlo error analysis.
 
 raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
 iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
 manual_delay = off; %Adds in a manual delay that helps to see the fitting process. Significantly increases runtime.
-chi2plots = off; %show plots from the chi2 error analysis
+chi2plots = on; %show plots from the chi2 error analysis
 
 MC_iterations = 250; %The numbers of iterations to run as part of the Monte Carlo Analysis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -23,7 +23,7 @@ iterations = 0;
 if MC == 1
     MC_iteration_limit = MC_iterations;
 else
-    MC_iteration_limit = 1;
+    MC_iteration_limit = 0;
 end
 
 currentFOLDER = pwd;
@@ -259,7 +259,7 @@ end
 joinedString = char(strjoin(SolveListNames, '_'));
 
 if global_fitting == 0
-    run_name = [sample ' ' probe ' ' crucible ' ' today '_fminsearch'];
+    run_name = [sample ' ' probe ' ' crucible ' ' today '_fmincon'];
 else
     run_name = [sample ' ' probe ' ' crucible ' ' today '_global'];
 end
@@ -269,7 +269,7 @@ if ~exist(runfolder, 'dir')
     mkdir(runfolder);
 end 
 
-[plotfolder, datafolderUSE, aveTemp_vector] = ExtractData(run_name,raw_plot,runfolder,timewindow);
+[plotfolder, datafolderUSE, aveTemp_vector, chiplotfolder] = ExtractData(raw_plot,runfolder,timewindow);
 
 tic
 
@@ -277,8 +277,6 @@ datafolder = datafolderUSE;
 cd(datafolder);
 names = dir();
 cd(currentFOLDER);
-
-ExcelFile = [run_name '.xlsx'];
 
 Results = zeros(numel(names)-2, 9);
 
@@ -315,7 +313,6 @@ fprintf(MCruninfo, '\n');
 cd(currentFOLDER)
 
 for n = 3:numel(names)
-    disp("Fitting data to model for file "+num2str(n-2)+" of "+num2str(numel(names)-2))
     [~, fn] = fileparts(names(n).name);
     %loading data
     cd(datafolder);
@@ -367,16 +364,19 @@ for n = 3:numel(names)
     fprintf('number of data points: %i \n',ndata);
     aveTemp = aveTemp_vector(n-2);
 
-    for run = 1:MC_iteration_limit
+    for run = 1:MC_iteration_limit+1
+        
+        if run == 1
+            MC = 0;
+        else
+            MC = 1;
+        end
 
         [par_vector, par_names] = Properties(probe,crucible,sample,aveTemp,Voltage,VoltageSTD,Current,CurrentSTD,MC);
 
-        if ~exist('iexecuted','var')
-            n0=length(par_vector);			%total number of parameters
-            iexecuted=1;
-            ipar=1;			%fit parameter index for error test
-            ntest=20;		%number of error analysis values
-        end
+        n0=length(par_vector);			%total number of parameters
+        ipar=1;			%fit parameter index for error test
+        ntest=20;		%number of error analysis values
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         Ifitpar = SolveList;
@@ -396,19 +396,6 @@ for n = 3:numel(names)
         Ifixpar=find(a);	%fix parameter index array
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if global_fitting == 0
-            %%%%%%%%%% fminsearch fitting
-            % Sstart=NeedleProbeModel(Time,par_vector,IV);
-            % close all;
-            % 
-            % foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4 ...
-            %     );
-
-            % [fitresult, Chi2_value]=fminsearch('Chi2',par_vector(Ifitpar),foptions,par_vector(Ifixpar),Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,IV);
-
-            %[optimized_params, resnorm] = lsqcurvefit(objective_func, initial_params, x_data, y_data, [], [], options);
-
-            % fitresult = abs(fitresult);
-            
             %%%%%%% fmincon fitting
             Sstart=NeedleProbeModel(Time,par_vector,IV);
             close all;
@@ -474,7 +461,7 @@ for n = 3:numel(names)
 
             clear Chi2
 
-        else
+        elseif global_fitting == 1
             % Initialize starting parameters and options
             Sstart = NeedleProbeModel(Time, par_vector, IV); % Model initialization
             close all;
@@ -513,8 +500,8 @@ for n = 3:numel(names)
         param(Ifitpar)=fitresult;
         Sfit=NeedleProbeModel(Time,param,IV);
 
-        if MC == 0
-            figure('Visible','off');
+        if run == 1
+            figure(Visible='off');
             semilogx(Time,dTemp-Sfit,'o',Time,Sstart-Sfit,'o');
             zoom on;
             xlabel('Time(sec)');
@@ -523,16 +510,13 @@ for n = 3:numel(names)
             title(['Residuals: ', num2str(Voltage),'V ', num2str(aveTemp), '°C ' ,today]);
 
             f = gcf;
-            drawnow; %new
-            %cd(plotfolder);
-            name1 = [sample '_' crucible '_' num2str(aveTemp) '_Voltage' num2str(Voltage) '_residues' '.png'];
-            %saveas(f,name1);
-            fullPath = fullfile(plotfolder, name1); %new
-            exportgraphics(f, fullPath); %new
+            drawnow;
+            name1 = [sample '_' crucible '_' num2str(aveTemp) '°C_' num2str(Voltage) 'V_residues' '.png'];
+            fullPath = fullfile(plotfolder, name1);
+            exportgraphics(f, fullPath);
             close(f)
-            %cd(currentFOLDER);
 
-            figure('Visible','off');
+            figure(Visible='off');
             semilogx(Time,dTemp,'o', Time,Sstart, Time,Sfit);
             zoom on;
             xlabel('Time(sec)');
@@ -543,9 +527,9 @@ for n = 3:numel(names)
 
             f = gcf;
             drawnow;
-            name1 = [sample '_' crucible '_' num2str(aveTemp) '_Voltage' num2str(Voltage) ' result fit' '.png'];
-            fullPath = fullfile(plotfolder, name1); %new
-            exportgraphics(f, fullPath); %new
+            name1 = [sample '_' crucible '_' num2str(aveTemp) '°C_' num2str(Voltage) 'V_result_fit' '.png'];
+            fullPath = fullfile(plotfolder, name1);
+            exportgraphics(f, fullPath);
             close(f)
 
         end
@@ -576,28 +560,30 @@ for n = 3:numel(names)
 
         fitresult_run(run,:) = fitresult;
 
-        cd(runfolder)
-
-        MCruninfo = fopen([run_name, ' MC_runinfo.txt'],'at');
-        fprintf(MCruninfo, '%s\t', num2str(run));
-        fprintf(MCruninfo, '%s\t', num2str(aveTemp));
-        fprintf(MCruninfo, '%s\t', num2str(Voltage));
-        for d=1:npar
-            if any([2 4 6 14 20 21]==Ifitpar(d))
-                fprintf(MCruninfo,' %e',fitresult(d));
-                fprintf(MCruninfo,'\t');
-            else
-                fprintf(MCruninfo,' %f',fitresult(d));
-                fprintf(MCruninfo,'\t');
+        if run ~= 1
+            cd(runfolder)
+    
+            MCruninfo = fopen([run_name, ' MC_runinfo.txt'],'at');
+            fprintf(MCruninfo, '%s\t', num2str(run-1));
+            fprintf(MCruninfo, '%s\t', num2str(aveTemp));
+            fprintf(MCruninfo, '%s\t', num2str(Voltage));
+            for d=1:npar
+                if any([2 4 6 14 20 21]==Ifitpar(d))
+                    fprintf(MCruninfo,' %e',fitresult(d));
+                    fprintf(MCruninfo,'\t');
+                else
+                    fprintf(MCruninfo,' %f',fitresult(d));
+                    fprintf(MCruninfo,'\t');
+                end
             end
+            fprintf(MCruninfo, '%g\t', par_vector);
+            fprintf(MCruninfo, '\n');
+            fclose(MCruninfo);
+    
+            cd(currentFOLDER)
         end
-        fprintf(MCruninfo, '%g\t', par_vector);
-        fprintf(MCruninfo, '\n');
-        fclose(MCruninfo);
-
-        cd(currentFOLDER)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        if MC == 0
+        if run == 1
             %error analysis
             ipar=min(length(Ifitpar),ipar);
             parmin=0.5*fitresult(ipar);
@@ -610,7 +596,7 @@ for n = 3:numel(names)
                 partest=parvec(ii);
                 fitresulttest=fitresult;
                 fitresulttest(ipar)=partest;
-                chitestvec(ii)=[Chi2(fitresulttest,par_vector(Ifixpar),Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,cp,IV)];
+                chitestvec(ii)=[Chi2(fitresulttest,par_vector(Ifixpar),Ifitpar,Ifixpar,Sstart,signal,manual_delay,iplotfit,IV)];
             end
             clear Chi2
 
@@ -623,13 +609,23 @@ for n = 3:numel(names)
                 familyvec(:,ii)=familyresult;
             end
 
-            P=polyfit(parvec,chitestvec,2); % 2);
+            % linexEquation = 'a*(exp(b*x) - b*x -1';
+            % myFitType = fittype(linexEquation, 'independent', 'x', 'dependent', 'y');
+            % options = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1,1]);
+            % 
+            % [curve,goodness] = fit(parvec,chitestvec,myFitType);
+            % 
+            % parabool = curve(parvec);
+            % 
+            % Chi2_error = ?;
+
+            P=polyfit(parvec,chitestvec,2);
             parabool=polyval(P,parvec);
             sigpar=sqrt(abs(-P(2)^2+4*P(1)*P(3)))/(2*P(1));
             Chi2_error = sigpar/sqrt(ndata);
 
             if chi2plots == 1
-                figure('Visible','off');
+                figure(Visible="off");
                 comstr=['par. ',int2str(ipar),' varies between ',num2str(parmin),' and ',num2str(parmax)];
 
                 semilogx(Time,familyvec);
@@ -638,32 +634,55 @@ for n = 3:numel(names)
                 ylabel('▲T (Kelvin)');
                 title(['familyvec over Tvec',today,' ',comstr]);
 
-                figure('Visible','off');
+                f = gcf;
+                drawnow;
+                name1 = [num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_1.png'];
+                fullPath = fullfile(chiplotfolder, name1);
+                exportgraphics(f, fullPath);
+                close(f)
+
+                figure(Visible="off");
                 plot(parvec,chitestvec,'o',parvec,parabool);
                 chisave=[parvec,chitestvec,parabool];
                 title([run_name,' par(',int2str(ipar),'): ',num2str(fitresult(ipar)),'+/-',num2str(sigpar),'/sqrt(',int2str(ndata),') file: ',fn]);
                 zoom on;
 
-                figure('Visible','off');
+                f = gcf;
+                drawnow;
+                name1 = [num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_2.png'];
+                fullPath = fullfile(chiplotfolder, name1);
+                exportgraphics(f, fullPath);
+                close(f)
+
+                figure(Visible="off");
                 semilogx(Time,dTemp,'o',Time,Sstart,Time,Sfit,Tvec,familyvec)
                 zoom on;
                 xlabel('Time(sec)');
                 ylabel('exp,startfit,resultfit,trial curves');
-                title(['family vec 2',today,' ',comstr]);
+                title(['family vec 2 ',today,' ',comstr]);
+
+                f = gcf;
+                drawnow;
+                name1 = [num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_3.png'];
+                fullPath = fullfile(chiplotfolder, name1);
+                exportgraphics(f, fullPath);
+                close(f)
             end
 
         end
-        iterations = iterations + 1;
-
-        allresults(iterations,1) = aveTemp;
-        for g=1:npar
-            allresults(iterations,(g+1)) = fitresult(g);
-        end
-        allresults(iterations,g+2) = Chi2_value;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        if run == 1
+            iterations = iterations + 1;
+    
+            allresults(iterations,1) = aveTemp;
+            for g=1:npar
+                allresults(iterations,(g+1)) = fitresult(g);
+            end
+            allresults(iterations,g+2) = Chi2_value;
+        end 
+       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
 
-    if MC == 0
+    if run == 1
         cd(runfolder)
         textfile = fopen([run_name, '.txt'],'at');
         fprintf(textfile, '%f\t%f\t',Voltage, aveTemp);
@@ -686,6 +705,7 @@ for n = 3:numel(names)
         disp(['Temperature: ' num2str(fix(aveTemp)) ' ' 'Voltage: ' num2str(Voltage)]);
         cd(currentFOLDER)
     end
+
 end
 
 cd(runfolder)
