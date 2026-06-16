@@ -113,26 +113,28 @@ alpha_Alumina = k_Alumina/(rho_Alumina*cp_Alumina);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %ALUMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%%
-%Thermal Conductivity- Alumel Not needed right now, but may be needed later
-if T>= 100 && T < 400
-    k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3; % COMSOL
-elseif T >= 400 && T < 773
-    k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; % COMSOL
-elseif T >= 773
-    k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %out of COMSOL'S RANGE
-end
+%Thermal Conductivity- Alumel
+% if T>= 100 && T < 400
+%     k_Alumel = 9.346236+0.1204046*T^1-2.33021E-4*T^2+1.774554E-7*T^3; % COMSOL
+% elseif T >= 400 && T < 773
+%     k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; % COMSOL
+% elseif T >= 773
+%     k_Alumel = 39.91124-0.08021887*T^1+1.89707E-4*T^2-1.037644E-7*T^3; %out of COMSOL'S RANGE
+% end
+k_Alumel = 0.0298301*T + 17.9676; % https://benthamopenarchives.com/contents/pdf/TOTHERJ/TOTHERJ-4-36.pdf
 
 % Density- Alumel
-rho_Alumel = 8600; %Not needed right now, but may be needed later
+rho_Alumel = 8600; %
 
-% % Heat Capacity- Alumel Not needed right now, but may be needed later
-if T >=293 && T < 360
-    cp_Alumel = 0.325*T + 387.17; % Linear extension from first 3 points of data from https://doi.org/10.1007/BF01563713
-elseif T >=360 && T < 760
-    cp_Alumel = 1E-06*T^3 - 0.0021*T^2 + 1.4178*T + 217.16; % 3rd order fit to data from https://doi.org/10.1007/BF01563713
-elseif T >= 760
-    cp_Alumel = 0.15*T + 459; % Linear extension from last 3 data points from https://doi.org/10.1007/BF01563713
-end
+% % Heat Capacity- Alumel
+% if T >=293 && T < 360
+%     cp_Alumel = 0.325*T + 387.17; % Linear extension from first 3 points of data from https://doi.org/10.1007/BF01563713
+% elseif T >=360 && T < 760
+%     cp_Alumel = 1E-06*T^3 - 0.0021*T^2 + 1.4178*T + 217.16; % 3rd order fit to data from https://doi.org/10.1007/BF01563713
+% elseif T >= 760
+%     cp_Alumel = 0.15*T + 459; % Linear extension from last 3 data points from https://doi.org/10.1007/BF01563713
+% end
+cp_Alumel = 0.0751194*T + 452.678; % https://benthamopenarchives.com/contents/pdf/TOTHERJ/TOTHERJ-4-36.pdf
 
 % Thermal Diffusivity- Alumel
 % if T >= 100 && T < 175
@@ -148,24 +150,24 @@ alpha_Alumel = k_Alumel/(rho_Alumel*cp_Alumel);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %CHROMEL: VALID UP TO 450K (177C) (ASSUMPTIONS ALLOW USAGE BEYOND 450K)%%%%
-%Thermal Conductivity- Chromel Not needed right now, but may be needed later
+%Thermal Conductivity- Chromel
 k_Chromel = 0.0191*T + 11.851; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 1, Table 157, Curve 6
 
 % Density- Chromel
-rho_Chromel = 8670; %Not needed right now, but may be later
+rho_Chromel = 8670; %
 
-% Heat Capacity- Chromel- Not needed right now, but may be later
-if T >= 293 && T < 360
-    % cp_Chromel =
-    % -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4; % COMSOL
-    cp_Chromel = 0.675*T + 188.83; % Linear extension from first 3 data points from https://doi.org/10.1007/BF01563713
-elseif T >= 360 && T <= 760
-    % cp_Chromel = 0.1786*T + 375.07; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 4, Table 100, Curve 9
-    cp_Chromel = -7E-09*T^4 + 2E-05*T^3 - 0.0173*T^2 + 7.5011*T - 746.92; % 4th order fit to data from https://doi.org/10.1007/BF01563713
-elseif T > 760
-    cp_Chromel = 0.15*T + 414; % Linear extension from last 3 data points from https://doi.org/10.1007/BF01563713
-end
-
+% Heat Capacity- Chromel
+% if T >= 293 && T < 360
+%     % cp_Chromel =
+%     % -169.134351+5.88577506*T^1-0.0235877058*T^2+0.0000447834022*T^3-0.0000000321153924*T^4; % COMSOL
+%     cp_Chromel = 0.675*T + 188.83; % Linear extension from first 3 data points from https://doi.org/10.1007/BF01563713
+% elseif T >= 360 && T <= 760
+%     % cp_Chromel = 0.1786*T + 375.07; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 4, Table 100, Curve 9
+%     cp_Chromel = -7E-09*T^4 + 2E-05*T^3 - 0.0173*T^2 + 7.5011*T - 746.92; % 4th order fit to data from https://doi.org/10.1007/BF01563713
+% elseif T > 760
+%     cp_Chromel = 0.15*T + 414; % Linear extension from last 3 data points from https://doi.org/10.1007/BF01563713
+% end
+cp_Chromel = 0.17864766*T+375.07175471; % Thermophysical properties of matter, ISBN: 0306670208, Vol. 1, Table 100, Curve 9
 
 % Thermal Diffusivity- Chromel
 % if T >= 100 && T < 175
@@ -250,8 +252,7 @@ alpha_ceramabond = k_ceramabond/(rho_ceramabond*cp_ceramabond);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %NICHROME: VALID UP TO 1400 K %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Thermal Conductivity- Nichrome Not needed right now, but may be needed
-%later
+%Thermal Conductivity- Nichrome
 if T>= 290 && T < 570
     k_Nichrome = 15; % https://www.kanthal.com/en/products/datasheets/material-datasheets/wire/resistance-heating-wire-and-resistance-wire/nikrothal-80/
 elseif T >= 570 && T < 1235
@@ -260,13 +261,13 @@ elseif T >= 1235
     k_Nichrome = 2.579 + 0.019*T; % https://doi.org/10.1016/j.tca.2009.04.015
 end
 
-% Heat Capacity- Nichrome Not needed right now, but may be needed later
+% Heat Capacity- Nichrome
 if T >=290 && T < 1370
     cp_Nichrome = -1E-07*T^3 + 0.0003*T^2 + 0.0499*T + 456.95; % Excel 3rd order fit to Kanthal
 end
 
 % Density- Nichrome
-rho_Nichrome = 8300; %Not needed right now, but may be needed later
+rho_Nichrome = 8300; %
 
 % Thermal Diffusivity- Nichrome
 alpha_Nichrome = k_Nichrome/(rho_Nichrome * cp_Nichrome);
@@ -1596,10 +1597,15 @@ if strcmp(probe,"3A-IN718-01")
     % r_4 = 8.232404e-04;
     % r_5 = 1.263517e-03;
 
-    % 6/8/26 Calibration
-    r_3 = 6.472083e-04;
-    r_4 = 8.252764e-04;
-    r_5 = 1.263211e-03;
+    % % 6/8/26 Calibration
+    % r_3 = 6.472083e-04;
+    % r_4 = 8.252764e-04;
+    % r_5 = 1.263211e-03;
+
+    % 6/16/26 Calibration
+    r_3 = 6.458333e-04;
+    r_4 = 8.238038e-04;
+    r_5 = 1.263706e-03;
 
     % Areas for each material %Not needed right now, but may be needed later
     %A_alumel = pi*(r_TC_wire^2);%only 1 alumel wire
@@ -1643,16 +1649,27 @@ if strcmp(probe,"3A-IN718-01")
     % emissivity_probe = 3.990057e-01;
     % Flux_decay = 3.804167e-04;
     
-    % 6/8/26 Calibration
-    k_eff_wire = -3.067769e-02*(T-273.15) + 3.195257e+01;
-    alpha_eff_wire = -1.243231e-08*(T-273.15) + 1.012591e-05;
-    k_insulation = -3.789386e-02*(T-273.15) + 3.175149e+01;
-    alpha_insulation = -1.132827e-08*(T-273.15) + 8.514835e-06;
-    RthInsShth = 1.344667e-01;
-    k_sheath = 1.850978e-02*(T-273.15) + 8.581231e+00;
-    alpha_sheath = 3.958333e-06;
-    emissivity_probe = 3.924053e-01;
-    Flux_decay = 3.578333e-04;
+    % % 6/8/26 Calibration
+    % k_eff_wire = -3.067769e-02*(T-273.15) + 3.195257e+01;
+    % alpha_eff_wire = -1.243231e-08*(T-273.15) + 1.012591e-05;
+    % k_insulation = -3.789386e-02*(T-273.15) + 3.175149e+01;
+    % alpha_insulation = -1.132827e-08*(T-273.15) + 8.514835e-06;
+    % RthInsShth = 1.344667e-01;
+    % k_sheath = 1.850978e-02*(T-273.15) + 8.581231e+00;
+    % alpha_sheath = 3.958333e-06;
+    % emissivity_probe = 3.924053e-01;
+    % Flux_decay = 3.578333e-04;
+
+    % 6/16/26 Calibration
+    k_eff_wire = -3.052517e-02*(T-273.15) + 3.197929e+01;
+    alpha_eff_wire = -1.211148e-08*(T-273.15) + 1.009517e-05;
+    k_insulation = -3.787862e-02*(T-273.15) + 3.175047e+01;
+    alpha_insulation = -1.132215e-08*(T-273.15) + 8.508585e-06;
+    RthInsShth = 1.340965e-01;
+    k_sheath = 1.832309e-02*(T-273.15) + 8.715321e+00;
+    alpha_sheath = 4.000000e-06;
+    emissivity_probe = 4.046331e-01;
+    Flux_decay = 4.167500e-04;
 
 end
 
@@ -1670,10 +1687,13 @@ rsample =  0.00209;
 % rcrucible = 1.266300e-02;
 % rsample = 2.173750e-03;
 
-% 6/8/26 Calibration
-rcrucible = 1.269837e-02;
-rsample = 2.174917e-03;
+% % 6/8/26 Calibration
+% rcrucible = 1.269837e-02;
+% rsample = 2.174917e-03;
 
+% 6/16/26 Calibration
+rcrucible = 1.267637e-02;
+rsample = 2.167625e-03;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %STAINLESS STEEL 316 (SOLID/POLISHED/OXIDIZED) %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1712,10 +1732,15 @@ if strcmp(crucible,'Inconel625')
     % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
     % emissivity_crucible = 1.331416e-01;
 
-    % 6/8/26 Calibration
-    k_crucible = 1.949166e-02*(T-273.15) + 7.718652e+00;
+    % % 6/8/26 Calibration
+    % k_crucible = 1.949166e-02*(T-273.15) + 7.718652e+00;
+    % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
+    % emissivity_crucible = 3.169445e-01;
+
+    % 6/16/26 Calibration
+    k_crucible = 1.949411e-02*(T-273.15) + 7.717308e+00;
     alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
-    emissivity_crucible = 3.169445e-01;
+    emissivity_crucible = 3.214205e-01;
 
 end
 
