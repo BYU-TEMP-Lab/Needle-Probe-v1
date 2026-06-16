@@ -32,7 +32,7 @@ for i = 1:length(targetTemps)
     sum_temp = 0;
     sum_squares = 0;
     for j = rb:re
-        sum_temp = sum_temp + SolvedPropTable{j,"K_Sample_W__m_K__"};
+        sum_temp = sum_temp + SolvedPropTable{j,"K__Sample_W__m_K__"};
         test_unc = SolvedPropTable{j,"Chi2Error"};
         sum_squares = sum_squares + test_unc^2;
     end
@@ -54,7 +54,7 @@ for n = 1:length(targetTemps)
     end
     rb = min(groupIndicesR);
     re = max(groupIndicesR);
-    stdev = std(SolvedPropTable{rb:re,"K_Sample_W__m_K__"});
+    stdev = std(SolvedPropTable{rb:re,"K__Sample_W__m_K__"});
     N = re - (rb-1); % number of tests
     nu = N -1; % degrees of freedom
     p = 0.975;
@@ -69,7 +69,7 @@ cd(file_location)
 MC_runs = readtable(file_sought,VariableNamingRule="preserve");
 
 numCols = width(MC_runs);
-tempValsMC = MC_runs{:, 2};
+tempValsMC = MC_runs{:, "Temp(°C)"};
 roughTempsMC = round(tempValsMC / 50) * 50;
 
 MC_Uncertainty_Results = table;
@@ -82,10 +82,10 @@ for k = 1:length(targetTemps)
     end
     rb = min(groupIndicesMC);
     re = max(groupIndicesMC);
-    stdev = std(MC_runs{rb:re,"K_Sample(W/(m*K))"});
+    stdev = std(MC_runs{rb:re,"K\_Sample(W/(m*K))"});
 
     figure;
-    histogram(MC_runs{rb:re,"K_Sample(W/(m*K))"},'BinMethod','fd');
+    histogram(MC_runs{rb:re,"K\_Sample(W/(m*K))"},'BinMethod','fd');
     title("MC Results, "+string(targetTemps(k))+"°C")
     xlabel("Sample Thermal Conductivity (W/m*K)")
     ylabel("Count")

@@ -10,7 +10,7 @@ global_fitting = off; % Uses fminsearch when off
 
 MC = on; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
 
-raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
+raw_plot = on; %Create plots of the raw data. Keep off to increase speed.
 iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
 manual_delay = off; %Adds in a manual delay that helps to see the fitting process. Significantly increases runtime.
 chi2plots = on; %show plots from the chi2 error analysis
