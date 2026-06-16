@@ -8,7 +8,7 @@ off = 0;
 
 global_fitting = off; % Uses fminsearch when off
 
-MC = on; %Turns on Monte Carlo error analysis.
+MC = on; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
 
 raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
 iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
@@ -34,7 +34,7 @@ m=menu('Probe Calibration or Sample Test?',...
     'Sample Test', ...
     'end');
 
-%Sets the time interval to be analyzed, in seconds. Set beginning to 0 to start from the beginning
+%Sets the time interval to be analyzed, in seconds.
 if m == 1
     timewindow = [0 5]; % early and short to capture probe properties
 elseif m == 2
@@ -387,7 +387,7 @@ for n = 3:numel(names)
             parlabel(b) = par_names(Ifitpar(b),1) + ' [' + par_names(Ifitpar(b),2) + ']';
         end
 
-        fitresult_run = zeros(MC_iteration_limit,npar);
+        fitresult_run = zeros(MC_iteration_limit+1,npar);
 
         a=ones(1,n0);
         a(Ifitpar)=0;
@@ -563,8 +563,8 @@ for n = 3:numel(names)
     
             MCruninfo = fopen([run_name, ' MC_runinfo.txt'],'at');
             fprintf(MCruninfo, '%s\t', num2str(run-1));
-            fprintf(MCruninfo, '%s\t', num2str(aveTemp));
             fprintf(MCruninfo, '%s\t', num2str(Voltage));
+            fprintf(MCruninfo, '%s\t', num2str(aveTemp));
             for d=1:npar
                 if any([2 4 6 14 20 21]==Ifitpar(d))
                     fprintf(MCruninfo,' %e',fitresult(d));

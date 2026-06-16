@@ -84,7 +84,7 @@ else
         zoom on;
         xlabel('x-variable');
         ylabel('exp,startfit,resultfit ');
-        title([today, ' ' num2str(param(12)) 'V ', num2str(param(11)) '°C', ' fit iteration: ',int2str(counter)]);
+        title([today, ' ' num2str(param(17)) 'V ', num2str(param(16)) '°C', ' fit iteration: ',int2str(counter)]);
         subplot(2,1,2);
         semilogy(1:length(chi2vec),chi2vec);
         xlabel('iteration');

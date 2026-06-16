@@ -19,7 +19,8 @@ for k = 1:length(files)
     
     % Read the data
     data = readtable(fullFileName);
-    data.Properties.VariableNames = {'Time' , 'TemperatureDelta' , 'Voltage' , 'Current'};
+    varNames = {'Time', 'TemperatureDelta', 'Voltage', 'Current'};
+    data.Properties.VariableNames = varNames(1:width(data));
     
     % Create a new figure, naming the window after the file
     fig = figure('Name', baseFileName, 'NumberTitle', 'off');

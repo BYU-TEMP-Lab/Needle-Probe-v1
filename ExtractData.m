@@ -31,6 +31,12 @@ if ~exist(plotfolder, 'dir')
     mkdir(plotfolder);
 end
 
+rawplotfolder = [plotfolder, '\raw_data'];
+if ~exist(rawplotfolder, 'dir')
+    mkdir(rawplotfolder);
+end
+
+
 chiplotfolder = [plotfolder '\Chi2Plots'];
 if ~exist(chiplotfolder, 'dir')
     mkdir(chiplotfolder)

@@ -13,9 +13,9 @@ testInfo = strsplit(file_sought);
 sample = testInfo(1);
 probe = testInfo(2);
 crucible = testInfo(3);
-date = extractBefore(testInfo(4),"_");
+date = extractBefore(testInfo(4), "_");
 
-tempVals = SolvedPropTable{:,2};
+tempVals = SolvedPropTable{:,"Temp__C_"};
 roughTemps = round(tempVals/50)*50;
 
 Fit_Uncertainty_Results = table;
@@ -57,8 +57,8 @@ for n = 1:length(targetTemps)
     stdev = std(SolvedPropTable{rb:re,"K_Sample_W__m_K__"});
     N = re - (rb-1); % number of tests
     nu = N -1; % degrees of freedom
-    t_table = dictionary([1,2,3,4,5,6,7,8,9,10],[12.706,4.303,3.182,2.770,2.571,2.447,2.365,2.306,2.262,2.228]);
-    uncR = t_table(nu)*(stdev/sqrt(N));
+    p = 0.975;
+    uncR = tinv(p,nu)*(stdev/sqrt(N));
     
     Repeatability_Uncertainty_Results(end+1,:)={targetTemps(n) uncR};
 end
@@ -95,9 +95,13 @@ end
 MC_Uncertainty_Results.Properties.VariableNames = {'Temperature','Standard_Deviation','Uncertainty'};
 
 Total_Uncertainty_Results = table;
-for m = 1:height(Fit_Uncertainty_Results)
-    uncT = sqrt(Fit_Uncertainty_Results{m,"Uncertainty"}^2 + Repeatability_Uncertainty_Results{m,"Uncertainty"}^2 + MC_Uncertainty_Results{m,"Uncertainty"}^2);
-    Total_Uncertainty_Results(end+1,:) = {targetTemps(m) uncT};
+temps = intersect(intersect(Fit_Uncertainty_Results.Temperature, Repeatability_Uncertainty_Results.Temperature), MC_Uncertainty_Results.Temperature);
+for m = 1:numel(temps)
+    t = temps(m);
+    uncF = Fit_Uncertainty_Results.Uncertainty(Fit_Uncertainty_Results.Temperature==t);
+    uncR = Repeatability_Uncertainty_Results.Uncertainty(Repeatability_Uncertainty_Results.Temperature==t);
+    uncMC = MC_Uncertainty_Results.Uncertainty(MC_Uncertainty_Results.Temperature==t);
+    Total_Uncertainty_Results(end+1,:) = {t sqrt(uncF.^2 + uncR.^2 + uncMC.^2)};
 end
 Total_Uncertainty_Results.Properties.VariableNames = {'Temperature','Uncertainty'};
 

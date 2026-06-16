@@ -46,36 +46,39 @@ for i = 1:length(tempvec)
         par_vector_varied = par_vector;
         par_vector_varied(k) = par_vector_varied(k)*0.95;
 
-        t = linspace(tbegin,tend,((tend-tbegin)/0.001));
+        t = linspace(tbegin,tend,floor((tend - tbegin) / 0.001) + 1);
         t = t';
         IV = 1;
         cp = 1;
-        f_initial = NeedleProbeModel(t,par_vector,cp,IV);
-        f_varied = NeedleProbeModel(t,par_vector_varied,cp,IV);
+        f_initial = NeedleProbeModel(t,par_vector,IV);
+        f_varied = NeedleProbeModel(t,par_vector_varied,IV);
 
-        % dy = diff(f_initial(:))./diff(log(t(:)));
-        % dy_varied = diff(f_varied(:))./diff(log(t(:)));
+        % Sloped Based
+        dy = diff(f_initial(:))./diff(log(t(:)));
+        dy_varied = diff(f_varied(:))./diff(log(t(:)));
+        sensitivity = 100*(dy_varied-dy)./dy;
 
-        % Add this inside your parameter loop, replacing the diff() calculations
-        delta_p = 0.05; % You are reducing by 5%
-        X_p = (f_initial - f_varied) / delta_p;
-
-        % sensitivity = 100*(dy_varied-dy)./dy;
+        % % Magnitude Based
+        % delta_p = 0.05; % You are reducing by 5%
+        % X_p = (f_initial - f_varied) / delta_p;
 
         figure(i)
         set(gcf, 'Position', [0,0,800,800])
         hold on
-        % semilogx(t(2:end),sensitivity,'Color',c(j,:),'LineStyle',s{j},'LineWidth',1.5)
+        % Slope Based
+        semilogx(t(2:end),sensitivity,'Color',c(j,:),'LineStyle',s{j},'LineWidth',1.5)
+        ylabel('Relative Change of dT/dt (%)');
         % xlim([0.0001 60]);
-        % Plot X_p
-        semilogx(t, X_p, 'Color', c(j,:), 'LineStyle', s{j}, 'LineWidth', 1.5)
-        ylabel('Scaled Sensitivity X_p (K)');
+
+        % % Magnitude Based
+        % semilogx(t, X_p, 'Color', c(j,:), 'LineStyle', s{j}, 'LineWidth', 1.5)
+        % ylabel('Scaled Sensitivity X_p (K)');
+
         hold on
         title(['SA for ', probe, ' with ', sample, ', in ', crucible, ' at ', int2str(avgTemp), '°C'])
         set(gca, 'XScale', 'log');
         % set(gca, 'YScale', 'log');
         xlabel('Time (s)');
-        % ylabel('Relative Change of dT/dt (%)');
         legend(par_names(parwanted(1:j)),'Location','eastoutside')
         % pause
     end 
