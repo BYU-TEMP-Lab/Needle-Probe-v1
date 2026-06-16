@@ -8,7 +8,7 @@ off = 0;
 
 global_fitting = off; % Uses fminsearch when off
 
-MC = off; %Turns on Monte Carlo error analysis.
+MC = on; %Turns on Monte Carlo error analysis.
 
 raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
 iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
@@ -38,7 +38,7 @@ m=menu('Probe Calibration or Sample Test?',...
 if m == 1
     timewindow = [0 5]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.5 60]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [0.5 15]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
 else
     disp('No selection, program terminated')
     return
@@ -284,17 +284,15 @@ Results = zeros(numel(names)-2, 9);
 [~, par_names] = Properties(probe,crucible,sample,25,5,0.00225,0.1,0.00225,MC);
 
 cd(runfolder)
-if MC == 0
-    textfile = fopen([run_name, '.txt'],'at');
-    fprintf(textfile, '%s\t', 'Voltage (V)');
-    fprintf(textfile, '%s\t', 'Temp (°C)');
-    for p=1:length(SolveList)
-        fprintf(textfile, '%s', [par_names(str2double(SolveListNames(p)),1),' (',par_names(str2double(SolveListNames(p)),2),')']);
-        fprintf(textfile, '\t');
-    end
-    fprintf(textfile, '%s', 'Chi2 Error');
-    fprintf(textfile, '\n');
+textfile = fopen([run_name, '.txt'],'at');
+fprintf(textfile, '%s\t', 'Voltage (V)');
+fprintf(textfile, '%s\t', 'Temp (°C)');
+for p=1:length(SolveList)
+    fprintf(textfile, '%s', [par_names(str2double(SolveListNames(p)),1),' (',par_names(str2double(SolveListNames(p)),2),')']);
+    fprintf(textfile, '\t');
 end
+fprintf(textfile, '%s', 'Chi2 Error');
+fprintf(textfile, '\n');
 
 MCruninfo = fopen([run_name, ' MC_runinfo.txt'],'at');
 fprintf(MCruninfo, '%s\t', 'Run');
@@ -609,20 +607,77 @@ for n = 3:numel(names)
                 familyvec(:,ii)=familyresult;
             end
 
-            % linexEquation = 'a*(exp(b*x) - b*x -1';
-            % myFitType = fittype(linexEquation, 'independent', 'x', 'dependent', 'y');
-            % options = fitoptions('Method','NonlinearLeastSquares','StartPoint',[1,1]);
-            % 
-            % [curve,goodness] = fit(parvec,chitestvec,myFitType);
-            % 
-            % parabool = curve(parvec);
-            % 
-            % Chi2_error = ?;
+            % 1. Define the shifted LINEX equation
+            linexEquation = 'a*(exp(b*(x-x0)) - b*(x-x0) - 1) + c';
+            myFitType = fittype(linexEquation, 'independent', 'x', 'dependent', 'y');
+            
+            % 2. Generate smart starting points to ensure the fit converges
+            [minChi2, minIdx] = min(chitestvec);
+            x0_guess = parvec(minIdx);
+            c_guess = max(minChi2, 1e-6); % Force guess to be positive
+            
+            % Use your existing polyfit to guess the initial LINEX shape parameters
+            P = polyfit(parvec, chitestvec, 2);
+            quad_a = max(P(1), 1e-6); % Force quadratic curvature guess to be positive
+            b_guess = -1; % Start with a moderate asymmetry assumption
+            a_guess = (2 * quad_a) / (b_guess^2); % Map quadratic curvature to LINEX 'a'
+            
+            % CRITICAL FIX: Add 'Lower' bounds so 'a' and 'c' cannot mathematically go negative
+            options = fitoptions('Method', 'NonlinearLeastSquares', ...
+                                 'StartPoint', [a_guess, b_guess, c_guess, x0_guess], ...
+                                 'Lower', [1e-8, -Inf, 0, -Inf]); % a > 0, c >= 0
+            
+            % 3. Fit the LINEX curve
+            [curve, goodness] = fit(parvec, chitestvec, myFitType, options);
+            
+            % 4. Extract fitted parameters
+            a_fit = curve.a;
+            b_fit = curve.b;
+            x0_fit = curve.x0;
+            c_fit = curve.c;
+            
+            % 5. Define the target Delta Chi^2 
+            delta_chi2 = c_fit / ndata;
+            
+            % 6. Create an anonymous function to find where LINEX equals the target delta
+            rootFunc = @(dx) a_fit*(exp(b_fit*dx) - b_fit*dx - 1) - delta_chi2;
+            
+            % 7. Use fzero to find the asymmetric bounds
+            % CRITICAL FIX: Added abs() to guarantee a real number for fzero
+            dx_guess = sqrt(abs(2 * delta_chi2 / (a_fit * b_fit^2)));
+            
+            % Find left and right bounds (shifts from the minimum)
+            % By starting exactly at +/- dx_guess, fzero will find the roots cleanly
+            dx_left = fzero(rootFunc, -dx_guess);
+            dx_right = fzero(rootFunc, dx_guess);
+            
+            % 8. Final Asymmetric Errors
+            Chi2_error_minus = abs(dx_left);
+            Chi2_error_plus = abs(dx_right);
 
-            P=polyfit(parvec,chitestvec,2);
-            parabool=polyval(P,parvec);
-            sigpar=sqrt(abs(-P(2)^2+4*P(1)*P(3)))/(2*P(1));
-            Chi2_error = sigpar/sqrt(ndata);
+            % 9. GUM-Compliant Expanded Uncertainty Calculation
+            % Map the LINEX asymmetric errors to the GUM bounds
+            b_plus = Chi2_error_plus;
+            b_minus = Chi2_error_minus;
+            
+            % Set n_chi2 (using the number of data points fitted)
+            n_chi2 = ndata; 
+            
+            % Calculate the combined standard uncertainty of the mean (Type B rectangular)
+            % GUM 4.3.7, 4.3.8, and 4.2.3
+            u_c = (b_plus + b_minus) / sqrt(12 * n_chi2);
+            
+            % Calculate Expanded Uncertainty (95% confidence level, k = 1.96)
+            % GUM 6.2.2 and Annex G.1.3
+            U_expanded = 1.96 * u_c;
+            Chi2_error = U_expanded;
+            
+            % 10. Final Reporting Statement (GUM 7.2.2)
+            % Extract the optimal parameter value from the fit (the minimum of the curve)
+            nominal_value = x0_fit;
+                        
+            % Optional: You can evaluate the curve for plotting just like before
+            parabool = curve(parvec); % Though it's now a 'linexbool' rather than a parabola!
 
             if chi2plots == 1
                 figure(Visible="off");
@@ -644,7 +699,7 @@ for n = 3:numel(names)
                 figure(Visible="off");
                 plot(parvec,chitestvec,'o',parvec,parabool);
                 chisave=[parvec,chitestvec,parabool];
-                title([run_name,' par(',int2str(ipar),'): ',num2str(fitresult(ipar)),'+/-',num2str(sigpar),'/sqrt(',int2str(ndata),') file: ',fn]);
+                title([run_name,' par(',int2str(ipar),'): ',num2str(fitresult(ipar)),') file: ',fn]);
                 zoom on;
 
                 f = gcf;
@@ -680,30 +735,31 @@ for n = 3:numel(names)
             allresults(iterations,g+2) = Chi2_value;
         end 
        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    end
 
-    if run == 1
-        cd(runfolder)
-        textfile = fopen([run_name, '.txt'],'at');
-        fprintf(textfile, '%f\t%f\t',Voltage, aveTemp);
-
-        for e=1:npar
-            if any([2 4 6 14 20 21]==Ifitpar(e))
-                fprintf(textfile,' %e',fitresult(e));
-                fprintf(textfile,'\t');
-            else
-                fprintf(textfile,' %f',fitresult(e));
-                fprintf(textfile,'\t');
+        if run == 1
+            cd(runfolder)
+            textfile = fopen([run_name, '.txt'],'at');
+            fprintf(textfile, '%f\t%f\t',Voltage, aveTemp);
+    
+            for e=1:npar
+                if any([2 4 6 14 20 21]==Ifitpar(e))
+                    fprintf(textfile,' %e',fitresult(e));
+                    fprintf(textfile,'\t');
+                else
+                    fprintf(textfile,' %f',fitresult(e));
+                    fprintf(textfile,'\t');
+                end
             end
+    
+            fprintf(textfile, '%.7f', Chi2_error);
+    
+            fprintf(textfile, '\n');
+            fclose(textfile);
+    
+            disp(['Temperature: ' num2str(fix(aveTemp)) ' ' 'Voltage: ' num2str(Voltage)]);
+            cd(currentFOLDER)
         end
-
-        fprintf(textfile, '%f', Chi2_error);
-
-        fprintf(textfile, '\n');
-        fclose(textfile);
-
-        disp(['Temperature: ' num2str(fix(aveTemp)) ' ' 'Voltage: ' num2str(Voltage)]);
-        cd(currentFOLDER)
+    
     end
 
 end
