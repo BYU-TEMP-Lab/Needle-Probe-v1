@@ -1,11 +1,19 @@
 clear
 
-targetTemps = [500, 550, 600, 700, 800]; % Update this to be the tested temperatures
+disp("Notice: Data is grouped to nearest 50°C. If tests were done at"+ newline +...
+    "temperatures that are not multiples of 50, results will likely have errors.")
+targetTemps = 50:50:1000;
 
 [file_sought,file_location] = uigetfile('.txt', 'Select the fmincon output file.');
 cd(file_location)
 SolvedPropTable = readtable(file_sought);
 SolvedPropTable = sortrows(SolvedPropTable,"Temp__C_","ascend");
+
+testInfo = strsplit(file_sought);
+sample = testInfo(1);
+probe = testInfo(2);
+crucible = testInfo(3);
+date = extractBefore(testInfo(4),"_");
 
 tempVals = SolvedPropTable{:,2};
 roughTemps = round(tempVals/50)*50;
@@ -87,7 +95,7 @@ end
 MC_Uncertainty_Results.Properties.VariableNames = {'Temperature','Standard_Deviation','Uncertainty'};
 
 Total_Uncertainty_Results = table;
-for m = 1:length(targetTemps)
+for m = 1:height(Fit_Uncertainty_Results)
     uncT = sqrt(Fit_Uncertainty_Results{m,"Uncertainty"}^2 + Repeatability_Uncertainty_Results{m,"Uncertainty"}^2 + MC_Uncertainty_Results{m,"Uncertainty"}^2);
     Total_Uncertainty_Results(end+1,:) = {targetTemps(m) uncT};
 end
@@ -95,8 +103,8 @@ Total_Uncertainty_Results.Properties.VariableNames = {'Temperature','Uncertainty
 
 figure;
 errorbar(Average_Results{:,"Temperature"},Average_Results{:,"Average_K_Sample"},Total_Uncertainty_Results{:,"Uncertainty"})
-xlim([targetTemps(1)-50,targetTemps(end)+50]);
+xlim([Average_Results{1,"Temperature"}-50,Average_Results{end,"Temperature"}+50]);
 xlabel("Temperature (°C)")
 ylabel("Thermal Conductivity (W/m*K)")
-saveas(gcf,'Final_Results.fig');
-saveas(gcf,'Final_Results.png');
+saveas(gcf,string(sample) + "_" + string(date) +'_Final_Results.fig');
+saveas(gcf,string(sample) + "_" + string(date) +'_Final_Results.png');
