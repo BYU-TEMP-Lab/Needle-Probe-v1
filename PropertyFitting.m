@@ -1,6 +1,7 @@
 clc
 clear
 close all
+fclose all;
 
 %Options for Speed and other utilities%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 on = 1;
@@ -8,7 +9,7 @@ off = 0;
 
 global_fitting = off; % Uses fminsearch when off
 
-MC = on; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
+MC = off; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
 
 raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
 iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
@@ -38,7 +39,7 @@ m=menu('Probe Calibration or Sample Test?',...
 if m == 1
     timewindow = [0 5]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.5 15]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [0.5 60]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
 else
     disp('No selection, program terminated')
     return

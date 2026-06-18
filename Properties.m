@@ -393,7 +393,7 @@ decay_point = 0; % Decay point
 % MgCl2-NaCl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(sample, 'MgNaCl')
     % Thermal Conductivity
-    k_MgNaCl = -0.0003*(T-273.15) + 0.6774; % fit to https://advanced.onlinelibrary.wiley.com/doi/full/10.1002/adts.202200206
+    k_MgNaCl = -2.60714*(10^-4)*T + 0.74764; % figure 5, https://advanced.onlinelibrary.wiley.com/doi/full/10.1002/adts.202200206
     
     % Heat Capacity
     cp_MgNaCl = 1000; %https://pubs.acs.org/doi/full/10.1021/acsami.2c19272
@@ -1668,7 +1668,7 @@ if strcmp(probe,"3A-IN718-01")
     RthInsShth = 1.340965e-01;
     k_sheath = 1.832309e-02*(T-273.15) + 8.715321e+00;
     alpha_sheath = 4.000000e-06;
-    emissivity_probe = 4.046331e-01;
+    emissivity_probe = 1.952842e-04*(T-273.15) + 3.355891e-01; %4.046331e-01;
     Flux_decay = 4.167500e-04;
 
 end
@@ -1740,7 +1740,7 @@ if strcmp(crucible,'Inconel625')
     % 6/16/26 Calibration
     k_crucible = 1.949411e-02*(T-273.15) + 7.717308e+00;
     alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
-    emissivity_crucible = 3.214205e-01;
+    emissivity_crucible = 1.156189e-04*(T-273.15) + 2.805427e-01; %3.214205e-01;
 
 end
 
