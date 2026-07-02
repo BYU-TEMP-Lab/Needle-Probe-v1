@@ -1,15 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
 import csv
+import logging
 import math
 import textwrap
+from dataclasses import dataclass
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from .libraries.simulations import simulation_options_dict
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -175,7 +178,7 @@ def run_sensitivity_analysis(
             writer.writeheader()
             writer.writerows(csv_rows)
 
-        print(f"Saved sensitivity summary CSV: {csv_path}")
+        logger.info("Saved sensitivity summary CSV: %s", csv_path)
 
     # Generate summary visualizations
     if save_plots and csv_rows:
@@ -218,7 +221,7 @@ def _plot_sensitivity_summary(csv_rows: list[dict], parameter_names: list[str], 
     out_file = plot_dir / "SA_Parameter_Ranking.png"
     fig.savefig(out_file, dpi=200, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved parameter ranking chart: {out_file}")
+    logger.info("Saved parameter ranking chart: %s", out_file)
 
     # Heatmap: sensitivity magnitude across files and parameters
     unique_files = sorted(set(row["filepath"] for row in csv_rows))
@@ -259,4 +262,4 @@ def _plot_sensitivity_summary(csv_rows: list[dict], parameter_names: list[str], 
     out_file = plot_dir / "SA_Heatmap_All_Parameters.png"
     fig.savefig(out_file, dpi=200, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved sensitivity heatmap: {out_file}")
+    logger.info("Saved sensitivity heatmap: %s", out_file)

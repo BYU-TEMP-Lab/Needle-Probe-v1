@@ -1,4 +1,4 @@
-import json, os, tkinter as tk, textwrap
+import json, logging, os, tkinter as tk, textwrap
 from tkinter import ttk, filedialog, messagebox
 from pathlib import Path
 
@@ -10,6 +10,9 @@ from ..libraries.crucibles import options as crucibles
 from ..libraries.calibrations import options as cal_dict
 from ..libraries.simulations import simulation_options_dict, cross_section_options_dict
 from ..build_model import model_param_map as decision_vars
+from ..bootstrap import setup_logging
+
+logger = logging.getLogger(__name__)
 
   
 
@@ -159,16 +162,14 @@ class SimulationOptions(tk.Tk):
             try:
                 data = target_path.read_text(encoding='utf-8')
                 self.defaults = json.loads(data)
-                print(f"Settings applied from: {"/".join(target_path.parts[-2:])}")
+                logger.info("Settings applied from: %s", "/".join(target_path.parts[-2:]))
                 
             except json.JSONDecodeError as e:
-                print(f"Error: {target_path.name} is not a valid JSON file. {e}")
+                logger.error("%s is not a valid JSON file: %s", target_path.name, e)
             except Exception as e:
-                print(f"Unexpected error reading file: {e}")
+                logger.exception("Unexpected error reading file: %s", e)
         else:
-            # Use .resolve() to show the full absolute path in the warning
-            # This helps you debug exactly where Python is looking
-            print(f"Warning: File not found at {target_path.resolve()}")
+            logger.warning("File not found at %s", target_path.resolve())
 
             
     def select_data_folder(self):
@@ -310,6 +311,8 @@ class SimulationOptions(tk.Tk):
         if self.check_selections():
             return
         
+        setup_logging(log_dir=self.test_folder_path / "logs")  # Reconfigure logging to write to the selected folder
+        
         # Save user input 
         self.probe = probes[self.probe_var.get()]
         self.crucible = crucibles[self.crucible_var.get()]
@@ -348,7 +351,7 @@ class SimulationOptions(tk.Tk):
             ### Data Folder: {self.test_folder_path}
             --------------------------------------------------
         """
-        print(textwrap.dedent(msg).strip())
+        logger.info(textwrap.dedent(msg).strip())
 
         self.user_cancelled = False
         self.destroy()  # close the GUI
@@ -380,14 +383,14 @@ if __name__ == "__main__":
     main_GUI = SimulationOptions()
     main_GUI.mainloop()   # waits here until window closes
     if getattr(main_GUI, "user_cancelled", True): # default to True if the attribute doesn't exist
-        print("User closed the window without proceeding. Exiting program.")
+        logger.info("User closed the window without proceeding. Exiting program.")
         exit(0)
     else:
         user_selections = main_GUI.get_selections_dict()
     
-    print("User selections:")
+    logger.info("User selections:")
     for key, value in user_selections.items():
-        print(f" - {key}: {value}")
+        logger.info(" - %s: %s", key, value)
 
     # Overview of main workflow:
     # 1. Get selections from user via GUI

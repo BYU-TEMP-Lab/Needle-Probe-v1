@@ -1,10 +1,15 @@
-import pandas as pd
-import numpy as np
-from matplotlib import pyplot as plt
+import logging
+from dataclasses import dataclass
 from pathlib import Path
-import warnings
-from dataclasses import dataclass, field
 from typing import Tuple
+
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+
+from .bootstrap import setup_logging
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class FileData:
@@ -14,6 +19,7 @@ class FileData:
     test_duration_overide: float # Optional override for test duration in seconds; if None, uses voltage cutoff to determine end of test
     generate_plots: bool # Whether to generate plots of the raw data and processed deltaT curve in preparation for saving
     plot_dir: Path # location to save plots if generated
+    current_units: str  # Units for the current data (e.g., "mA", "A")
 
     # # Processed data fields (populated in __post_init__)
     # tempData: np.ndarray = field(default=None, init=False)
@@ -29,11 +35,13 @@ class FileData:
         """
         Reads experimental data from a tab-separated file.
         Expected format: [Time, Temp, Voltage, Current]
+
+        Returns: (time, temp, voltage, current)
         """
         # Read CSV or txt file (assuming tab-separated)
         df = pd.read_csv(self.filepath, sep="\t", header=None)  # Adjust header if needed
         _, N_cols = df.shape
-        print(f"Importing {self.filepath.name} with {N_cols} columns...")
+        logger.info("Importing %s with %s columns...", self.filepath.name, N_cols)
 
         if N_cols != 4:
             raise ValueError(
@@ -50,6 +58,11 @@ class FileData:
         return time, temp, voltage, current
 
     def _get_start_stop(self, voltage, time):
+        """
+        Determines the start and stop indices of the heating period based on voltage threshold.
+        
+        Returns: (V_start, V_end)
+        """
         # Find first applied voltage > V_min_cutoff to establish t=0
         V_inx = np.where(voltage > self.V_min_cutoff)[0] # indices where voltage is above cutoff
         if len(V_inx) == 0:
@@ -83,6 +96,10 @@ class FileData:
         """
 
         time_raw, temp_raw, voltage_raw, current_raw = self._read_data()
+        if self.current_units not in ["mA", "A"]:
+            raise ValueError(f"Invalid current_units '{self.current_units}'. Must be 'mA' or 'A'.")
+        elif self.current_units == "mA":
+            current_raw = current_raw / 1000  # Convert mA to A
         V_start, V_end = self._get_start_stop(voltage_raw, time_raw)
 
         # Ambient temperature
@@ -97,7 +114,10 @@ class FileData:
         self.time = time_raw[V_start:V_end] - time_raw[V_start]
         self.deltaT = temp_raw[V_start:V_end] - avgT_amb_C # deltaT = temp - avgT_amb
         self.voltage = voltage_raw[V_start:V_end]
-        self.current = current_raw[V_start:V_end]
+        self.current = current_raw[V_start:V_end] 
+        if self.current_units == "mA":
+            self.current = self.current
+        self.power = self.voltage * self.current  # Power in Watts (V * A)
 
         # Average voltage during heating period, standard deviation, and standard error
         avgVoltage = np.mean(self.voltage)
@@ -105,8 +125,8 @@ class FileData:
         sem_V = std_V / np.sqrt(len(self.voltage))
 
         # Average current during heating period, standard deviation, and standard error
-        avgCurrent = np.nanmean(self.current) / 1000  # Convert mA to A
-        std_I = np.nanstd(self.current, ddof=1) / 1000
+        avgCurrent = np.nanmean(self.current)
+        std_I = np.nanstd(self.current, ddof=1)
         n_valid = np.count_nonzero(~np.isnan(self.current)) # handle NaN values
         sem_I = std_I / np.sqrt(n_valid) if n_valid > 0 else 0
 
@@ -120,74 +140,115 @@ class FileData:
             self._generate_plot(time_raw, temp_raw, voltage_raw, current_raw)
 
     def print_summary(self):
-        print(f"File: {self.filepath.name}")
-        print(f"  Ambient Temperature: {self.avgT_amb_K-273.15:.2f} C ± {self.temp_amb_sem:.4f} C")
-        print(f"  Average Power: {self.avgQ:.4f} W ± {self.semQ:.4f} W")
-        print(f"  Test length: {self.time[-1]:.4f} seconds")
-        print(f"  Temp range: {self.deltaT.min() + self.avgT_amb_K -273.15:.4f} to {self.deltaT.max() + self.avgT_amb_K -273.15:.4f} C (Diff = {self.deltaT.max() - self.deltaT.min():.4f} C)")
+        logger.info("File: %s", self.filepath.name)
+        logger.info("  Ambient Temperature: %.2f C ± %.4f C", self.avgT_amb_K - 273.15, self.temp_amb_sem)
+        logger.info(
+            "  Temp range: %.4f to %.4f C (Diff = %.4f C)",
+            self.deltaT.min() + self.avgT_amb_K - 273.15,
+            self.deltaT.max() + self.avgT_amb_K - 273.15,
+            self.deltaT.max() - self.deltaT.min(),
+        )
+        logger.info("  Average Power: %.4f W ± %.6f W", self.avgQ, self.semQ)
+        logger.info("  Test length: %.4f seconds", self.time[-1])
 
     def _generate_plot(self, time_raw, temp_raw, voltage_raw, current_raw):
-        # Create two stacked subplots sharing the x-axis (time)
-        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(9, 8))
-
-        # Raw temperature vs time (full record)
-        ax1.scatter(time_raw, temp_raw, s=0.6, c="r", alpha=0.6,
-                    label=f"Ambient temp: {self.avgT_amb_K-273.15:.2f} C")
-        ax1.set_ylabel("Temperature (C)")
-        ax1.legend(markerscale=10, loc="lower center")
-        ax1.set_title(f"{self.filepath.name}")
+        # Create stacked subplots
+        fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(5, 1, figsize=(9, 10))
 
         # Voltage vs time (full record)
-        ax2.scatter(time_raw, voltage_raw, s=0.6, c="r", alpha=0.6,
+        ax1.scatter(time_raw, voltage_raw, s=0.6, c="r", alpha=0.6,
                     label=f"Average Measured Voltage: {np.mean(self.voltage):.2f} V")
-        ax2.set_ylabel("Voltage (V)")
+        ax1.set_ylabel("Voltage (V)")
+        ax1.set_xlabel("Time (s)")
+        ax1.legend(markerscale=10, loc="lower center")
+        ax1.set_title(f"{self.filepath.name} \n Ambient temp: {self.avgT_amb_K-273.15:.2f} +/- {self.temp_amb_sem:.4f} C, Test length: {self.time[-1]:.4f} s")
+
+        # current vs time (full record)
+        ax2.scatter(time_raw, current_raw, s=0.6, c="r", alpha=0.6,
+                    label=f"Average Measured Current: {np.nanmean(self.current):.2f} A")
+        ax2.set_ylabel(f"Current (A)")
         ax2.set_xlabel("Time (s)")
         ax2.legend(markerscale=10, loc="lower center")
 
-        # current vs time (full record)
-        ax3.scatter(time_raw, current_raw, s=0.6, c="r", alpha=0.6,
-                    label=f"Average Measured Current: {np.nanmean(self.current):.2f} mA")
-        ax3.set_ylabel("Current (mA)")
+        # Power vs time (heating period only)
+        ax3.scatter(self.time, self.power, s=0.6, c="r", alpha=0.6,
+                    label=f"Power Applied (heating period only): {self.avgQ:.3f} W ± {self.semQ:.5f} W")
         ax3.set_xlabel("Time (s)")
+        ax3.set_ylabel("Power (W)")
         ax3.legend(markerscale=10, loc="lower center")
-        
-        ax4.scatter(self.time, self.deltaT, s=0.6, c="r", alpha=0.6,
+
+        # Raw temperature vs time (full record)
+        ax4.scatter(time_raw, temp_raw, s=0.6, c="r", alpha=0.6,
                     label=f"Temperature Difference: {self.deltaT.min() + self.avgT_amb_K -273.15:.4f} to {self.deltaT.max() + self.avgT_amb_K -273.15:.4f} C ({self.deltaT.max() - self.deltaT.min():.4f} C range)")
-        ax4.set_xlabel(r"$\Delta t$ (s)")
-        ax4.set_ylabel(r"$\Delta T$ (C)")
-        # ax4.set_xscale("log")
+        ax4.set_ylabel("Temperature (C)")
         ax4.legend(markerscale=10, loc="lower center")
+        
+        # deltaT vs time (heating period only)
+        ax5.scatter(self.time, self.deltaT, s=0.6, c="r", alpha=0.6,
+                    label=f"Processed Data (heating period only)")
+        ax5.set_xlabel(r"$\Delta t$ (s)")
+        ax5.set_ylabel(r"$\Delta T$ (C)")
+        # ax5.set_xscale("log")
+        ax5.legend(markerscale=10, loc="lower center")
 
         fig.tight_layout()
         self.plot = fig
         self.plot.savefig(self.plot_dir / f"{self.filepath.stem}_raw_data.png", dpi=200, bbox_inches="tight")
+        plt.close(fig)  # Close the figure to free memory, but keep the reference in self.plot for later display
     
     def show_plot(self):
         if not hasattr(self, "plot"):
-            print("No plot available to show. Please ensure 'generate_plots' is set to True and that the data was processed successfully. Check {self.plot_dir} for saved plots.")
+            logger.warning(
+                "No plot available to show. Please ensure 'generate_plots' is set to True and that the data was processed successfully. Check %s for saved plots.",
+                self.plot_dir,
+            )
             return
         
         self.plot.show()
         plt.show(block=True)
         plt.close(self.plot)
         
-def get_folder_data(data_folder: Path, V_min_cutoff=0.5, test_duration_overide=None, generate_plots: bool = True):
-    """Load and process all .txt files from a folder, returning FileData instances."""
-    print(f"Importing data from {data_folder.name}...")
+def get_folder_data(data_folder: Path, current_units, V_min_cutoff=0.5, test_duration_overide=None, generate_plots: bool = True):
+    """Load and process all .txt files from a folder, returning FileData instances.
+    
+    
+    Parameters
+    ----------
+    data_folder : Path
+        The folder containing the .txt files to process.
+    current_units : str
+        The units for the current ("A" or "mA").
+    V_min_cutoff : float, optional
+        The minimum voltage cutoff for data processing (default is 0.5).
+    test_duration_overide : float, optional
+        The duration to override the test duration (default is None).
+    generate_plots : bool, optional
+        Whether to generate and save plots of raw data (default is True).
+
+    Returns
+    -------
+    list of FileData
+        A list of FileData instances for each processed file.
+    """
+    logger.info("Importing data from %s...", data_folder.name)
     folder_data = []
 
     if generate_plots:
         out_dir = data_folder.resolve() / "raw_data_plots"
         out_dir.mkdir(parents=True, exist_ok=True)
-        print(f"Plots will be saved to: {out_dir}")
+        logger.info("Plots will be saved to: %s", out_dir)
+    else:
+        out_dir = None
 
+    files = list(data_folder.glob("*.txt")) + [f for f in data_folder.glob("*") if "." not in f.name]
 
-    for file_path in data_folder.glob("*.txt"):
+    for file_path in files:
         # Ensure we are not trying to process sub-folders
         if file_path.is_file():   
             try:
                 file_data = FileData(
                     file_path, 
+                    current_units=current_units,
                     V_min_cutoff=V_min_cutoff,
                     test_duration_overide=test_duration_overide,
                     generate_plots=generate_plots,
@@ -196,18 +257,16 @@ def get_folder_data(data_folder: Path, V_min_cutoff=0.5, test_duration_overide=N
                 file_data.print_summary()
                 folder_data.append(file_data)
                 
-            except Exception as e:
-                print(f"Could not process {file_path.name}: {e}")
+            except Exception:
+                logger.exception("Could not process %s", file_path.name)
 
     if not folder_data:
-        print(f"Unable to successfully read any .txt files from folder: {data_folder.absolute()}.")
+        logger.warning("Unable to successfully read any .txt files from folder: %s.", data_folder.absolute())
         return None
 
     return folder_data
 
 if __name__ == "__main__":
-    # process_data("./MATLAB_ONLY/FLiNaK_730C_3V_1 (1).txt", test_duration=10.0)
-    filepath = Path("./MATLAB_ONLY/FLiNaK_730C_3V_1 (1).txt")
-    file_data = FileData(filepath, V_min_cutoff=0.5, generate_plots=True)
-    file_data.print_summary()
-    file_data.show_plot()
+    setup_logging()
+    folder_path = Path("C:\\Users\\samia\\Documents\\Financial & Administrative\\Employment\\Job Specific\\BYU TEMP Lab\\$Raw Data\\3A-IN718-01 Ar Calib 6-26-26")
+    get_folder_data(folder_path, current_units="A", generate_plots=True)

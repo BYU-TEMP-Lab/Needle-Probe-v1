@@ -1,4 +1,5 @@
 import json
+import logging
 import textwrap
 from pathlib import Path
 import tkinter as tk
@@ -11,7 +12,9 @@ from ..libraries.probes import options as probes
 from ..libraries.crucibles import options as crucibles
 from ..libraries.simulations import simulation_options_dict
 from ..build_model import model_param_map as decision_vars
+from ..bootstrap import setup_logging
 
+logger = logging.getLogger(__name__)
 
 TASK_PROBE_CALIBRATION = "Probe Calibration"
 TASK_THERMAL_CONDUCTIVITY = "Thermal Conductivity Measurement"
@@ -374,13 +377,13 @@ class SimulationOptions(tk.Tk):
         if target_path.is_file():
             try:
                 self.defaults = json.loads(target_path.read_text(encoding="utf-8"))
-                print(f"Settings applied from: {'/'.join(target_path.parts[-2:])}")
+                logger.info("Settings applied from: %s", "/".join(target_path.parts[-2:]))
             except json.JSONDecodeError as e:
-                print(f"Error: {target_path.name} is not a valid JSON file. {e}")
+                logger.error("%s is not a valid JSON file: %s", target_path.name, e)
             except Exception as e:
-                print(f"Unexpected error reading file: {e}")
+                logger.exception("Unexpected error reading file: %s", e)
         else:
-            print(f"Warning: File not found at {target_path.resolve()}")
+            logger.warning("File not found at %s", target_path.resolve())
 
     def select_data_folder(self):
         folder = filedialog.askdirectory(
@@ -472,6 +475,8 @@ class SimulationOptions(tk.Tk):
         else:
             calibration_text = "Use uncalibrated parameters"
 
+        setup_logging(log_dir=self.data_folder_path / "logs")  # Reconfigure logging to write to the selected folder
+
         msg = f"""
             --------------------------------------------------
             Proceeding with:
@@ -489,7 +494,7 @@ class SimulationOptions(tk.Tk):
             ### Data Folder: {self.data_folder_path}
             --------------------------------------------------
         """
-        print(textwrap.dedent(msg).strip())
+        logger.info(textwrap.dedent(msg).strip())
 
         self.user_cancelled = False
         self.complete = True
@@ -538,10 +543,10 @@ if __name__ == "__main__":
     main_GUI = SimulationOptions()
     main_GUI.mainloop()
     if getattr(main_GUI, "user_cancelled", True):
-        print("User closed the window without proceeding. Exiting program.")
+        logger.info("User closed the window without proceeding. Exiting program.")
         raise SystemExit(0)
 
     user_selections = main_GUI.get_selections_dict()
-    print("User selections:")
+    logger.info("User selections:")
     for key, value in user_selections.items():
-        print(f" - {key}: {value}")
+        logger.info(" - %s: %s", key, value)

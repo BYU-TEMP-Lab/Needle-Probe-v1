@@ -1,4 +1,9 @@
-import textwrap, numpy as np
+import logging
+import textwrap
+
+import numpy as np
+
+logger = logging.getLogger(__name__)
 
 def run(x, y):
     times = np.linspace(0, 60, 100)
@@ -126,7 +131,7 @@ def generate_flex_file(file_data, user_selections):
     """
 
     file_contents = textwrap.dedent(file_contents).strip()
-    print(textwrap.dedent(file_contents).strip())
+    logger.info(textwrap.dedent(file_contents).strip())
 
 
 def run_flexpde2(par_vector, par_names, SolvNam, endtime, flexpde_path=r'C:\Program Files\FlexPDE7\FlexPDE7.exe'):

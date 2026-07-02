@@ -1,5 +1,8 @@
+import logging
+
 from .optimizer import build_optim_vectors
 
+logger = logging.getLogger(__name__)
 
 # UI-facing labels for available parameters.
 # This stays here because the GUI consumes it directly.
@@ -73,28 +76,12 @@ def _flatten_model_parameters(resolved_params):
             resolved_params[key] = value["initial_value"]
 
 
-def prepare_folder_for_optim(folder_data, user_selections):
-    prepared_list = []
-
-    for file_data in folder_data:
-        resolved_params, optim_vecs = resolve_params_at_T(file_data, user_selections)
-
-        prepared_list.append(
-            {
-                "file_data": file_data,
-                "resolved_params": resolved_params,
-                "simulation": user_selections.simulation_name,
-                "optim_vecs": optim_vecs,
-            }
-        )
-
-    return prepared_list
-
-
-def resolve_params_at_T(file_data, user_selections):
+def _resolve_params_at_T(file_data, user_selections):
     ambient_temperature = file_data["avgT_amb_K"]["initial_value"]
-    print(
-        f"# Resolving parameters for file {file_data['filepath'].name} at T_amb = {ambient_temperature} K..."
+    logger.info(
+        "Resolving parameters for file %s at T_amb = %s K...",
+        file_data["filepath"].name,
+        ambient_temperature,
     )
 
     _update_materials_at_ambient_temperature(user_selections, ambient_temperature)
@@ -152,3 +139,20 @@ def resolve_params_at_T(file_data, user_selections):
     resolved_params["filepath"] = file_data["filepath"]
 
     return resolved_params, optim_vecs
+
+def prepare_folder_for_optim(folder_data, user_selections):
+    prepared_list = []
+
+    for file_data in folder_data:
+        resolved_params, optim_vecs = _resolve_params_at_T(file_data, user_selections)
+
+        prepared_list.append(
+            {
+                "file_data": file_data,
+                "resolved_params": resolved_params,
+                "simulation": user_selections.simulation_name,
+                "optim_vecs": optim_vecs,
+            }
+        )
+
+    return prepared_list

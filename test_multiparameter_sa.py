@@ -1,4 +1,5 @@
 """Demo of multi-parameter sensitivity analysis summary plots."""
+import logging
 import sys
 from pathlib import Path
 import csv
@@ -9,10 +10,12 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 import numpy as np
 import matplotlib.pyplot as plt
 
+logger = logging.getLogger("salt_probe_util")
+
 
 def demo_sensitivity_summary_plots():
     """Generate summary plots from sensitivity analysis data."""
-    print("Demonstrating multi-parameter sensitivity summary plots...\n")
+    logger.info("Demonstrating multi-parameter sensitivity summary plots...\n")
 
     # Example data: simulate results from 10 parameters across 1 file at different temps
     parameters = [
@@ -47,7 +50,7 @@ def demo_sensitivity_summary_plots():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Bar chart: parameter ranking
-    print("✓ Generating parameter ranking chart...")
+    logger.info("✓ Generating parameter ranking chart...")
     sorted_params = sorted(param_magnitudes.items(), key=lambda x: x[1], reverse=True)
     param_names_sorted = [p[0] for p in sorted_params]
     magnitudes_sorted = [p[1] for p in sorted_params]
@@ -74,26 +77,26 @@ def demo_sensitivity_summary_plots():
     out_file = out_dir / "SA_Parameter_Ranking.png"
     fig.savefig(out_file, dpi=200, bbox_inches="tight")
     plt.close(fig)
-    print(f"  → {out_file}")
+    logger.info("  → %s", out_file)
 
     # Save CSV summary
-    print("✓ Saving sensitivity summary to CSV...")
+    logger.info("✓ Saving sensitivity summary to CSV...")
     csv_path = out_dir / "sensitivity_ranking.csv"
     with open(csv_path, "w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=["Rank", "Parameter", "Sensitivity_Magnitude_Percent"])
         writer.writeheader()
         for rank, (param, mag) in enumerate(sorted_params, 1):
             writer.writerow({"Rank": rank, "Parameter": param, "Sensitivity_Magnitude_Percent": f"{mag:.2f}"})
-    print(f"  → {csv_path}")
+    logger.info("  → %s", csv_path)
 
-    print("\n📊 Summary:")
-    print(f"  Parameters analyzed: {len(parameters)}")
-    print(f"  Top 3 most sensitive parameters:")
+    logger.info("\n📊 Summary:")
+    logger.info("  Parameters analyzed: %s", len(parameters))
+    logger.info("  Top 3 most sensitive parameters:")
     for i, (param, mag) in enumerate(sorted_params[:3], 1):
         marker = "🎯 SAMPLE K" if param == "Sample k" else ""
-        print(f"    {i}. {param}: {mag:.1f}% {marker}")
+        logger.info("    %s. %s: %.1f%% %s", i, param, mag, marker)
     
-    print(f"\n✓ Demo complete! Check {out_dir} for plots.")
+    logger.info("\n✓ Demo complete! Check %s for plots.", out_dir)
 
 
 if __name__ == "__main__":

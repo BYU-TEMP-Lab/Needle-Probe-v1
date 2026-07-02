@@ -1,6 +1,9 @@
 import json
+import logging
 from pathlib import Path
 from .materials import options as materials
+
+logger = logging.getLogger(__name__)
 
 class Calibration:
     def __init__ (self, json_filepath: Path):
@@ -22,13 +25,11 @@ class Calibration:
                 data = self.json_filepath.read_text(encoding='utf-8')
                 self.data = json.loads(data)
             except json.JSONDecodeError as e:
-                print(f"Error: {self.json_filepath.name} is not a valid JSON file. {e}")
+                logger.error("%s is not a valid JSON file: %s", self.json_filepath.name, e)
             except Exception as e:
-                print(f"Unexpected error reading file: {e}")
+                logger.exception("Unexpected error reading file: %s", e)
         else:
-            # Use .resolve() to show the full absolute path in the warning
-            # This helps you debug exactly where Python is looking
-            print(f"Warning: File not found at {self.json_filepath.resolve()}")
+            logger.warning("File not found at %s", self.json_filepath.resolve())
 
 # 1. Setup the directory path relative to this file
 # Adjust .parent count depending on exactly where this code lives
@@ -51,4 +52,4 @@ for json_file in CAL_DIR.glob("*.json"):
         options[cal.name] = cal
         
     except Exception as e:
-        print(f"Failed to load calibration {json_file.name}: {e}")
+        logger.exception("Failed to load calibration %s: %s", json_file.name, e)

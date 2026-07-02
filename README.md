@@ -2,6 +2,23 @@
 Description here. 
 
 # Python rewrite
+
+To do:
+1) Integrate props with model
+2) Integrate calibration with model
+3) Write optimization objective
+- LM with bounds?
+- True Bayesian optimization?
+4) Plot results
+5) Uncertainty quantification
+- Bayesian?
+- Monte Carlo?
+- Chi square?
+- Storing uncertainty info in calibration?
+6) Update material properties to improve range and accuracy (CSV)
+
+
+
 Sudo code:
 
 main.py:

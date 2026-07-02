@@ -1,8 +1,13 @@
-from pathlib import Path
+import logging
 import math
 import textwrap
+from pathlib import Path
+
 import matplotlib.pyplot as plt
+
 from .libraries.simulations import simulation_options_dict
+
+logger = logging.getLogger(__name__)
 
 
 def _normalize_to_initial(y_values):
@@ -27,14 +32,14 @@ def plot_initial_model_vs_data(prepared_list, show=False, out_dir=None):
 
         sim_callable = simulation_options_dict.get(sim_name)
         if sim_callable is None:
-            print(f"No simulation callable found for '{sim_name}', skipping plot for {file_data['filepath'].name}")
+            logger.warning("No simulation callable found for '%s', skipping plot for %s", sim_name, file_data['filepath'].name)
             continue
 
         # run simulation with the resolved (initial) parameters
         try:
             sim_curve = sim_callable(resolved, file_data["filepath"])
         except Exception as e:
-            print(f"Simulation {sim_name} failed for {file_data['filepath'].name}: {e}")
+            logger.warning("Simulation %s failed for %s: %s", sim_name, file_data['filepath'].name, e)
             continue
 
         time_exp = file_data["tempData"][:, 0]
@@ -71,7 +76,7 @@ def plot_initial_model_vs_data(prepared_list, show=False, out_dir=None):
         fig.savefig(out_file, dpi=200, bbox_inches="tight")
         plt.close(fig)
 
-        print(f"Saved initial-model plot: {out_file}")
+        logger.info("Saved initial-model plot: %s", out_file)
 
         if show:
             img = plt.imread(out_file)
@@ -83,7 +88,7 @@ def plot_initial_model_vs_data(prepared_list, show=False, out_dir=None):
 def plot_solved_parameters_vs_temperature(folder_solved_values, show=False, out_dir=None):
     """Plot solved parameters against ambient temperature across all files."""
     if not folder_solved_values:
-        print("No solved values available for summary plot.")
+        logger.warning("No solved values available for summary plot.")
         return None
 
     param_names = set()
@@ -95,7 +100,7 @@ def plot_solved_parameters_vs_temperature(folder_solved_values, show=False, out_
         param_names.update(solved.get("solved_values", {}).keys())
 
     if not temp_solved_pairs or not param_names:
-        print("Insufficient solved values to build summary plot.")
+        logger.warning("Insufficient solved values to build summary plot.")
         return None
 
     sorted_pairs = sorted(temp_solved_pairs, key=lambda pair: pair[0])
@@ -136,7 +141,7 @@ def plot_solved_parameters_vs_temperature(folder_solved_values, show=False, out_
     fig.tight_layout()
     fig.savefig(out_file, dpi=200, bbox_inches="tight")
     plt.close(fig)
-    print(f"Saved solved-parameter summary plot: {out_file}")
+    logger.info("Saved solved-parameter summary plot: %s", out_file)
 
     if show:
         img = plt.imread(out_file)

@@ -1,11 +1,22 @@
 
+import logging
+import textwrap
+from dataclasses import dataclass
+from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import least_squares
-from .libraries.simulations import simulation_options_dict
-import matplotlib.pyplot as plt
-from pathlib import Path
-import textwrap
 
+from .libraries.simulations import simulation_options_dict
+
+logger = logging.getLogger(__name__)
+
+@dataclass
+class OptimParam:
+    initial_value: float
+    bounds: tuple
+    prior_sigma: float
 
 def build_optim_vectors(resolved_params, user_selections):
     # Build vectors for optimization based on resolved parameters
@@ -19,11 +30,11 @@ def build_optim_vectors(resolved_params, user_selections):
 
     for var in candidate_decision_vars:
         if var not in resolved_params.keys():
-            print(f"Warning: Decision variable {var} not found in resolved parameters.")
+            logger.warning("Decision variable %s not found in resolved parameters.", var)
             continue
 
         if not isinstance(resolved_params[var], dict) or "initial_value" not in resolved_params[var]:
-            print(f"Warning: Decision variable {var} is not a scalar parameter and will be skipped.")
+            logger.warning("Decision variable %s is not a scalar parameter and will be skipped.", var)
             continue
 
         active_decision_vars.append(var)
@@ -214,7 +225,7 @@ def get_solved_values(prepared_file_data):
         solved["fitted_plot"] = str(out_file)
     except Exception as e:
         solved["fitted_plot"] = None
-        print(f"Warning: could not create fitted plot: {e}")
+        logger.warning("Could not create fitted plot: %s", e)
 
     return solved
 

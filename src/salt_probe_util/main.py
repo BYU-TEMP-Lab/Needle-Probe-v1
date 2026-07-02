@@ -1,14 +1,22 @@
-import glob, subprocess, time, os, sys, warnings, json, itertools, numpy as np, pandas as pd
+import logging
+import numpy as np
 from .bootstrap import setup_logging
+
+logger = logging.getLogger("salt_probe_util")
+setup_logging()
 
 from concurrent.futures import ProcessPoolExecutor
 
-from .GUI.GUI_main import SimulationOptions
-from .process_raw_data import get_folder_data
-from .optimizer import get_solved_values
-from .build_model import prepare_folder_for_optim
-from .plotting import plot_initial_model_vs_data, plot_solved_parameters_vs_temperature
-from .calibration import export_probe_calibration
+try:
+    from .GUI.GUI_main import SimulationOptions
+    from .process_raw_data import get_folder_data
+    from .optimizer import get_solved_values
+    from .build_model import prepare_folder_for_optim
+    from .plotting import plot_initial_model_vs_data, plot_solved_parameters_vs_temperature
+    from .calibration import export_probe_calibration
+except Exception as exc:
+    logger.error("Failed during module import for main workflow: %s", exc)
+    raise
 
 # add uncertainty of thermocouple??? +/- 2.2 C
 
@@ -33,13 +41,11 @@ def main():
     # 1. get user selections
     # ==============================================================================================
 
-    # initialize logging????
-
     main_GUI = SimulationOptions()
     main_GUI.mainloop()   # waits here until window closes
 
     if getattr(main_GUI, "user_cancelled", True): # default to True if the attribute doesn't exist
-        print("User closed the window without proceeding. Exiting program.")
+        logger.info("User closed the window without proceeding. Exiting program.")
         exit(0)
     else:
         UI = main_GUI.get_selections_dict()
@@ -50,8 +56,8 @@ def main():
     # 2. If sensitivity analysis, run sensitivity analysis and save results (including user selections and warnings), then exit.
     # ==============================================================================================
     if task_mode == "Sensitivity Analysis":
-            print("Running sensitivity analysis...")
-            print("Sensitivity analysis is not yet implemented. Exiting program.")
+            logger.info("Running sensitivity analysis...")
+            logger.info("Sensitivity analysis is not yet implemented. Exiting program.")
             exit(0)
 
     # ==============================================================================================
@@ -65,12 +71,12 @@ def main():
 
     # end program if no readable files
     if not folder_data:
-        print("No valid data found. Exiting program.")
+        logger.warning("No valid data found. Exiting program.")
         return
     
     # solve and store properties for each file in folder_data at ambient temperature (multi-threading requires pickling, which doesn't like nested functions)
-    # Note that this means we assume constant properties as well as heat flux during optimization at each temperature, and that the ambient temperature is representative of the entire test
-    prepared_folder_data = prepare_folder_for_optim(folder_data, main_GUI)
+    # Note that this means we assume constant properties, heat flux, and ambient temperature during optimization of each file. 
+    model_params_list = prepare_folder_for_optim(folder_data, main_GUI)
     
     model_name = UI.get("simulation_name")
     calibration = UI.get("calibration")
@@ -88,9 +94,9 @@ def main():
     # ==============================================================================================
     # plot initial model vs experimental data for inspection
     try:
-        plot_initial_model_vs_data(prepared_folder_data, show=False)
+        plot_initial_model_vs_data(model_params_dict, show=False)
     except Exception as e:
-        print(f"Warning: plotting initial models failed: {e}")
+        logger.warning("Plotting initial models failed: %s", e)
     
     # ==============================================================================================
     # 5. For each file, solve for properties at ambient temperature and store results (including user selections and warnings) (multi-threaded)
@@ -98,32 +104,32 @@ def main():
     # ==============================================================================================
     # set up multi-threading for running optimization
     with ProcessPoolExecutor() as executor:
-        print("Beginning multi-threaded optimization...")
+        logger.info("Beginning multi-threaded optimization...")
         folder_solved_values = list(executor.map(
             get_solved_values, 
-            prepared_folder_data))
+            model_params_dict))
 
     if getattr(main_GUI, "run_calibration_var", None) is not None and main_GUI.run_calibration_var.get():
         try:
-            out_csv = export_probe_calibration(prepared_folder_data, folder_solved_values)
-            print(f"Saved probe calibration CSV: {out_csv}")
+            out_csv = export_probe_calibration(model_params_dict, folder_solved_values)
+            logger.info("Saved probe calibration CSV: %s", out_csv)
         except Exception as e:
-            print(f"Warning: exporting probe calibration failed: {e}")
+            logger.warning("Exporting probe calibration failed: %s", e)
 
         if getattr(main_GUI, "save_summary_plots_var", None) is not None and main_GUI.save_summary_plots_var.get():
             try:
                 plot_solved_parameters_vs_temperature(folder_solved_values, show=False)
             except Exception as e:
-                print(f"Warning: solved-parameter summary plot failed: {e}")
+                logger.warning("Solved-parameter summary plot failed: %s", e)
 
     if getattr(main_GUI, "save_fit_plots_var", None) is not None and not main_GUI.save_fit_plots_var.get():
-        print("Fit plots were requested off in the GUI, but per-file fit plots are created by the optimizer after convergence.")
+        logger.info("Fit plots were requested off in the GUI, but per-file fit plots are created by the optimizer after convergence.")
 
     # Process results...
-    print(f"Processed {len(folder_solved_values)} files.")
+    logger.info("Processed %s files.", len(folder_solved_values))
     
     for solved_file in folder_solved_values:
-        print(solved_file["message"])
+        logger.info(solved_file["message"])
 
 
 
