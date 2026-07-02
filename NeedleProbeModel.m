@@ -2,16 +2,17 @@ function f=NeedleProbeModel(t,par_vector,IV)
 %Seeks to solve for Probe thermocouple temperature when the liquid sample is surrounded by a crucible
 
 % Adjust time vector if not starting at 0
-if t(1) > 0.01
-    % Calculate the extra time steps needed to include 0
+if t(1) > 0.001
     dt = t(2) - t(1); % Time step size
-    extended_t = (0.01:dt:t(end))'; % Create extended time vector column
-    if (t(end) - extended_t(end)) > 0.001
-        extended_t(end + 1) = t(end);
-    end
+
+    % Generate ONLY the missing early time steps
+    prepended_t = (0.000001 : dt : (t(1) - dt))';
+
+    % Concatenate the new points with the EXACT original time vector
+    extended_t = [prepended_t; t];
     
-    % Find the index of the first value of the original time vector
-    original_start_index = find((abs((extended_t+0.01)-0.001) > t(1)),1);
+    % We know exactly how many points we added, so we know exactly where to slice later
+    original_start_index = length(prepended_t) + 1;
 else
     % If the time vector already starts at 0, no extension is needed
     extended_t = t;

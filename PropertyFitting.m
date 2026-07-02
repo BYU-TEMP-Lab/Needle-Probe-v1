@@ -37,9 +37,9 @@ m=menu('Probe Calibration or Sample Test?',...
 
 %Sets the time interval to be analyzed, in seconds.
 if m == 1
-    timewindow = [0 5]; % early and short to capture probe properties
+    timewindow = [0.001 7]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.5 60]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [1 30]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
 else
     disp('No selection, program terminated')
     return
@@ -340,14 +340,12 @@ for n = 3:numel(names)
     % Cleaning up current signal because the current is at a different
     % sampling freq. then also takes average
     if M(2) >= 4
-        for b = 1:1:length(Time)
-            if signal(b,4) < 10
-                signal(b,4) = NaN;
-            end
+        Current = median(signal(:,4),'omitnan'); %Changed to median from mean to avoid influence of outliers
+        CurrentSTD = std(signal(:,4),'omitnan');
+        if Current > 10 % old data aquisition recorded current in mA, this accounts for that and converts it to A
+            Current = Current/1000;
+            CurrentSTD = CurrentSTD/1000;
         end
-        % corrects mA to A
-        Current = median(signal(:,4),'omitnan')/1000;   %Changed to median from mean to avoid influence of outliers
-        CurrentSTD = std(signal(:,4),'omitnan')/1000;
         IV = on;
         if isnan(Current)
             IV = off;
@@ -450,7 +448,7 @@ for n = 3:numel(names)
                 if SolveList(i) == 30 % flux decay factor
                     % range of 0 - 0.001 because initial guess is 0
                     lb(i) = 0;
-                    ub(i) = 0.001;
+                    ub(i) = 0;
                 end
             end
 
@@ -743,13 +741,13 @@ for n = 3:numel(names)
             fprintf(textfile, '%f\t%f\t',Voltage, aveTemp);
     
             for e=1:npar
-                if any([2 4 6 14 20 21]==Ifitpar(e))
+                % if any([2 4 6 7 10 14 20 21]==Ifitpar(e))
                     fprintf(textfile,' %e',fitresult(e));
                     fprintf(textfile,'\t');
-                else
-                    fprintf(textfile,' %f',fitresult(e));
-                    fprintf(textfile,'\t');
-                end
+                % else
+                %     fprintf(textfile,' %f',fitresult(e));
+                %     fprintf(textfile,'\t');
+                % end
             end
     
             fprintf(textfile, '%.7f', Chi2_error);

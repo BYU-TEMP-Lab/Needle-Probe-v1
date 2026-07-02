@@ -2,14 +2,16 @@ clc
 clear
 close all
 
+y_flag = 2;
+
 today = char(datetime('now','Format','MM-dd-yy,HH-mm'));
 
 probe = '3A-IN718-01';
 crucible = 'Inconel625';
 sample = 'MgNaCl';
-tvec = [0.0001 60];
-tempvec = [500 550 600 700 800];
-parwanted = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31];
+tvec = [0.00001 120];
+tempvec = [500 550 600 600 800];
+parwanted = [8 9 26 27]; % 1 to 31
 
 baseColors = lines(8); 
 baseStyles = {'-', '--', ':', '-.'};
@@ -37,9 +39,9 @@ for i = 1:length(tempvec)
         avgTemp = tempvec(i);
 
         MC = 0;
-        Voltage = 4.1951;
+        Voltage = 2.77;
         VoltageSTD = 0.00158840632635735;
-        Current = 0.7816;
+        Current = 367;
         CurrentSTD = 0.000478290768346059;
         [par_vector, par_names] = Properties(probe,crucible,sample,avgTemp,Voltage,VoltageSTD,Current,CurrentSTD,MC);
 
@@ -53,35 +55,42 @@ for i = 1:length(tempvec)
         f_initial = NeedleProbeModel(t,par_vector,IV);
         f_varied = NeedleProbeModel(t,par_vector_varied,IV);
 
-        % Sloped Based
-        dy = diff(f_initial(:))./diff(log(t(:)));
-        dy_varied = diff(f_varied(:))./diff(log(t(:)));
-        sensitivity = 100*(dy_varied-dy)./dy;
-
-        % % Magnitude Based
-        % delta_p = 0.05; % You are reducing by 5%
-        % X_p = (f_initial - f_varied) / delta_p;
+        if y_flag == 1 % Sloped Based Percent
+            dy = diff(f_initial(:))./diff(log(t(:)));
+            dy_varied = diff(f_varied(:))./diff(log(t(:)));
+            sensitivity = 100*(dy_varied-dy)./dy;
+        elseif y_flag == 2 % Slope Based Diff
+            dy = diff(f_initial(:))./diff(log(t(:)));
+            dy_varied = diff(f_varied(:))./diff(log(t(:)));
+            sensitivity = dy_varied - dy; %100*(dy_varied-dy)./dy;
+        elseif y_flag == 3 % Magnitude Based
+            delta_p = 0.05; % You are reducing by 5%
+            X_p = (f_initial - f_varied) / delta_p;
+        end
 
         figure(i)
         set(gcf, 'Position', [0,0,800,800])
         hold on
-        % Slope Based
-        semilogx(t(2:end),sensitivity,'Color',c(j,:),'LineStyle',s{j},'LineWidth',1.5)
-        ylabel('Relative Change of dT/dt (%)');
-        % xlim([0.0001 60]);
-
-        % % Magnitude Based
-        % semilogx(t, X_p, 'Color', c(j,:), 'LineStyle', s{j}, 'LineWidth', 1.5)
-        % ylabel('Scaled Sensitivity X_p (K)');
+        if y_flag == 1 | y_flag == 2 % Slope Based
+            semilogx(t(2:end),sensitivity,'Color',c(j,:),'LineStyle',s{j},'LineWidth',1.5)
+            if y_flag == 1
+                ylabel('Relative Change of dT/dt (%)');
+            elseif y_flag == 2
+                ylabel('Change of dT/dt')
+            end
+        elseif y_flag == 3 % Magnitude Based
+            semilogx(t, X_p, 'Color', c(j,:), 'LineStyle', s{j}, 'LineWidth', 1.5)
+            ylabel('Scaled Sensitivity X_p (K)');
+        end
 
         hold on
         title(['SA for ', probe, ' with ', sample, ', in ', crucible, ' at ', int2str(avgTemp), '°C'])
         set(gca, 'XScale', 'log');
-        % set(gca, 'YScale', 'log');
         xlabel('Time (s)');
         legend(par_names(parwanted(1:j)),'Location','eastoutside')
         % pause
-    end 
+    end
+
     % Define the custom folder and file name
     customFolder = ['SA_Plots/',today];
     fileNamefig = ['SA_',probe,'_',sample,'_',crucible,'_',int2str(avgTemp),'C.fig'];
@@ -101,5 +110,4 @@ for i = 1:length(tempvec)
     saveas(gcf,fullFileNamepng,'png')
     
     hold off
-    close all
 end
