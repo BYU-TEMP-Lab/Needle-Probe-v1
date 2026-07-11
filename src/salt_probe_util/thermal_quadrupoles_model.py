@@ -14,8 +14,7 @@ class TQProbe:
     L: float 
 
     # electrical properties
-    R_elec: float # electrical resistance of the heating wire circuit
-    power_decay_rate: float # decay rate of the heat source (1/s). Typically 0.
+    power_decay_rate: float # decay rate of the heat source (1/s). Typically 0. Maybe account for axial heat transfer? Not sure. 
 
     # core (lumped properties of all material wthin outer radius of wires)
     r_core: float 
@@ -40,9 +39,6 @@ class TQProbe:
 class TQSample:
     k: float
     alpha: float
-    rho: float
-    cp: float
-    rhocp: float
     refractive_index: float
     scattering_coeff: float
 
@@ -58,7 +54,7 @@ class TQCrucible:
 class TQEnvironment:
     T_amb: float
     h_conv: float
-    power: float
+    power_avg: float
     time_array: np.ndarray
 
 def _cylindrical_layer(s, r_in, r_out, k_val, alpha_val, length):
@@ -91,8 +87,7 @@ def _radiative_transform(m_cyl, R_rad):
     )
 
 def _laplace_response(s, probe: TQProbe, sample: TQSample, crucible: TQCrucible, environment: TQEnvironment):
-    alpha_sample = sample.alpha
-    q0_initial = environment.power
+    q0_initial = environment.power_avg
 
     # effective wire region
     q1 = probe.r_core * np.sqrt(s / probe.alpha_eff_core) # thermal wave number for the effective wire region
@@ -361,43 +356,63 @@ def thermal_quadrupoles(probe: TQProbe, sample: TQSample, crucible: TQCrucible, 
     return response
 
 if __name__ == "__main__":
-    test_pars = ThermalQuadrupoleParameters(
-        k_wire_layer=2,
-        alpha_wire_layer=3,
-        k_insulation=4,
-        alpha_insulation=5,
-        thermal_contact_resistance_insulation_sheath=6,
-        k_sheath=7,
-        alpha_sheath=8,
-        ksample=9,
-        alpha_sample=10,
-        k_crucible=11,
-        alpha_crucible=12,
-        emissivity1=0.5,
-        emissivity2=0.6,
-        index=1.5,
-        scatter=0.03,
-        T0=273,
-        V=3.3,
-        electrical_resistance=10,
-        rwires=0.01,
-        rsheath_inner=0.02,
-        rsheath=0.03,
-        rsample=0.04,
-        rcrucible=0.05,
-        L=10,
-        h_conv=20,
-        rhosample=1000,
-        cpsample=500,
-        rhocp=500000,
-        I_val=0.2,
-        source_decay_rate=0.01
+    print("--- TEST (thermal_quadrupoles_model.py) ---")
+    import matplotlib.pyplot as plt
+    from salt_probe_util.bootstrap import setup_logging
+
+    setup_logging()
+    logger = logging.getLogger(f"salt_probe_util.{__name__}")
+    # logger.setLevel(logging.DEBUG)
+    t_test = np.linspace(0.01, 10, 100)
+
+    probe = TQProbe(
+        L=1.0e-2,
+        power_decay_rate=0.00,
+        r_core=5.0e-4,
+        k_eff_core=15.0,
+        alpha_eff_core=1.0e-5,
+        r_insulation=7.0e-4,
+        k_insulation=0.18,
+        alpha_insulation=7.5e-7,
+        tcr_ins_sh=1.0e-4,
+        r_sheath=1.0e-3,
+        k_sheath=20.0,
+        alpha_sheath=4.5e-6,
+        emissivity_sheath=0.80,
     )
-    t_test = np.linspace(0.0, 10, 100)
+
+    sample = TQSample(
+        k=2.0,
+        alpha=1.7e-6,
+        refractive_index=1.45,
+        scattering_coeff=0.03,
+    )
+
+    crucible = TQCrucible(
+        r_inner=1.2e-3,
+        r_outer=1.5e-3,
+        k=15.0,
+        alpha=6.0e-6,
+        emissivity=0.80,
+    )
+
+    environment = TQEnvironment(
+        T_amb=298.15,
+        h_conv=20.0,
+        power_avg=1.1,
+        time_array=np.asarray(t_test, dtype=float).ravel(),
+    )
+    
     result = thermal_quadrupoles(
-        t_test,
-        test_pars,
-        sample_diffusivity_mode="from_rho_cp",
-        power_calculation_mode="direct_current",
+        probe,
+        sample,
+        crucible,
+        environment
     )
     logger.debug("Thermal quadrupole model result: %s", result)
+    plt.scatter(t_test, result)
+    plt.xlabel("Time")
+    plt.ylabel("Delta T (C)")
+    plt.title("Thermal Quadrupole Model Test")
+    plt.show()
+    # print("Thermal quadrupole model result:", result)

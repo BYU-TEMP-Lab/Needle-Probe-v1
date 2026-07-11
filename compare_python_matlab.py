@@ -86,7 +86,7 @@ def build_thermal_model_inputs(
     environment = TQEnvironment(
         T_amb=p[15],
         h_conv=p[24],
-        power=power,
+        power_avg=power,
         time_array=np.asarray(time_array, dtype=float).ravel(),
     )
 

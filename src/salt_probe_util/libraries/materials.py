@@ -45,6 +45,9 @@ def cp_Alumel(T):
     else:
         return 4215.99923 - 16.6533325*T + 0.018666665*T**2
     
+def rho_Alumel(T):
+    return 8600
+    
 def alpha_Alumel(T):
     if 100 <= T < 175:
         return 2.777243e-5 - 3.26281e-7*T + 1.773714e-9*T**2 - 3.253333e-12*T**3
@@ -58,7 +61,7 @@ def alpha_Alumel(T):
     else:
         return -7.507129e-5 + 3.614333e-7*T - 3.952381e-10*T**2
 
-Alumel = Material("Alumel", k_func=k_Alumel, cp_func=cp_Alumel, rho_func=lambda T: 8600, valid_range=(100, 450), ignore_out_of_range=True)
+Alumel = Material("Alumel", k_func=k_Alumel, cp_func=cp_Alumel, rho_func=rho_Alumel, valid_range=(100, 450), ignore_out_of_range=True)
 
 
 # ========================================
@@ -714,6 +717,22 @@ Steel316 = Material(
     ignore_out_of_range=True
 )
 
+# ========================================
+# Thermocouple, Type K (Chromel-Alumel average)
+# ========================================
+def k_TCK(T):
+    return (k_Chromel(T) + k_Alumel(T)) / 2
+def rho_TCK(T):
+    return (rho_Chromel(T) + rho_Alumel(T)) / 2
+def cp_TCK(T):
+    return (cp_Alumel(T) * rho_Alumel(T) + cp_Chromel(T) * rho_Chromel(T)) / (rho_Alumel(T) + rho_Chromel(T))
+
+Thermocouple_TypeK = Material(name="Type K Thermocouple",
+                               valid_range=(max(Chromel.valid_range[0], Alumel.valid_range[0]), min(Chromel.valid_range[1], Alumel.valid_range[1])),
+                               ignore_out_of_range=True,
+                               k_func=k_TCK,
+                               rho_func=rho_TCK,
+                               cp_func=cp_TCK)
 
 # ========================================
 # Toluene

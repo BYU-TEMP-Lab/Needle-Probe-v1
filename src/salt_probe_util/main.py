@@ -2,8 +2,7 @@ import logging
 import numpy as np
 from .bootstrap import setup_logging
 
-logger = logging.getLogger("salt_probe_util")
-setup_logging()
+logger, _ = setup_logging()  # Initialize logging
 
 from concurrent.futures import ProcessPoolExecutor
 

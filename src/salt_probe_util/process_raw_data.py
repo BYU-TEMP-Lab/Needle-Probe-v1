@@ -233,8 +233,12 @@ def get_folder_data(data_folder: Path, current_units, V_min_cutoff=0.5, test_dur
     logger.info("Importing data from %s...", data_folder.name)
     folder_data = []
 
+    if not data_folder.exists():
+        logger.error("Folder does not exist: %s", data_folder.resolve(strict=False))
+        # exit(1)
+
     if generate_plots:
-        out_dir = data_folder.resolve() / "raw_data_plots"
+        out_dir = data_fo2lder.resolve() / "raw_data_plots"
         out_dir.mkdir(parents=True, exist_ok=True)
         logger.info("Plots will be saved to: %s", out_dir)
     else:

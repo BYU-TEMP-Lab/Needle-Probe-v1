@@ -18,6 +18,9 @@ class OptimParam:
     bounds: tuple
     prior_sigma: float
 
+    def __post_init__(self):
+        self.current_value = self.initial_value  # Initialize current_value to initial_value
+
 def build_optim_vectors(resolved_params, user_selections):
     # Build vectors for optimization based on resolved parameters
     candidate_decision_vars = [list(user_selections.decision_vars.keys())[i] for i in user_selections.decision_vars_indx]

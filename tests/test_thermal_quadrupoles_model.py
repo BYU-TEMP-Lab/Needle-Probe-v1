@@ -24,5 +24,5 @@ def test_build_thermal_model_inputs_from_matlab_vector():
     assert probe.k_eff_core == par_vec[0]
     assert sample.refractive_index == par_vec[13]
     assert crucible.r_inner == par_vec[21]
-    assert environment.power == par_vec[16] * par_vec[28]
+    assert environment.power_avg == par_vec[16] * par_vec[28]
     assert environment.T_amb == par_vec[15]
