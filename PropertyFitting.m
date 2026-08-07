@@ -39,7 +39,7 @@ m=menu('Probe Calibration or Sample Test?',...
 if m == 1
     timewindow = [0.001 7]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [1 30]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [0.001 30]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
 else
     disp('No selection, program terminated')
     return
