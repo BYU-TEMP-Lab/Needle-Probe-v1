@@ -6,7 +6,7 @@ SolvedPropTable = sortrows(SolvedPropTable,"Temp__C_","ascend");
 show_figs = 'on';
 
 vars = SolvedPropTable.Properties.VariableNames;
-T_range = linspace(0, 800, 100);
+T_range = linspace(500, 800, 100);
 fit_choice = menu("Choose fit order:", 'average', 'linear', 'quadratic', 'cubic', 'fourth-order', 'power', 'logarithmic', 'exponential');
 
 if fit_choice == 1

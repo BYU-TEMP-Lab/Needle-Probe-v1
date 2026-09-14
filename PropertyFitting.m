@@ -30,8 +30,15 @@ end
 currentFOLDER = pwd;
 today = char(datetime('now','Format','MM,dd,yy,HH-mm'));
 
-m=menu('Probe Calibration or Sample Test?',...
+prompt = 'Enter relevant information to identify this run:';
+dlgtitle = 'Run Note';
+fieldsize = [2 50];
+definput = {''};
+runnote = inputdlg(prompt,dlgtitle,fieldsize,definput);
+
+m=menu('Calibration or Sample Test?',...
     'Probe Calibration', ...
+    'Crucible Calibration', ...
     'Sample Test', ...
     'end');
 
@@ -39,7 +46,9 @@ m=menu('Probe Calibration or Sample Test?',...
 if m == 1
     timewindow = [0.001 7]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.001 30]; % late and long to capture sample properties, ***could be adjusted based on sensitivity analysis***
+    timewindow = [30 60]; % late and long to capture crucible properties
+elseif m == 3
+    timewindow = [0.001 30]; % k sample sensitivity peak is approximately from 0.3s - 30s fro MgNaCl
 else
     disp('No selection, program terminated')
     return
@@ -285,6 +294,14 @@ Results = zeros(numel(names)-2, 9);
 [~, par_names] = Properties(probe,crucible,sample,25,5,0.00225,0.1,0.00225,MC);
 
 cd(runfolder)
+
+fid = fopen('runnote.txt','w');
+if fid == -1
+    error('Run Note File Error');
+end
+fprintf(fid,'%s\n', string(runnote));
+fclose(fid);
+
 textfile = fopen([run_name, '.txt'],'at');
 fprintf(textfile, '%s\t', 'Voltage (V)');
 fprintf(textfile, '%s\t', 'Temp (°C)');
@@ -394,7 +411,7 @@ for n = 3:numel(names)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if global_fitting == 0
             %%%%%%% fmincon fitting
-            Sstart=NeedleProbeModel(Time,par_vector,IV);
+            Sstart=MatrixNeedleProbeModel(Time,par_vector,IV);
             close all;
 
             foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4);
@@ -460,7 +477,7 @@ for n = 3:numel(names)
 
         elseif global_fitting == 1
             % Initialize starting parameters and options
-            Sstart = NeedleProbeModel(Time, par_vector, IV); % Model initialization
+            Sstart = MatrixNeedleProbeModel(Time, par_vector, IV); % Model initialization
             close all;
             
             foptions = optimset('MaxIter', 1e9, 'MaxFunEvals', 3e16, 'Display', 'iter'); % Optimization options
@@ -495,7 +512,7 @@ for n = 3:numel(names)
         close all;
         param=par_vector;
         param(Ifitpar)=fitresult;
-        Sfit=NeedleProbeModel(Time,param,IV);
+        Sfit=MatrixNeedleProbeModel(Time,param,IV);
 
         if run == 1
             figure(Visible='off');
@@ -602,7 +619,7 @@ for n = 3:numel(names)
             for ii=1:ntest
                 partest=parvec(ii);
                 param(Ifitpar(ipar))=partest; %variable fitting parameters
-                familyresult = NeedleProbeModel(Time,param,IV);
+                familyresult = MatrixNeedleProbeModel(Time,param,IV);
                 familyvec(:,ii)=familyresult;
             end
 

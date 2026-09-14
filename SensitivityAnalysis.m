@@ -11,7 +11,7 @@ crucible = 'Inconel625';
 sample = 'MgNaCl';
 tvec = [0.00001 120];
 tempvec = [500 550 600 600 800];
-parwanted = [8 9 26 27]; % 1 to 31
+parwanted = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31]; % 1 to 31
 
 baseColors = lines(8); 
 baseStyles = {'-', '--', ':', '-.'};
@@ -52,8 +52,8 @@ for i = 1:length(tempvec)
         t = t';
         IV = 1;
         cp = 1;
-        f_initial = NeedleProbeModel(t,par_vector,IV);
-        f_varied = NeedleProbeModel(t,par_vector_varied,IV);
+        f_initial = MatrixNeedleProbeModel(t,par_vector,IV);
+        f_varied = MatrixNeedleProbeModel(t,par_vector_varied,IV);
 
         if y_flag == 1 % Sloped Based Percent
             dy = diff(f_initial(:))./diff(log(t(:)));

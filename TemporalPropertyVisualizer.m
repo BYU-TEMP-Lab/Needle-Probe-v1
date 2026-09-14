@@ -1,10 +1,10 @@
 clear
 
-time = (0.00001:0.01:120)'; %linspace(0.02,40,4000);
+time = (0.00001:0.01:1080)'; %linspace(0.02,40,4000);
 
-[par_vector,par_names] = Properties("3A-IN718-01","Inconel625","MgNaCl",700,2.8,0,0.37,0,0);
+[par_vector,par_names] = Properties("3A-IN718-01","Inconel625","MgNaCl",500,2.8,0,0.37,0,0);
 
-par_test_list = [1,3,6,8,10];
+par_test_list = [1,3,6,8,10,19,20,21,22,23];
 
 figure;
 for j = 1:length(par_test_list)

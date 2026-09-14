@@ -14,3 +14,5 @@ MATLAB_Data_Analysis/From_NonCOMSOL_Computer/Analysis_Results/**
 *.swp
 *.asv
 TEST.m
+testingdata/
+testingdataAr/
