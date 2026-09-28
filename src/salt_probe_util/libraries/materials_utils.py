@@ -65,6 +65,8 @@ class Material:
             self.valid_range = (min(T_points), max(T_points))
         else:
             self.valid_range = (None, None)  # No range provided :(
+            logger.warning(f"WARNING: No valid temperature range defined for {self.name}. "
+                           f"Property calculations may be physically invalid.")
 
     def _check_range(self, T):
         Tmin, Tmax = self.valid_range
@@ -111,7 +113,7 @@ class Material:
         else:
             alpha = k / (rho * cp)
 
-        # compute uncertainty of alpha if not provided
+        # compute uncertainty of alpha if not provided (taylor series error propogation)
         if self.alpha_perc_uncertainty is None or not hasattr(self, 'alpha_perc_uncertainty'):
             self.alpha_perc_uncertainty = alpha * np.sqrt(
                 (self.k_perc_uncertainty/k)**2 +
@@ -248,4 +250,20 @@ def apply_porosity(material: Material, porosity_percent: float, model="Zivcoca")
     
     else:
         raise ValueError("Material object does not have k_points or k_func defined.")
+
+def get_optim_params_at_T(Temp, model:str):
+    """gets the optimization parameters at a given temperature for a given model
+    
+    Parameters:
+        Temp: Temperature at which to get optimization parameters
+        model: ("Thermal Quadrupoles", etc.) Model for which to get optimization parameters
+    
+    Returns:
+        Optimization parameters object for the specified model and temperature
+    """
+    if model == "Thermal Quadrupoles":
+        from salt_probe_util.optimizer import OptimParam
+        k = OptimParam(
+            initial_value=self.k_func()
+        )
     

@@ -3,7 +3,20 @@ Description here.
 
 # Python rewrite
 
-To do:
+Design requirements:
+The program should...
+1) Process experimental data
+2) Generate temperatuere dependent material properties
+3) Store and load calibrated probe/crucible properties
+4) Run a selected thermal model based on properties and calibrations
+5) Run optimizer to match model to experimental data
+6) Display results
+7) Quantify uncertainty
+8) Perform sensitivity analysis
+9) Easily adjust material properties, calibrations (probe/crucible), and models
+10) Integrate with DAQ code?
+
+
 1) Integrate props with model
 2) Integrate calibration with model
 3) Write optimization objective
