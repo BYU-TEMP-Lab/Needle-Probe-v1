@@ -5,25 +5,7 @@ starttime = timewindow(1);%set to 0 to start at the beginning. Make sure values 
 timesend = timewindow(2);
 
 % PUT RAW DATA INTO USABLE FORMAT
-prompt = 'Select a raw data folder ';
-m = 1;
-while m == 1
-    disp(prompt);
-    datafolder = uigetdir;
-    if datafolder == 0
-        datafolder = 'd';
-    end
-
-    if ~exist(datafolder, 'dir')
-        disp('404d. Folder not found.')
-        image404 = imread("404d.jpg");
-        %imshow(image404)
-        return
-    else
-        m = 0;
-    end
-end
-
+datafolder = uigetdir('','Select data folder. Folder must contain ONLY data files.');
 
 plot = 'Plots';
 plotfolder = [runfolder '\' plot];

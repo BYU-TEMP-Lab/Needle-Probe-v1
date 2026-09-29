@@ -194,6 +194,8 @@ f = f((original_start_index):end);
         I = par_vector(29);
         k = par_vector(30); % Power decay
         decay_point = par_vector(31); % Power time
+        RthShthSamp = par_vector(32);
+        RthSampCruc = par_vector(33);
 
         kcorrosion = 0.5 * kcrucible;
         alphacorrosion = 0.5 * alphacrucible;
@@ -278,6 +280,14 @@ f = f((original_start_index):end);
         % Define the static contact resistance matrix
         M_contact = [1, RthInsShth; 
                      0, 1];
+
+        % Sheath - Sample Contact Resistance
+        M_Sh_Sa = [1, RthShthSamp; 
+                     0, 1];
+
+        % Sample - Crucible Contact Resistance
+        M_Sa_Cr = [1, RthSampCruc; 
+                     0, 1];
         
         % Iterate over all frequencies/values of 's'
         for i = 1:length(s)
@@ -301,7 +311,7 @@ f = f((original_start_index):end);
                   C6(i),  D6(i)];
             
             % Built-in Matrix Multiplication
-            M_sys = M1 * M2 * M_contact * M3 * M4 * M5 * M6;
+            M_sys = M1 * M2 * M_contact * M3 * M_Sh_Sa * M4 * M_Sa_Cr * M5;
             
             A_sys = M_sys(1,1);
             B_sys = M_sys(1,2);

@@ -9,14 +9,14 @@ off = 0;
 
 global_fitting = off; % Uses fminsearch when off
 
-MC = off; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
+MC = on; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
 
 raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
 iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
 manual_delay = off; %Adds in a manual delay that helps to see the fitting process. Significantly increases runtime.
-chi2plots = on; %show plots from the chi2 error analysis
+chi2plots = off; %show plots from the chi2 error analysis
 
-MC_iterations = 250; %The numbers of iterations to run as part of the Monte Carlo Analysis
+MC_iterations = 2000; %250; %The numbers of iterations to run as part of the Monte Carlo Analysis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iterations = 0;
@@ -78,8 +78,8 @@ end
 
 m=menu('Crucible Material:',...
     'Steel316',...
-    'Nickel 200',...
-    'Inconel 625',...
+    'Nickel200',...
+    'Inconel625',...
     'end');
 
 if m == 1
@@ -159,7 +159,7 @@ choices = {
     "2 - Alpha Eff. Wires",           
     "3 - K Insulation",           
     "4 - Alpha Insulation",  
-    "5 - Rth Insulation-Sheath",  
+    "5 - Rth Insulation-Sheath",
     "6 - K Sheath",           
     "7 - Alpha Sheath", 
     "8 - K Sample",
@@ -177,7 +177,9 @@ choices = {
     "27 - Cp Sample",
     "28 - Rhosample * Cp Sample",
     "29 - Current",
-    "30 - Flux Decay Factor"
+    "30 - Flux Decay Factor",
+    "32 - Rth Sheath-Sample",
+    "33 - Rth Sample-Crucible"
 };
 
 % Display the dialog to select multiple values
@@ -262,6 +264,12 @@ if ok
             case 23
                 SolveListNames = [SolveListNames, "30"];
                 SolveList = [SolveList, 30];
+            case 24
+                SolveListNames = [SolveListNames, "32"];
+                SolveList = [SolveList, 32];
+            case 25
+                SolveListNames = [SolveListNames, "33"];
+                SolveList = [SolveList, 33];
         end
     end
 end
@@ -411,7 +419,7 @@ for n = 3:numel(names)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if global_fitting == 0
             %%%%%%% fmincon fitting
-            Sstart=MatrixNeedleProbeModel(Time,par_vector,IV);
+            Sstart=NeedleProbeModel(Time,par_vector,IV);
             close all;
 
             foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4);
@@ -435,10 +443,9 @@ for n = 3:numel(names)
                     lb(i) = x0(i)*0.5;
                     ub(i) = x0(i)*1.5;
                 end
-                if SolveList(i) == 5 % thermal contact resistance
-                    % set on range of 0 - 1, since initial guess is 0
-                    lb(i) = 0;
-                    ub(i) = 1;
+                if SolveList(i) == 5 || SolveList(i) == 32 || SolveList(i) == 33 % thermal contact resistance
+                    lb(i) = x0(i)*0;
+                    ub(i) = x0(i)*1;
                 end
                 if SolveList(i) == 3 || SolveList(i) == 4 ||...
                 SolveList(i) == 6 || SolveList(i) == 7 ||...
@@ -447,14 +454,14 @@ for n = 3:numel(names)
                     % smaller bounds for uncertainty in material properties
                     % (for 2A probes, insulation is actually lumped Alumina
                     % and Ceramabond and should use larger bounds)
-                    lb(i) = x0(i)*0.9;
-                    ub(i) = x0(i)*1.1;
+                    lb(i) = x0(i)*0.5;
+                    ub(i) = x0(i)*1.5;
                 end
                 if SolveList(i) == 12 || SolveList(i) == 13 % probe and crucible emissivity
                     % larger bounds on emissivity because of uncertainty
                     % regarding impact of molten salt on exposed surfaces
-                    lb(i) = x0(i)*0.5;
-                    ub(i) = x0(i)*1.5;
+                    lb(i) = x0(i)*0.8;
+                    ub(i) = x0(i)*1.2;
                 end
                 if SolveList(i) == 19 || SolveList(i) == 20 || SolveList(i) == 21 || SolveList(i) == 22 || SolveList(i) == 23 % radii
                     % smaller bounds on geometry due to measurement
@@ -477,7 +484,7 @@ for n = 3:numel(names)
 
         elseif global_fitting == 1
             % Initialize starting parameters and options
-            Sstart = MatrixNeedleProbeModel(Time, par_vector, IV); % Model initialization
+            Sstart = NeedleProbeModel(Time, par_vector, IV); % Model initialization
             close all;
             
             foptions = optimset('MaxIter', 1e9, 'MaxFunEvals', 3e16, 'Display', 'iter'); % Optimization options
@@ -512,7 +519,7 @@ for n = 3:numel(names)
         close all;
         param=par_vector;
         param(Ifitpar)=fitresult;
-        Sfit=MatrixNeedleProbeModel(Time,param,IV);
+        Sfit=NeedleProbeModel(Time,param,IV);
 
         if run == 1
             figure(Visible='off');
@@ -619,7 +626,7 @@ for n = 3:numel(names)
             for ii=1:ntest
                 partest=parvec(ii);
                 param(Ifitpar(ipar))=partest; %variable fitting parameters
-                familyresult = MatrixNeedleProbeModel(Time,param,IV);
+                familyresult = NeedleProbeModel(Time,param,IV);
                 familyvec(:,ii)=familyresult;
             end
 

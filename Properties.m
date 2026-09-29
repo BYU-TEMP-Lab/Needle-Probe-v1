@@ -194,8 +194,8 @@ alpha_air = k_air/(density_air*cp_air);
 % alpha_Alumina = R*alpha_Alumina + (1-R)*alpha_air;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Stainless Steel 316: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Thermal Conductivity- Stainless Steel 316
+%Stainless Steel316: VALID UP TO ~K (~C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Thermal Conductivity- Stainless Steel316
 if T >= 4 && T < 9
     k_SS316 = -0.9611905+0.5776587*T^1-0.08547619*T^2+0.004722222*T^3;
 elseif T >= 9 && T < 135
@@ -204,7 +204,7 @@ elseif T >= 135 && T < 1220
     k_SS316 = 7.956002+0.02084122*T^1-4.706772E-6*T^2+6.271478E-10*T^3-1.240772E-12*T^4;
 end
 
-% Density- Stainless Steel 316
+% Density- Stainless Steel316
 if T >= 4 && T < 114
     rho_SS316 = 8042.496-0.01245121*T^1+3.834401E-5*T^2-7.363868E-6*T^3;
 elseif T >= 114 && T < 1273
@@ -366,7 +366,7 @@ if T >= 293 && T < 1093
     alpha_Inconel625 = k_Inconel625/(rho_Inconel625 * cp_Inconel625);
 end
 
-% Total Radiative Emissivity- Inconel 625
+% Total Radiative Emissivity- Inconel625
 if T < 473
     emissivity_Inconel625 = 0.31; % low value from https://ntrs.nasa.gov/citations/19860012189
 elseif T >=473 && T < 1144
@@ -387,7 +387,7 @@ scatter = 0;
 h_convection = 10; %just an assumption. Don't know if there's a better way to measure this.Study done on 1/18/23 denoted that this parameter does not affect our results in any appreciable way
 
 Flux_decay = 0; % Decay constant
-decay_point = 0; % Decay point
+decay_point = 60; % Decay point
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MgCl2-NaCl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1581,36 +1581,17 @@ if strcmp(probe,"3A-IN718-01")
     %Geometry%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %r_1 = ; % inside radius up to wires %Not needed right now, but may be needed later
     %r_2 = ; % middle of wires %Not needed right now, but may be needed later
-    % r_3 = 0.35e-3; % outside of wires - XRay
-    r_3 = (1.1939/2)/1000; % CT scan
-    % r_4 = 1e-3; % inside radius of sheath - XRay
-    r_4 = (1.5475/2)/1000; % CT scan
-    r_5 = 0.001397; % outside radius of the probe, used in semi-infinite layer and sheath layer (meters)
-    % r_heating_wire = 0.0001143; % radius of heating wires - XRay
-    r_heating_wire = (0.3134/2)/1000; % CT scan
-    % r_TC_wire = 0.0001143; % radius of thermocouple wires - XRay
-    r_TC_wire = (0.3134/2)/1000; % CT scan
+    r_3 = (0.5742)/1000; % Outside radius of lumped wire region, CT scan
+    r_4 =((2.794-(2*0.04064))/2)/1000; % Inside radius of sheath, ILC
+    r_5 = (2.794/2)/1000; % Outside radius of sheath, used in semi-infinite layer and sheath layer (meters)
+    r_heating_wire = (0.2286/2)/1000; % ILC
+    r_TC_wire = (0.2286/2)/1000; % ILC
     L = 0.1016; % Length of the sensing region of probe
 
     % recalculate radius based on cte HERE
     % r = r + 15e-6 * (T-298);
     r_4 = r_4 + (r_4 * 15e-6 * (T-298)); 
     r_5 = r_5 + (r_5 * 15e-6 * (T-298));
-
-    % % 6/1/26 Calibration, flux decay limited 1
-    % r_3 = 6.468750e-04;
-    % r_4 = 8.232404e-04;
-    % r_5 = 1.263517e-03;
-
-    % % 6/8/26 Calibration
-    % r_3 = 6.472083e-04;
-    % r_4 = 8.252764e-04;
-    % r_5 = 1.263211e-03;
-
-    % % 6/16/26 Calibration
-    % r_3 = 6.458333e-04;
-    % r_4 = 8.238038e-04;
-    % r_5 = 1.263706e-03;
 
     % % 7/1/26 Calibration
     % r_3 = 6.479369e-04;
@@ -1644,57 +1625,24 @@ if strcmp(probe,"3A-IN718-01")
     cp_eff_wire = (cp_Chromel*(V_tc/2)+ cp_Alumel*V_tc/2 + cp_Nichrome*(V_h) +cp_Magnesium_Oxide*V_A)/(V_tc+V_h+V_A);
     k_eff_wire = alpha_eff_wire*(rho_eff_wire*cp_eff_wire); %/4 is added
     
-    k_insulation = k_Magnesium_Oxide;   % Use if separated into probe layers
+    k_insulation = k_Magnesium_Oxide;
     alpha_insulation = alpha_Magnesium_Oxide;
     k_sheath = k_IN718;
     alpha_sheath = alpha_IN718;
     emissivity_probe = emissivity_IN718;
 
-    RthInsShth = 0;
+    RthInsShth = 0.2;
     Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085; % Copied from INL probe
-    
-    % % 6/1/26 Calibration, flux decay limited 1
-    % k_eff_wire = -3.064098e-02*(T-273.15) + 3.188021e+01;
-    % alpha_eff_wire = -1.237358e-08*(T-273.15) + 1.010192e-05;
-    % k_insulation = -3.803002e-02*(T-273.15) + 3.177246e+01;
-    % alpha_insulation = -1.124845e-08*(T-273.15) + 8.484239e-06;
-    % RthInsShth = 1.354415e-01;
-    % k_sheath = 1.761093e-02*(T-273.15) + 8.784065e+00;
-    % alpha_sheath = 3.958333e-06;
-    % emissivity_probe = 3.990057e-01;
-    % Flux_decay = 3.804167e-04;
-    
-    % % 6/8/26 Calibration
-    % k_eff_wire = -3.067769e-02*(T-273.15) + 3.195257e+01;
-    % alpha_eff_wire = -1.243231e-08*(T-273.15) + 1.012591e-05;
-    % k_insulation = -3.789386e-02*(T-273.15) + 3.175149e+01;
-    % alpha_insulation = -1.132827e-08*(T-273.15) + 8.514835e-06;
-    % RthInsShth = 1.344667e-01;
-    % k_sheath = 1.850978e-02*(T-273.15) + 8.581231e+00;
-    % alpha_sheath = 3.958333e-06;
-    % emissivity_probe = 3.924053e-01;
-    % Flux_decay = 3.578333e-04;
 
-    % % 6/16/26 Calibration
-    % k_eff_wire = -3.052517e-02*(T-273.15) + 3.197929e+01;
-    % alpha_eff_wire = -1.211148e-08*(T-273.15) + 1.009517e-05;
-    % k_insulation = -3.787862e-02*(T-273.15) + 3.175047e+01;
-    % alpha_insulation = -1.132215e-08*(T-273.15) + 8.508585e-06;
-    % RthInsShth = 1.340965e-01;
-    % k_sheath = 1.832309e-02*(T-273.15) + 8.715321e+00;
-    % alpha_sheath = 4.000000e-06;
-    % emissivity_probe = 1.952842e-04*(T-273.15) + 3.355891e-01; %4.046331e-01;
-    % Flux_decay = 4.167500e-04;
-
-    % % 7/1/26 Calibration
-    % k_eff_wire = -1.480148e-02*(T-273.15) + 2.436831e+01; % +5 for better mgnacl fit
-    % alpha_eff_wire = -7.402697e-09*(T-273.15) + 8.199885e-06;
-    % k_insulation = -2.005516e-02*(T-273.15) + 2.308360e+01; % +5 for better mgnacl fit
-    % alpha_insulation = -5.206405e-09*(T-273.15) + 5.675724e-06;
-    % RthInsShth = 2.470349e-01;
-    % k_sheath = 1.233350e-02*(T-273.15) + 1.172190e+01; % +5 for better mgnacl fit
-    % alpha_sheath = 4.437088e-10*(T-273.15) + 4.360298e-06;
-    % emissivity_probe = 5.275748e-04*(T-273.15) + 1.517999e-01;
+    % 7/1/26 Calibration
+    k_eff_wire = -1.480148e-02*(T-273.15) + 2.436831e+01; % +5 for better mgnacl fit
+    alpha_eff_wire = -7.402697e-09*(T-273.15) + 8.199885e-06;
+    k_insulation = -2.005516e-02*(T-273.15) + 2.308360e+01; % +5 for better mgnacl fit
+    alpha_insulation = -5.206405e-09*(T-273.15) + 5.675724e-06;
+    RthInsShth = 2.470349e-01;
+    k_sheath = 1.233350e-02*(T-273.15) + 1.172190e+01; % +5 for better mgnacl fit
+    alpha_sheath = 4.437088e-10*(T-273.15) + 4.360298e-06;
+    emissivity_probe = 5.275748e-04*(T-273.15) + 1.517999e-01;
 
     % % 9/10/26 Calibration
     % k_eff_wire = -1.496610e-02*(T-273.15) + 2.444455e+01;
@@ -1705,6 +1653,26 @@ if strcmp(probe,"3A-IN718-01")
     % k_sheath = 1.312937e-02*(T-273.15) + 1.116302e+01;
     % alpha_sheath = 1.863466e-09*(T-273.15) + 3.704275e-06;
     % emissivity_probe = 3.913808e-04*(T-273.15) + 2.565713e-01;
+
+    % % 9/15/26 Calibration
+    % k_eff_wire = -3.122497e-02*(T-273.15) + 3.844881e+01;
+    % alpha_eff_wire = -1.728102e-09*(T-273.15) + 2.557710e-06;
+    % k_insulation = -2.208983e-02*(T-273.15) + 2.491832e+01;
+    % alpha_insulation = -4.402199e-09*(T-273.15) + 4.887191e-06;
+    % RthInsShth = -5.417523e-03*(T-273.15) + 5.653168e+00;
+    % k_sheath = 1.490012e-02*(T-273.15) + 8.978736e+00;
+    % alpha_sheath = 2.139579e-09*(T-273.15) + 3.629310e-06;
+    % emissivity_probe = 3.452885e-04*(T-273.15) + 1.878733e-01;
+
+    % % 9/21/26 Calibration
+    % k_eff_wire = -3.413750e-02*(T-273.15) + 3.920387e+01;
+    % alpha_eff_wire = -3.051344e-09*(T-273.15) + 3.727914e-06;
+    % k_insulation = -3.045969e-02*(T-273.15) + 3.033227e+01;
+    % alpha_insulation = -6.309509e-09*(T-273.15) + 6.154360e-06;
+    % RthInsShth = -2.054259e-03*(T-273.15) + 2.762876e+00;
+    % k_sheath = 1.597822e-02*(T-273.15) + 8.450951e+00;
+    % alpha_sheath = 2.507207e-09*(T-273.15) + 3.363902e-06;
+    % emissivity_probe = 4.195306e-04*(T-273.15) + 1.923005e-01;
 end
 
 rwires = r_3;
@@ -1716,22 +1684,6 @@ rsheath = r_5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rcrucible = 0.0127;
 rsample =  0.00209;
-
-% % 6/1/26 calibration, flux decay limited 1
-% rcrucible = 1.266300e-02;
-% rsample = 2.173750e-03;
-
-% % 6/8/26 Calibration
-% rcrucible = 1.269837e-02;
-% rsample = 2.174917e-03;
-
-% % 6/16/26 Calibration
-% rcrucible = 1.267637e-02;
-% rsample = 2.167625e-03;
-
-% % 6/29/26 Calibration
-% rcrucible = 1.263952e-02; % * 0.5; % * 0.5 for better MgNaCl fit
-% rsample = 2.139471e-03;
 
 % 9/10/26 Calibration
 % rcrucible = 1.291643e-02;
@@ -1773,82 +1725,76 @@ if strcmp(crucible,'Inconel625')
     rcrucible = rcrucible + (rcrucible * 15e-6 * (T-298));
     rsample = rsample + (rsample * 15e-6 * (T-298));
 
-    % % 6/1/26 Calibration, flux decay limited 1
-    % k_crucible = 1.949338e-02*(T-273.15) + 7.714343e+00;
-    % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
-    % emissivity_crucible = 1.331416e-01;
-
-    % % 6/8/26 Calibration
-    % k_crucible = 1.949166e-02*(T-273.15) + 7.718652e+00;
-    % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
-    % emissivity_crucible = 3.169445e-01;
-
-    % % 6/16/26 Calibration
-    % k_crucible = 1.949411e-02*(T-273.15) + 7.717308e+00;
-    % alpha_crucible = 4.148462e-09*(T-273.15) + 2.033284e-06;
-    % emissivity_crucible = 1.156189e-04*(T-273.15) + 2.805427e-01; %3.214205e-01;
-
-    % % 7/1/26 Calibration
-    % k_crucible = 1.949877e-02*(T-273.15) + 7.714801e+00;
-    % alpha_crucible = 2.576609e-09*(T-273.15) + 2.652344e-06;
-    % emissivity_crucible = 1.374661e-04*(T-273.15) + 2.297996e-01;
+    % 7/1/26 Calibration
+    k_crucible = 1.949877e-02*(T-273.15) + 7.714801e+00;
+    alpha_crucible = 2.576609e-09*(T-273.15) + 2.652344e-06;
+    emissivity_crucible = 1.374661e-04*(T-273.15) + 2.297996e-01;
 
     % % 9/10/26 Calibration
     % k_crucible = 1.776503e-02*(T-273.15) + 9.006214e+00;
     % alpha_crucible = 3.538864e-09*(T-273.15) + 2.006947e-06;
     % emissivity_crucible = 3.158105e-04*(T-273.15) + 2.237477e-01;
 
+    % % 9/15/26 Calibration
+    % k_crucible = 2.138623e-02*(T-273.15) + 6.279432e+00;
+    % alpha_crucible = 2.585053e-09*(T-273.15) + 2.665446e-06;
+    % emissivity_crucible = 1.780071e-04*(T-273.15) + 1.810385e-01;
+
+    % % 9/21/26 Calibration
+    % k_crucible = 2.034831e-02*(T-273.15) + 7.050581e+00;
+    % alpha_crucible = 2.702798e-09*(T-273.15) + 2.620931e-06;
+    % emissivity_crucible = 8.177911e-05*(T-273.15) + 2.545593e-01;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Thermal Contact Resistance: Probe - Sample - Crucible
-% if strcmp(probe,'INL')
-%     RthProbeSample = 1e-8; %Where did this come from?
-% end
-% 
-% if strcmp(probe,"2A-SS-03")
-%     RthProbeSample = 1e-8; %Where did this come from?
-% end
-% 
-% if strcmp(probe,"2A-SS-04")
-%     if strcmp(sample,'Ar')
-%         RthProbeSample = 1e-8; %Where did this come from?
-%     else
-%         RthProbeSample = 1e-8; %Where did this come from?
-%     end
-% end
-% 
-% if strcmp(probe,"3A-IN718-01")
-%     if strcmp(sample,'Ar')
-%         RthProbeSample = 1e-8; %Where did this come from?
-%     else
-%         RthProbeSample = 1e-8; %Where did this come from?
-%     end
-% end
-% 
-% if strcmp(crucible,'Steel316')
-%     if strcmp(sample,'Ar')
-%         RthSampleCrucible = 0.0;
-%     else
-%         RthSampleCrucible = 0;
-%     end
-% end
-% 
-% if strcmp(crucible,'Nickel 200')
-%     if strcmp(sample,'Ar')
-%         RthSampleCrucible = 0.0;
-%     else
-%         RthSampleCrucible = 0;
-%     end
-% end
-% 
-% if strcmp(crucible,'Inconel 625')
-%     if strcmp(sample,'Ar')
-%         RthSampleCrucible = 0.0;
-%     else
-%         RthSampleCrucible = 0;
-%     end
-% end
+if strcmp(probe,'INL')
+    RthProbeSample = 1e-8; %Where did this come from?
+end
+
+if strcmp(probe,"2A-SS-03")
+    RthProbeSample = 1e-8; %Where did this come from?
+end
+
+if strcmp(probe,"2A-SS-04")
+    if strcmp(sample,'Ar')
+        RthProbeSample = 1e-8; %Where did this come from?
+    else
+        RthProbeSample = 1e-8; %Where did this come from?
+    end
+end
+
+if strcmp(probe,"3A-IN718-01")
+    if strcmp(sample,'Ar')
+        RthProbeSample = 1e-8; %Where did this come from?
+    else
+        RthProbeSample = 1e-8; %Where did this come from?
+    end
+end
+
+if strcmp(crucible,'Steel316')
+    if strcmp(sample,'Ar')
+        RthSampleCrucible = 1e-8;
+    else
+        RthSampleCrucible = 1e-8;
+    end
+end
+
+if strcmp(crucible,'Nickel200')
+    if strcmp(sample,'Ar')
+        RthSampleCrucible = 1e-8;
+    else
+        RthSampleCrucible = 1e-8;
+    end
+end
+
+if strcmp(crucible,'Inconel625')
+    if strcmp(sample,'Ar')
+        RthSampleCrucible = 1e-8;
+    else
+        RthSampleCrucible = 1e-8;
+    end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Monte Carlo Analysis
@@ -1905,11 +1851,11 @@ if MC == 1
     bias_RthInsShth = 0;
     uncertainty_RthInsShth = 0.05; %Check This
 
-    % bias_RthProbeSample = 0;
-    % uncertainty_RthProbeSample = 0.05; %Check This
+    bias_RthProbeSample = 0;
+    uncertainty_RthProbeSample = 0.05; %Check This
 
-    % bias_RthSampleCrucible = 0;
-    % uncertainty_RthSampleCrucible = 0.05; %Check This
+    bias_RthSampleCrucible = 0;
+    uncertainty_RthSampleCrucible = 0.05; %Check This
 
     bias_current = 0;
     uncertainty_current = CurrentSTD*2/Current;
@@ -1937,8 +1883,8 @@ if MC == 1
     L = MonteCarloProp(uncertainty_length,bias_length,L);
     h_convection = MonteCarloProp(uncertainty_h,bias_h,h_convection);
     RthInsShth = MonteCarloProp(uncertainty_RthInsShth,bias_RthInsShth,RthInsShth);
-    % RthProbeSample = MonteCarloProp(uncertainty_RthProbeSample,bias_RthProbeSample,RthProbeSample);
-    % RthSampleCrucible = MonteCarloProp(uncertainty_RthSampleCrucible,bias_RthSampleCrucible,RthSampleCrucible);
+    RthProbeSample = MonteCarloProp(uncertainty_RthProbeSample,bias_RthProbeSample,RthProbeSample);
+    RthSampleCrucible = MonteCarloProp(uncertainty_RthSampleCrucible,bias_RthSampleCrucible,RthSampleCrucible);
     Current = MonteCarloProp(uncertainty_current,bias_current,Current);
     k_sample = MonteCarloProp(uncertainty_k_sample,bias_k_sample,k_sample);
     cp_sample = MonteCarloProp(uncertainty_cp_sample,bias_cp_sample,cp_sample);
@@ -1982,6 +1928,8 @@ par_vector(28) = rho_sample*cp_sample;
 par_vector(29) = Current;
 par_vector(30) = Flux_decay;
 par_vector(31) = decay_point;
+par_vector(32) = RthProbeSample;
+par_vector(33) = RthSampleCrucible;
 
 par_names(1,1) = "K\_Eff\_Wires";          
 par_names(2,1) = "Alpha\_Eff\_Wires";          
@@ -2014,6 +1962,8 @@ par_names(28,1) = "Rho\_cp\_sample";
 par_names(29,1) = "Current";
 par_names(30,1) = "Flux\_Decay\_Factor";
 par_names(31,1) = "Decay\_Point";
+par_names(32,1) = "Rth\_Sheath-Sample";
+par_names(33,1) = "Rth\_Sample-Crucible";
 
 par_names(1,2) = "W/(m*K)";         
 par_names(2,2) = "m^2/s";          
@@ -2046,6 +1996,8 @@ par_names(28,2) = "J/(m^3*K)";
 par_names(29,2) = "Amps";
 par_names(30,2) = "unitless";
 par_names(31,2) = "unitless";
+par_names(32,2) = "m*K/W";
+par_names(33,2) = "m*K/W";
 
 disp("Properties calculations complete.")
 end

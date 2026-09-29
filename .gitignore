@@ -16,3 +16,7 @@ MATLAB_Data_Analysis/From_NonCOMSOL_Computer/Analysis_Results/**
 TEST.m
 testingdata/
 testingdataAr/
+ChatNeedleProbeModel.m
+GemNeedleProbeModel.m
+Gem2NeedleProbeModel.m
+NPM_up_down_test.m
