@@ -9,14 +9,14 @@ off = 0;
 
 global_fitting = off; % Uses fminsearch when off
 
-MC = on; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
+MC = off; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
 
-raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
+raw_plot = on; %Create plots of the raw data. Keep off to increase speed.
 iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
 manual_delay = off; %Adds in a manual delay that helps to see the fitting process. Significantly increases runtime.
-chi2plots = off; %show plots from the chi2 error analysis
+chi2plots = on; %show plots from the chi2 error analysis
 
-MC_iterations = 2000; %250; %The numbers of iterations to run as part of the Monte Carlo Analysis
+MC_iterations = 250; %250; %The numbers of iterations to run as part of the Monte Carlo Analysis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 iterations = 0;
@@ -419,7 +419,7 @@ for n = 3:numel(names)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if global_fitting == 0
             %%%%%%% fmincon fitting
-            Sstart=NeedleProbeModel(Time,par_vector,IV);
+            Sstart=MatrixNeedleProbeModel(Time,par_vector,IV);
             close all;
 
             foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4);
@@ -484,7 +484,7 @@ for n = 3:numel(names)
 
         elseif global_fitting == 1
             % Initialize starting parameters and options
-            Sstart = NeedleProbeModel(Time, par_vector, IV); % Model initialization
+            Sstart = MatrixNeedleProbeModel(Time, par_vector, IV); % Model initialization
             close all;
             
             foptions = optimset('MaxIter', 1e9, 'MaxFunEvals', 3e16, 'Display', 'iter'); % Optimization options
@@ -519,7 +519,7 @@ for n = 3:numel(names)
         close all;
         param=par_vector;
         param(Ifitpar)=fitresult;
-        Sfit=NeedleProbeModel(Time,param,IV);
+        Sfit=MatrixNeedleProbeModel(Time,param,IV);
 
         if run == 1
             figure(Visible='off');
@@ -626,7 +626,7 @@ for n = 3:numel(names)
             for ii=1:ntest
                 partest=parvec(ii);
                 param(Ifitpar(ipar))=partest; %variable fitting parameters
-                familyresult = NeedleProbeModel(Time,param,IV);
+                familyresult = MatrixNeedleProbeModel(Time,param,IV);
                 familyvec(:,ii)=familyresult;
             end
 
@@ -755,7 +755,7 @@ for n = 3:numel(names)
             for g=1:npar
                 allresults(iterations,(g+1)) = fitresult(g);
             end
-            allresults(iterations,g+2) = Chi2_value;
+            allresults(iterations,g+2) = Chi2_error;
         end 
        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -791,7 +791,7 @@ cd(runfolder)
 figure('Visible','off');
 yyaxis right
 plot(allresults(:,1),allresults(:,end),'x')
-ylabel('Chi^2 Value');
+ylabel('Chi^2 Error');
 
 for i = 1:length(SolveListNames)
     len =length(SolveListNames);

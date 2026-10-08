@@ -1634,15 +1634,15 @@ if strcmp(probe,"3A-IN718-01")
     RthInsShth = 0.2;
     Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085; % Copied from INL probe
 
-    % 7/1/26 Calibration
-    k_eff_wire = -1.480148e-02*(T-273.15) + 2.436831e+01; % +5 for better mgnacl fit
-    alpha_eff_wire = -7.402697e-09*(T-273.15) + 8.199885e-06;
-    k_insulation = -2.005516e-02*(T-273.15) + 2.308360e+01; % +5 for better mgnacl fit
-    alpha_insulation = -5.206405e-09*(T-273.15) + 5.675724e-06;
-    RthInsShth = 2.470349e-01;
-    k_sheath = 1.233350e-02*(T-273.15) + 1.172190e+01; % +5 for better mgnacl fit
-    alpha_sheath = 4.437088e-10*(T-273.15) + 4.360298e-06;
-    emissivity_probe = 5.275748e-04*(T-273.15) + 1.517999e-01;
+    % % 7/1/26 Calibration
+    % k_eff_wire = -1.480148e-02*(T-273.15) + 2.436831e+01; % +5 for better mgnacl fit
+    % alpha_eff_wire = -7.402697e-09*(T-273.15) + 8.199885e-06;
+    % k_insulation = -2.005516e-02*(T-273.15) + 2.308360e+01; % +5 for better mgnacl fit
+    % alpha_insulation = -5.206405e-09*(T-273.15) + 5.675724e-06;
+    % RthInsShth = 2.470349e-01;
+    % k_sheath = 1.233350e-02*(T-273.15) + 1.172190e+01; % +5 for better mgnacl fit
+    % alpha_sheath = 4.437088e-10*(T-273.15) + 4.360298e-06;
+    % emissivity_probe = 5.275748e-04*(T-273.15) + 1.517999e-01;
 
     % % 9/10/26 Calibration
     % k_eff_wire = -1.496610e-02*(T-273.15) + 2.444455e+01;
@@ -1725,10 +1725,10 @@ if strcmp(crucible,'Inconel625')
     rcrucible = rcrucible + (rcrucible * 15e-6 * (T-298));
     rsample = rsample + (rsample * 15e-6 * (T-298));
 
-    % 7/1/26 Calibration
-    k_crucible = 1.949877e-02*(T-273.15) + 7.714801e+00;
-    alpha_crucible = 2.576609e-09*(T-273.15) + 2.652344e-06;
-    emissivity_crucible = 1.374661e-04*(T-273.15) + 2.297996e-01;
+    % % 7/1/26 Calibration
+    % k_crucible = 1.949877e-02*(T-273.15) + 7.714801e+00;
+    % alpha_crucible = 2.576609e-09*(T-273.15) + 2.652344e-06;
+    % emissivity_crucible = 1.374661e-04*(T-273.15) + 2.297996e-01;
 
     % % 9/10/26 Calibration
     % k_crucible = 1.776503e-02*(T-273.15) + 9.006214e+00;

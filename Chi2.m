@@ -39,7 +39,7 @@ Sfit=NeedleProbeModel(Time,param,IV);
 
 %k_SA_scale = abs(Time./2 - (maxTime-minTime)/2);
 
-chi2=sum(abs(abs(Sfit-dTemp).^2)./length(dTemp)); %chi2 to be minimized
+chi2= sum(((dTemp-Sfit).^2)./ Sfit);%sum(abs(abs(Sfit-dTemp).^2)./length(dTemp)); %chi2 to be minimized
 %chi2=sum(abs(abs((Sfit-dTemp).*SA_scale_curve(:,2)).^2)./length(dTemp)); %chi2 to be minimized
 
 % if any(isnan(chi2(:))) % Check if any value is NaN
