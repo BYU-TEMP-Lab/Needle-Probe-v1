@@ -11,7 +11,7 @@ global_fitting = off; % Uses fminsearch when off
 
 MC = off; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
 
-raw_plot = on; %Create plots of the raw data. Keep off to increase speed.
+raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
 iplotfit = off; %Shows the plot during the fitting process. Keep off to increase speed.
 manual_delay = off; %Adds in a manual delay that helps to see the fitting process. Significantly increases runtime.
 chi2plots = on; %show plots from the chi2 error analysis
@@ -443,9 +443,9 @@ for n = 3:numel(names)
                     lb(i) = x0(i)*0.5;
                     ub(i) = x0(i)*1.5;
                 end
-                if SolveList(i) == 5 || SolveList(i) == 32 || SolveList(i) == 33 % thermal contact resistance
-                    lb(i) = x0(i)*0;
-                    ub(i) = x0(i)*1;
+                if SolveList(i) == 5 || SolveList(i) == 32 || SolveList(i) == 33 % thermal contact resistances
+                    lb(i) = 0;
+                    ub(i) = x0(i)*10;
                 end
                 if SolveList(i) == 3 || SolveList(i) == 4 ||...
                 SolveList(i) == 6 || SolveList(i) == 7 ||...
@@ -454,25 +454,14 @@ for n = 3:numel(names)
                     % smaller bounds for uncertainty in material properties
                     % (for 2A probes, insulation is actually lumped Alumina
                     % and Ceramabond and should use larger bounds)
-                    lb(i) = x0(i)*0.5;
-                    ub(i) = x0(i)*1.5;
+                    lb(i) = x0(i)*0.8;
+                    ub(i) = x0(i)*1.2;
                 end
                 if SolveList(i) == 12 || SolveList(i) == 13 % probe and crucible emissivity
                     % larger bounds on emissivity because of uncertainty
                     % regarding impact of molten salt on exposed surfaces
-                    lb(i) = x0(i)*0.8;
-                    ub(i) = x0(i)*1.2;
-                end
-                if SolveList(i) == 19 || SolveList(i) == 20 || SolveList(i) == 21 || SolveList(i) == 22 || SolveList(i) == 23 % radii
-                    % smaller bounds on geometry due to measurement
-                    % uncertainty from X-Rays and CT scans
-                    lb(i) = x0(i)*0.9;
-                    ub(i) = x0(i)*1.1;
-                end
-                if SolveList(i) == 30 % flux decay factor
-                    % range of 0 - 0.001 because initial guess is 0
                     lb(i) = 0;
-                    ub(i) = 0;
+                    ub(i) = 1;
                 end
             end
 
@@ -721,6 +710,8 @@ for n = 3:numel(names)
 
                 figure(Visible="off");
                 plot(parvec,chitestvec,'o',parvec,parabool);
+                xlabel('Test Thermal Conductivity')
+                ylabel('Chi-squared Value')
                 chisave=[parvec,chitestvec,parabool];
                 title([run_name,' par(',int2str(ipar),'): ',num2str(fitresult(ipar)),') file: ',fn]);
                 zoom on;

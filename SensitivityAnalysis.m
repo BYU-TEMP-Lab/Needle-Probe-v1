@@ -8,10 +8,10 @@ today = char(datetime('now','Format','MM-dd-yy,HH-mm'));
 
 probe = '3A-IN718-01';
 crucible = 'Inconel625';
-sample = 'MgNaCl';
-tvec = [0.00001 120];
-tempvec = [500 550 600 600 800];
-parwanted = [8]; % 1 to 31
+sample = 'Ar';
+tvec = [0.00001 240];
+tempvec = [400 500 550 600 600 800];
+parwanted = [1 2 3 4 5 6 7 8 9 10 11 12 13]; % 1 to 31
 
 baseColors = lines(8); 
 baseStyles = {'-', '--', ':', '-.'};
