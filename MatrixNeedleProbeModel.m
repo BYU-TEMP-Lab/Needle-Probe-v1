@@ -196,10 +196,6 @@ f = f((original_start_index):end);
         decay_point = par_vector(31); % Power time
         RthShthSamp = par_vector(32);
         RthSampCruc = par_vector(33);
-
-        kcorrosion = 0.5 * kcrucible;
-        alphacorrosion = 0.5 * alphacrucible;
-        rcorrosion = 0.001;
         
         % --- Constants & Initial Conditions ---
         area_convection = 2*pi*rcrucible*L;   % outer crucible surface area [m^2]
@@ -224,8 +220,6 @@ f = f((original_start_index):end);
         q42 = rsample.*sqrt(s/alphasample);           
         q51 = rsample.*sqrt(s/alphacrucible);         
         q52 = rcrucible.*sqrt(s/alphacrucible);
-        q61 = rcrucible.*sqrt(s/alphacorrosion);
-        q62 = rcorrosion.*sqrt(s/alphacorrosion);
     
         % --- Quadripole Matrix Elements (Arrays of length(s)) ---
         
@@ -262,12 +256,6 @@ f = f((original_start_index):end);
         B5 = (1./(2.*pi.*kcrucible.*L)).*((besseli(0,q52).*besselk(0,q51))-(besseli(0,q51).*besselk(0,q52)));
         C5 = 2.*pi.*kcrucible.*L.*q51.*q52.*((besseli(1,q52).*besselk(1,q51))-(besseli(1,q51).*besselk(1,q52)));
         D5 = q51.*((besseli(0,q52).*besselk(1,q51))+(besseli(1,q51).*besselk(0,q52)));
-        
-        % 6. Corrosion
-        A6 = q61.*((besseli(0,q61).*besselk(1,q62))+(besseli(1,q62).*besselk(0,q61)));
-        B6 = (1./(2.*pi.*kcorrosion.*L)).*((besseli(0,q62).*besselk(0,q61))-(besseli(0,q61).*besselk(0,q62)));
-        C6 = 2.*pi.*kcorrosion.*L.*q61.*q62.*((besseli(1,q62).*besselk(1,q61))-(besseli(1,q61).*besselk(1,q62)));
-        D6 = q61.*((besseli(0,q62).*besselk(1,q61))+(besseli(1,q61).*besselk(0,q62)));
 
         % Convection Boundary
         C_convection = h_convec * area_convection;
@@ -306,9 +294,6 @@ f = f((original_start_index):end);
                   
             M5 = [A5(i),  B5(i); 
                   C5(i),  D5(i)];
-
-            M6 = [A6(i),  B6(i); 
-                  C6(i),  D6(i)];
             
             % Built-in Matrix Multiplication
             M_sys = M1 * M2 * M_contact * M3 * M_Sh_Sa * M4 * M_Sa_Cr * M5;
