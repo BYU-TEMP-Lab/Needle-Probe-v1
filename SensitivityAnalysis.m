@@ -11,7 +11,7 @@ crucible = 'Inconel625';
 sample = 'Ar';
 tvec = [0.00001 240];
 tempvec = [400 500 550 600 600 800];
-parwanted = [1 2 3 4 5 6 7 8 9 10 11 12 13]; % 1 to 31
+parwanted = [25]; % 1 to 31
 
 baseColors = lines(8); 
 baseStyles = {'-', '--', ':', '-.'};

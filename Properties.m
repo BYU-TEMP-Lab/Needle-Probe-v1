@@ -13,11 +13,15 @@ T=Temp+273.15;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NICKEL 200: VALID UP TO 1273K (1000C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Thermal Conductivity- Nickel
-if T >= 173 && T < 673
-    k_Nickel = 76.12158+0.02717507*T^1-2.126458E-4*T^2+1.876168E-7*T^3;
-elseif T >= 673 && T <= 1273
-    k_Nickel = 40.623+0.02201643*T^1-3.571429E-7*T^2;
-end
+% if T >= 173 && T < 673
+%     k_Nickel = 76.12158+0.02717507*T^1-2.126458E-4*T^2+1.876168E-7*T^3;
+% elseif T >= 673 && T <= 1273
+%     k_Nickel = 40.623+0.02201643*T^1-3.571429E-7*T^2;
+% end
+k_Nickel = -4.66010842E-16 * T^6 + 2.63017019E-12 * T^5 - 5.84637352E-09...
+    * T^4 + 6.39752009E-06 * T^3 - 3.45714587E-03 * T^2 + 7.76085913E-01...
+    * T + 3.78488719E+01; % Thermophysical properties of matter, ISBN: 0306670208, recommended thermal conductivity of Nickel
+
 
 %Density- Nickel %Not needed right now, but may be needed later
 rho_Nickel = 8964.214-0.1681755*T^1-3.536041E-4*T^2+2.01714E-7*T^3-4.919056E-11*T^4; % 73 to 1373 K
@@ -30,24 +34,24 @@ elseif T >= 633 && T < 1726
 end
 
 % Thermal Diffusivity- Nickel
-if T >= 293 && T < 633
-    alpha_Nickel = 3.044717E-5-5.149323E-8*T^1+3.129624E-11*T^2;
-elseif T >= 633 && T < 676
-    alpha_Nickel = 4.81462E-5-1.036816E-7*T^1+7.54384E-11*T^2;
-elseif T >= 676 && T <= 1273
-    alpha_Nickel = 1.087891E-5+2.600264E-9*T^1-2.279477E-13*T^2;
+if T >= 293 && T < 631
+    alpha_Nickel = -3.5534E-08*T + 3.3461E-05; % Thermophysical properties of matter, ISBN: 0306670208, Recommended thermal diffusivity of Nickel
+elseif T >= 631 && T < 700
+    alpha_Nickel = 4.6377E-08*T - 1.8264E-05; % Thermophysical properties of matter, ISBN: 0306670208, Recommended thermal diffusivity of Nickel
+elseif T >= 700 && T <= 1500
+    alpha_Nickel = 2.0833E-09*T + 1.2897E-05; % Thermophysical properties of matter, ISBN: 0306670208, Recommended thermal diffusivity of Nickel
 end
 
 % Total Radiative Emissivity- Nickel200, Nickel200 or Nickel Oxide?
 if T < 473
-    emissivity_Nickel = 0.35;    %0.35
-elseif T >=473 && T < 1144
-    %     emissivity_Nickel = 0.0007*T + 0.0316; %Why is this equation commented
-    %     out, could we still use it?
-    emissivity_Nickel = 0.86; %max emissivity of Nickel Oxide found in literature
-elseif T >= 1144
-    emissivity_Nickel = 0.86;
+    emissivity_Nickel = 0.35;
+elseif T >=473 && T < 1273
+    emissivity_Nickel = 0.0001*T + 0.1292; % Thermophysical properties of matter, ISBN: 0306670208, Table 130, Curve 2
 end
+
+% Mean Coefficient of Thermal Expansion (Linear approximation, starting from room temperature)
+cte_Nickel = 0.0049*T + 10.852;
+% Thermophysical properties of matter, ISBN: 0306670208, CTE Nickel, Table 34, Curve 49, mean CTE calculated from instantaneous CTE in table
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ALUMINA: VALID UP TO 873K (600C)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -348,7 +352,7 @@ alpha_Magnesium_Oxide = k_Magnesium_Oxide/(rho_Magnesium_Oxide*cp_Magnesium_Oxid
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Inconel625%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if T >= 293 && T < 1093
+if T >= 293 && T < 1300
     k_Inconel625 = 0.0195*T + 2.3886; % Curve 70, Table 285, Thermophysical properties of matter, ISBN: 0306670208, Vol. 1 (not an exact match for composition, but similar in Ni and Cr %)
 end
 
@@ -387,7 +391,7 @@ scatter = 0;
 h_convection = 10; %just an assumption. Don't know if there's a better way to measure this.Study done on 1/18/23 denoted that this parameter does not affect our results in any appreciable way
 
 Flux_decay = 0; % Decay constant
-decay_point = 60; % Decay point
+power_off_time = 100; % Decay point
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MgCl2-NaCl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1631,7 +1635,7 @@ if strcmp(probe,"3A-IN718-01")
     alpha_sheath = alpha_IN718;
     emissivity_probe = emissivity_IN718;
 
-    RthInsShth = 0.2;
+    RthInsShth = 3.04e-4; % https://arc.aiaa.org/doi/10.2514/1.T5684, approximate from rough metal (SS304) - rough ceramic (Al2O3) interface, Fig. 8
     Resistance = (-5*10^-7).*T.^2 + .0023.*T + 3.7085; % Copied from INL probe
 
     % % 7/1/26 Calibration
@@ -1673,6 +1677,16 @@ if strcmp(probe,"3A-IN718-01")
     % k_sheath = 1.597822e-02*(T-273.15) + 8.450951e+00;
     % alpha_sheath = 2.507207e-09*(T-273.15) + 3.363902e-06;
     % emissivity_probe = 4.195306e-04*(T-273.15) + 1.923005e-01;
+
+    % % 10/13/26 Calibration
+    % k_eff_wire = -1.273990e-02*(T-273.15) + 1.701710e+01;
+    % alpha_eff_wire = -6.845646e-09*(T-273.15) + 8.042942e-06;
+    % k_insulation = -8.307016e-03*(T-273.15) + 1.105621e+01;
+    % alpha_insulation = -5.612430e-09*(T-273.15) + 6.216369e-06;
+    % RthInsShth = 4.930250e-07*(T-273.15) + -2.805599e-05;
+    % k_sheath = 1.404933e-02*(T-273.15) + 1.015146e+01;
+    % alpha_sheath = 5.924277e-10*(T-273.15) + 4.737298e-06;
+    % emissivity_probe = 7.774541e-04*(T-273.15) + 5.707191e-02;
 end
 
 rwires = r_3;
@@ -1711,6 +1725,15 @@ if strcmp(crucible,'Nickel200')
     k_crucible = k_Nickel;
     alpha_crucible = alpha_Nickel;
     emissivity_crucible = emissivity_Nickel;
+
+    % recalculate radius based on CTE HERE
+    rcrucible = rcrucible + (rcrucible * cte_Nickel * (T-293));
+    rsample = rsample + (rsample * cte_Nickel * (T-293));
+
+    % % 10/13/26 Calibration
+    % k_crucible = 2.403947e-02*(T-273.15) + 5.450158e+01;
+    % alpha_crucible = 7.967717e-09*(T-273.15) + 1.028332e-05;
+    % emissivity_crucible = 2.406276e-04*(T-273.15) + 2.902718e-02;
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1749,50 +1772,60 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Thermal Contact Resistance: Probe - Sample - Crucible
 if strcmp(probe,'INL')
-    RthProbeSample = 1e-8; %Where did this come from?
+    if strcmp(sample,'Ar')
+        RthProbeSample = 1e-4;
+    else
+        RthProbeSample = 0;
+    end
 end
 
 if strcmp(probe,"2A-SS-03")
-    RthProbeSample = 1e-8; %Where did this come from?
+    if strcmp(sample,'Ar')
+        RthProbeSample = 1e-4;
+    else
+        RthProbeSample = 0;
+    end
 end
 
 if strcmp(probe,"2A-SS-04")
     if strcmp(sample,'Ar')
-        RthProbeSample = 1e-8; %Where did this come from?
+        RthProbeSample = 1e-4;
     else
-        RthProbeSample = 1e-8; %Where did this come from?
+        RthProbeSample = 0;
     end
 end
 
 if strcmp(probe,"3A-IN718-01")
     if strcmp(sample,'Ar')
-        RthProbeSample = 1e-8; %Where did this come from?
+        RthProbeSample = 1e-4;
+        % RthProbeSample = -2.271027e-02*(T-273.15) + 2.085534e+01; % 10/13/26 calibration
     else
-        RthProbeSample = 1e-8; %Where did this come from?
+        RthProbeSample = 0;
     end
 end
 
 if strcmp(crucible,'Steel316')
     if strcmp(sample,'Ar')
-        RthSampleCrucible = 1e-8;
+        RthSampleCrucible = 1e-4;
     else
-        RthSampleCrucible = 1e-8;
+        RthSampleCrucible = 0;
     end
 end
 
 if strcmp(crucible,'Nickel200')
     if strcmp(sample,'Ar')
-        RthSampleCrucible = 1e-8;
+        RthSampleCrucible = 1e-4;
+        % RthSampleCrucible = -2.271027e-02*(T-273.15) + 2.085534e+01; % 10/13/26 calibration
     else
-        RthSampleCrucible = 1e-8;
+        RthSampleCrucible = 0;
     end
 end
 
 if strcmp(crucible,'Inconel625')
     if strcmp(sample,'Ar')
-        RthSampleCrucible = 1e-8;
+        RthSampleCrucible = 1e-4;
     else
-        RthSampleCrucible = 1e-8;
+        RthSampleCrucible = 0;
     end
 end
 
@@ -1927,7 +1960,7 @@ par_vector(27) = cp_sample;
 par_vector(28) = rho_sample*cp_sample;
 par_vector(29) = Current;
 par_vector(30) = Flux_decay;
-par_vector(31) = decay_point;
+par_vector(31) = power_off_time;
 par_vector(32) = RthProbeSample;
 par_vector(33) = RthSampleCrucible;
 
@@ -1969,7 +2002,7 @@ par_names(1,2) = "W/(m*K)";
 par_names(2,2) = "m^2/s";          
 par_names(3,2) = "W/(m*K)";          
 par_names(4,2) = "m^2/s";
-par_names(5,2) = "Rth\_Insulation-Sheath";  
+par_names(5,2) = "m^2*K/W";  
 par_names(6,2) = "W/(m*K)";          
 par_names(7,2) = "m^2/s";
 par_names(8,2) = "W/(m*K)";
@@ -1989,15 +2022,15 @@ par_names(21,2) = "meters";
 par_names(22,2) = "meters";
 par_names(23,2) = "meters";
 par_names(24,2) = "meters";
-par_names(25,2) = "r/(m*K)";
+par_names(25,2) = "W/(m^2*K)";
 par_names(26,2) = "kg/m^3";
 par_names(27,2) = "J/(kg*K)";
 par_names(28,2) = "J/(m^3*K)";
 par_names(29,2) = "Amps";
 par_names(30,2) = "unitless";
 par_names(31,2) = "unitless";
-par_names(32,2) = "m*K/W";
-par_names(33,2) = "m*K/W";
+par_names(32,2) = "m^2*K/W";
+par_names(33,2) = "m^2*K/W";
 
 disp("Properties calculations complete.")
 end

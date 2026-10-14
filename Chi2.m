@@ -16,9 +16,9 @@ if isempty(counter)
 end
 
 counter=counter+1; %counts number of iterations
-param(Ifitpar)=abs(fitparam); %variable fitting parameters
-param(Ifixpar)=abs(fixparam); %fixed parameters
-Sfit=NeedleProbeModel(Time,param,IV);
+param(Ifitpar)=fitparam; %variable fitting parameters
+param(Ifixpar)=fixparam; %fixed parameters
+Sfit=MatrixNeedleProbeModel(Time,param,IV);
 
 % minTime = min(Time);
 % maxTime = max(Time);

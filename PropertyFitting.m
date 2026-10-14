@@ -38,17 +38,17 @@ runnote = inputdlg(prompt,dlgtitle,fieldsize,definput);
 
 m=menu('Calibration or Sample Test?',...
     'Probe Calibration', ...
-    'Crucible Calibration', ...
+    'Heat and Cool', ...
     'Sample Test', ...
     'end');
 
 %Sets the time interval to be analyzed, in seconds.
 if m == 1
-    timewindow = [0.001 7]; % early and short to capture probe properties
+    timewindow = [0.01 7]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [30 60]; % late and long to capture crucible properties
+    timewindow = [0.01 120];
 elseif m == 3
-    timewindow = [0.001 30]; % k sample sensitivity peak is approximately from 0.3s - 30s fro MgNaCl
+    timewindow = [0.01 30]; % k sample sensitivity peak is approximately from 0.3s - 30s fro MgNaCl
 else
     disp('No selection, program terminated')
     return
@@ -440,12 +440,16 @@ for n = 3:numel(names)
                 if SolveList(i) == 1 || SolveList(i) == 2 % k eff wires and alpha eff wires
                     % larger bounds for uncertainty in lumped properties,
                     % +_50% of initial guess
-                    lb(i) = x0(i)*0.5;
-                    ub(i) = x0(i)*1.5;
+                    lb(i) = x0(i)*0.1;
+                    ub(i) = x0(i)*1.9;
                 end
-                if SolveList(i) == 5 || SolveList(i) == 32 || SolveList(i) == 33 % thermal contact resistances
-                    lb(i) = 0;
-                    ub(i) = x0(i)*10;
+                if SolveList(i) == 5 % thermal contact resistance, insulation-sheath
+                    lb(i) = x0(i)*0.1;
+                    ub(i) = x0(i)*1.9;
+                end
+                if SolveList(i) == 32 || SolveList(i) == 33 % thermal contact resistances with sample
+                    lb(i) = x0(i)*0;
+                    ub(i) = Inf; % x0(i)*100;
                 end
                 if SolveList(i) == 3 || SolveList(i) == 4 ||...
                 SolveList(i) == 6 || SolveList(i) == 7 ||...
@@ -454,14 +458,17 @@ for n = 3:numel(names)
                     % smaller bounds for uncertainty in material properties
                     % (for 2A probes, insulation is actually lumped Alumina
                     % and Ceramabond and should use larger bounds)
-                    lb(i) = x0(i)*0.8;
-                    ub(i) = x0(i)*1.2;
+                    lb(i) = x0(i)*0.5;
+                    ub(i) = x0(i)*1.5;
                 end
                 if SolveList(i) == 12 || SolveList(i) == 13 % probe and crucible emissivity
                     % larger bounds on emissivity because of uncertainty
                     % regarding impact of molten salt on exposed surfaces
-                    lb(i) = 0;
-                    ub(i) = 1;
+                    lb(i) = x0(i)*0.5;
+                    ub(i) = x0(i)*1.5;
+                    if x0(i)*1.3 > 1
+                        ub(i) = 1;
+                    end
                 end
             end
 
