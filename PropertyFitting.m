@@ -398,7 +398,7 @@ for n = 3:numel(names)
 
         n0=length(par_vector);			%total number of parameters
         ipar=1;			%fit parameter index for error test
-        ntest=20;		%number of error analysis values
+        ntest=40;		%number of error analysis values
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         Ifitpar = SolveList;
@@ -440,8 +440,8 @@ for n = 3:numel(names)
                 if SolveList(i) == 1 || SolveList(i) == 2 % k eff wires and alpha eff wires
                     % larger bounds for uncertainty in lumped properties,
                     % +_50% of initial guess
-                    lb(i) = x0(i)*0.1;
-                    ub(i) = x0(i)*1.9;
+                    lb(i) = x0(i)*0;
+                    ub(i) = x0(i)*Inf;
                 end
                 if SolveList(i) == 5 % thermal contact resistance, insulation-sheath
                     lb(i) = x0(i)*0.1;
@@ -603,8 +603,8 @@ for n = 3:numel(names)
         if run == 1
             %error analysis
             ipar=min(length(Ifitpar),ipar);
-            parmin=0.5*fitresult(ipar);
-            parmax=1.5*fitresult(ipar);
+            parmin=0.3*fitresult(ipar);
+            parmax=1.7*fitresult(ipar);
 
             parvec=linspace(parmin,parmax,ntest)';
             chitestvec=zeros(ntest,1);

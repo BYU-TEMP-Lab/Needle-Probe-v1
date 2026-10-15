@@ -9,9 +9,9 @@ today = char(datetime('now','Format','MM-dd-yy,HH-mm'));
 probe = '3A-IN718-01';
 crucible = 'Inconel625';
 sample = 'Ar';
-tvec = [0.00001 240];
+tvec = [5 30];
 tempvec = [400 500 550 600 600 800];
-parwanted = [25]; % 1 to 31
+parwanted = [1:1:31]; % 1 to 31
 
 baseColors = lines(8); 
 baseStyles = {'-', '--', ':', '-.'};

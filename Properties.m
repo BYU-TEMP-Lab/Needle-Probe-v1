@@ -51,6 +51,7 @@ end
 
 % Mean Coefficient of Thermal Expansion (Linear approximation, starting from room temperature)
 cte_Nickel = 0.0049*T + 10.852;
+cte_Nickel = cte_Nickel*10^-6;
 % Thermophysical properties of matter, ISBN: 0306670208, CTE Nickel, Table 34, Curve 49, mean CTE calculated from instantaneous CTE in table
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
