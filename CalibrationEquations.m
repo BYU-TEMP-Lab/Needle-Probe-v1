@@ -1,4 +1,4 @@
-[file_sought,file_location] = uigetfile('.txt', 'Select the output fminsearch file.');
+file_sought,file_location] = uigetfile('.txt', 'Select the output fminsearch file.');
 cd(file_location)
 SolvedPropTable = readtable(file_sought);
 SolvedPropTable = sortrows(SolvedPropTable,"Temp__C_","ascend");

@@ -7,8 +7,6 @@ fclose all;
 on = 1;
 off = 0;
 
-global_fitting = off; % Uses fminsearch when off
-
 MC = off; %Turns on Monte Carlo error analysis. Should be on unless you just want to quickly check fit quality.
 
 raw_plot = off; %Create plots of the raw data. Keep off to increase speed.
@@ -30,25 +28,29 @@ end
 currentFOLDER = pwd;
 today = char(datetime('now','Format','MM,dd,yy,HH-mm'));
 
+% Prompts for user to input a note that will be saved as a text file with
+% the output of the run
 prompt = 'Enter relevant information to identify this run:';
 dlgtitle = 'Run Note';
 fieldsize = [2 50];
 definput = {''};
 runnote = inputdlg(prompt,dlgtitle,fieldsize,definput);
 
+% Prompts user to specify the type of test which determines the time
+% interval over which the model will be fit to the data
 m=menu('Calibration or Sample Test?',...
     'Probe Calibration', ...
     'Heat and Cool', ...
     'Sample Test', ...
     'end');
 
-%Sets the time interval to be analyzed, in seconds.
+% Time window in seconds
 if m == 1
     timewindow = [0.01 7]; % early and short to capture probe properties
 elseif m == 2
-    timewindow = [0.01 120];
+    timewindow = [0.1 180];
 elseif m == 3
-    timewindow = [0.01 30]; % k sample sensitivity peak is approximately from 0.3s - 30s fro MgNaCl
+    timewindow = [0.01 60]; % k sample sensitivity peak is approximately from 0.3s - 30s for MgNaCl
 else
     disp('No selection, program terminated')
     return
@@ -179,7 +181,8 @@ choices = {
     "29 - Current",
     "30 - Flux Decay Factor",
     "32 - Rth Sheath-Sample",
-    "33 - Rth Sample-Crucible"
+    "33 - Rth Sample-Crucible",
+    "34 - Furnace Emissivity"
 };
 
 % Display the dialog to select multiple values
@@ -270,17 +273,16 @@ if ok
             case 25
                 SolveListNames = [SolveListNames, "33"];
                 SolveList = [SolveList, 33];
+            case 26
+                SolveListNames = [SolveListNames, "34"];
+                SolveList = [SolveList, 34];
         end
     end
 end
 
 joinedString = char(strjoin(SolveListNames, '_'));
 
-if global_fitting == 0
-    run_name = [sample ' ' probe ' ' crucible ' ' today '_fmincon'];
-else
-    run_name = [sample ' ' probe ' ' crucible ' ' today '_global'];
-end
+run_name = [sample ' ' probe ' ' crucible ' ' today '_fmincon'];
 
 runfolder = [currentFOLDER '\Analysis_Results\' run_name];
 if ~exist(runfolder, 'dir')
@@ -397,7 +399,6 @@ for n = 3:numel(names)
         [par_vector, par_names] = Properties(probe,crucible,sample,aveTemp,Voltage,VoltageSTD,Current,CurrentSTD,MC);
 
         n0=length(par_vector);			%total number of parameters
-        ipar=1;			%fit parameter index for error test
         ntest=40;		%number of error analysis values
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -417,105 +418,82 @@ for n = 3:numel(names)
         a(Ifitpar)=0;
         Ifixpar=find(a);	%fix parameter index array
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        if global_fitting == 0
-            %%%%%%% fmincon fitting
-            Sstart=MatrixNeedleProbeModel(Time,par_vector,IV);
-            close all;
+        %%%%%%% fmincon fitting
+        Sstart=ChatNeedleProbeModel(Time,par_vector,IV);
+        close all;
 
-            foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4);
+        foptions=optimset('TolFun', 1e-6, 'TolX', 1e-6, 'MaxIter', 1e4,'MaxFunEvals',1e4);
 
-            % 1. Initial guess
-            x0 = par_vector(Ifitpar);
+        % 1. Initial guess
+        x0 = par_vector(Ifitpar);
 
-            % 2. Create an anonymous function to pass all your extra variables to 'Chi2'.
-            %    MATLAB will optimize the variable 'x', while treating everything else as a constant.
-            objFun = @(x) Chi2(x, par_vector(Ifixpar), Ifitpar, Ifixpar, Sstart, signal, manual_delay, iplotfit, IV);
+        % 2. Create an anonymous function to pass all your extra variables to 'Chi2'.
+        %    MATLAB will optimize the variable 'x', while treating everything else as a constant.
+        objFun = @(x) Chi2(x, par_vector(Ifixpar), Ifitpar, Ifixpar, Sstart, signal, manual_delay, iplotfit, IV);
 
-            % 3. Define bounds
-            lb =  x0.*0;
-            ub =  Inf(size(lb));
+        % 3. Define bounds
+        lb =  x0.*0;
+        ub =  Inf(size(lb));
 
-            % 3.5 Define specific bounds for certain properties
-            for i = 1:length(SolveList)
-                if SolveList(i) == 1 || SolveList(i) == 2 % k eff wires and alpha eff wires
-                    % larger bounds for uncertainty in lumped properties,
-                    % +_50% of initial guess
-                    lb(i) = x0(i)*0;
-                    ub(i) = x0(i)*Inf;
-                end
-                if SolveList(i) == 5 % thermal contact resistance, insulation-sheath
-                    lb(i) = x0(i)*0.1;
-                    ub(i) = x0(i)*1.9;
-                end
-                if SolveList(i) == 32 || SolveList(i) == 33 % thermal contact resistances with sample
-                    lb(i) = x0(i)*0;
-                    ub(i) = Inf; % x0(i)*100;
-                end
-                if SolveList(i) == 3 || SolveList(i) == 4 ||...
-                SolveList(i) == 6 || SolveList(i) == 7 ||...
-                SolveList(i) == 10 || SolveList(i) == 11
-                % k sheath, alpha sheath, k crucible, alpha crucible, k insulation, alpha insulation
-                    % smaller bounds for uncertainty in material properties
-                    % (for 2A probes, insulation is actually lumped Alumina
-                    % and Ceramabond and should use larger bounds)
-                    lb(i) = x0(i)*0.5;
-                    ub(i) = x0(i)*1.5;
-                end
-                if SolveList(i) == 12 || SolveList(i) == 13 % probe and crucible emissivity
-                    % larger bounds on emissivity because of uncertainty
-                    % regarding impact of molten salt on exposed surfaces
-                    lb(i) = x0(i)*0.5;
-                    ub(i) = x0(i)*1.5;
-                    if x0(i)*1.3 > 1
-                        ub(i) = 1;
-                    end
+        % 3.5 Define specific bounds for certain properties
+        for i = 1:length(SolveList)
+            if SolveList(i) == 1 || SolveList(i) == 2 % k eff wires and alpha eff wires
+                % larger bounds for uncertainty in lumped properties,
+                % +_50% of initial guess
+                lb(i) = x0(i)*0.3;
+                ub(i) = x0(i)*1.7;
+            end
+            if SolveList(i) == 5 % thermal contact resistance, insulation-sheath
+                lb(i) = x0(i)*0.01;
+                ub(i) = x0(i)*10;
+            end
+            if SolveList(i) == 32 || SolveList(i) == 33 % thermal contact resistances with sample
+                lb(i) = x0(i)*0.01;
+                ub(i) = x0(i)*10;
+            end
+            if SolveList(i) == 3 || SolveList(i) == 4 ||...
+            SolveList(i) == 6 || SolveList(i) == 7 ||...
+            SolveList(i) == 10 || SolveList(i) == 11
+            % k sheath, alpha sheath, k crucible, alpha crucible, k insulation, alpha insulation
+                % smaller bounds for uncertainty in material properties
+                % (for 2A probes, insulation is actually lumped Alumina
+                % and Ceramabond and should use larger bounds)
+                lb(i) = x0(i)*0.3;
+                ub(i) = x0(i)*1.7;
+            end
+            if SolveList(i) == 12 || SolveList(i) == 13 % probe and crucible emissivity
+                % larger bounds on emissivity because of uncertainty
+                % regarding impact of molten salt on exposed surfaces
+                lb(i) = x0(i)*0.3;
+                ub(i) = x0(i)*1.7;
+                if ub(i) > 1
+                    ub(i) = 1;
                 end
             end
-
-            % 4. Call fmincon using strict positional arguments:
-            %    fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
-            [fitresult, Chi2_value] = fmincon(objFun, x0, [], [], [], [], lb, ub, [], foptions);
-
-            clear Chi2
-
-        elseif global_fitting == 1
-            % Initialize starting parameters and options
-            Sstart = MatrixNeedleProbeModel(Time, par_vector, IV); % Model initialization
-            close all;
-            
-            foptions = optimset('MaxIter', 1e9, 'MaxFunEvals', 3e16, 'Display', 'iter'); % Optimization options
-            
-            % Define the Chi2 function as an anonymous function for optimization
-            chi2_func = @(fit_params) Chi2(fit_params, par_vector(Ifixpar), Ifitpar, Ifixpar, Sstart, signal, manual_delay, iplotfit, IV);
-            
-            % Bounds for the parameters (optional, set to large ranges if unknown)
-            lb = par_vector(Ifitpar) * 0; % Example: 0% of initial guess
-            ub = par_vector(Ifitpar) * 5000; % Example: 5000% of initial guess
-            
-            % Define the optimization problem for fmincon
-            problem = createOptimProblem('fmincon', ...
-                'objective', chi2_func, ...
-                'x0', par_vector(Ifitpar), ...
-                'lb', lb, ...
-                'ub', ub, ...
-                'options', foptions);
-            
-            % Use MultiStart to explore multiple initial guesses
-            ms = MultiStart('UseParallel', true); % Enable parallel computing for efficiency
-            num_starts = 100; % Number of starting points
-            [fitresult, fval] = run(ms, problem, num_starts);
-            
-            % Ensure the results are valid
-            fitresult = abs(fitresult); % Ensure positive values
-            clear Chi2
+            if SolveList(i) == 19 || SolveList(i) == 20 || SolveList(i) == 21 || SolveList(i) == 22 || SolveList(i) == 23 % radii
+                    % smaller bounds on geometry due to measurement
+                    % uncertainty from X-Rays and CT scans
+                    lb(i) = x0(i)*0.99;
+                    ub(i) = x0(i)*1.01;
+            end
+            if SolveList(i) == 34 % furnace emissivity
+                lb(i) = 0;
+                ub(i) = 1;
+            end
         end
+
+        % 4. Call fmincon using strict positional arguments:
+        %    fmincon(fun, x0, A, b, Aeq, beq, lb, ub, nonlcon, options)
+        [fitresult, Chi2_value] = fmincon(objFun, x0, [], [], [], [], lb, ub, [], foptions);
+
+        clear Chi2
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %show actual result
         close all;
         param=par_vector;
         param(Ifitpar)=fitresult;
-        Sfit=MatrixNeedleProbeModel(Time,param,IV);
+        Sfit=ChatNeedleProbeModel(Time,param,IV);
 
         if run == 1
             figure(Visible='off');
@@ -601,10 +579,11 @@ for n = 3:numel(names)
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if run == 1
+            for ipar=1 %(1:length(Ifitpar))
             %error analysis
-            ipar=min(length(Ifitpar),ipar);
-            parmin=0.3*fitresult(ipar);
-            parmax=1.7*fitresult(ipar);
+            % ipar=min(length(Ifitpar),ipar);
+            parmin=0.5*fitresult(ipar);
+            parmax=1.5*fitresult(ipar);
 
             parvec=linspace(parmin,parmax,ntest)';
             chitestvec=zeros(ntest,1);
@@ -622,54 +601,54 @@ for n = 3:numel(names)
             for ii=1:ntest
                 partest=parvec(ii);
                 param(Ifitpar(ipar))=partest; %variable fitting parameters
-                familyresult = MatrixNeedleProbeModel(Time,param,IV);
+                familyresult = ChatNeedleProbeModel(Time,param,IV);
                 familyvec(:,ii)=familyresult;
             end
 
             % 1. Define the shifted LINEX equation
             linexEquation = 'a*(exp(b*(x-x0)) - b*(x-x0) - 1) + c';
             myFitType = fittype(linexEquation, 'independent', 'x', 'dependent', 'y');
-            
+
             % 2. Generate smart starting points to ensure the fit converges
             [minChi2, minIdx] = min(chitestvec);
             x0_guess = parvec(minIdx);
             c_guess = max(minChi2, 1e-6); % Force guess to be positive
-            
+
             % Use your existing polyfit to guess the initial LINEX shape parameters
             P = polyfit(parvec, chitestvec, 2);
             quad_a = max(P(1), 1e-6); % Force quadratic curvature guess to be positive
             b_guess = -1; % Start with a moderate asymmetry assumption
             a_guess = (2 * quad_a) / (b_guess^2); % Map quadratic curvature to LINEX 'a'
-            
+
             % CRITICAL FIX: Add 'Lower' bounds so 'a' and 'c' cannot mathematically go negative
             options = fitoptions('Method', 'NonlinearLeastSquares', ...
                                  'StartPoint', [a_guess, b_guess, c_guess, x0_guess], ...
                                  'Lower', [1e-8, -Inf, 0, -Inf]); % a > 0, c >= 0
-            
+
             % 3. Fit the LINEX curve
             [curve, goodness] = fit(parvec, chitestvec, myFitType, options);
-            
+
             % 4. Extract fitted parameters
             a_fit = curve.a;
             b_fit = curve.b;
             x0_fit = curve.x0;
             c_fit = curve.c;
-            
+
             % 5. Define the target Delta Chi^2 
             delta_chi2 = c_fit / ndata;
-            
+
             % 6. Create an anonymous function to find where LINEX equals the target delta
             rootFunc = @(dx) a_fit*(exp(b_fit*dx) - b_fit*dx - 1) - delta_chi2;
-            
+
             % 7. Use fzero to find the asymmetric bounds
             % CRITICAL FIX: Added abs() to guarantee a real number for fzero
             dx_guess = sqrt(abs(2 * delta_chi2 / (a_fit * b_fit^2)));
-            
+
             % Find left and right bounds (shifts from the minimum)
             % By starting exactly at +/- dx_guess, fzero will find the roots cleanly
             dx_left = fzero(rootFunc, -dx_guess);
             dx_right = fzero(rootFunc, dx_guess);
-            
+
             % 8. Final Asymmetric Errors
             Chi2_error_minus = abs(dx_left);
             Chi2_error_plus = abs(dx_right);
@@ -678,23 +657,23 @@ for n = 3:numel(names)
             % Map the LINEX asymmetric errors to the GUM bounds
             b_plus = Chi2_error_plus;
             b_minus = Chi2_error_minus;
-            
+
             % Set n_chi2 (using the number of data points fitted)
             n_chi2 = ndata; 
-            
+
             % Calculate the combined standard uncertainty of the mean (Type B rectangular)
             % GUM 4.3.7, 4.3.8, and 4.2.3
             u_c = (b_plus + b_minus) / sqrt(12 * n_chi2);
-            
+
             % Calculate Expanded Uncertainty (95% confidence level, k = 1.96)
             % GUM 6.2.2 and Annex G.1.3
             U_expanded = 1.96 * u_c;
             Chi2_error = U_expanded;
-            
+
             % 10. Final Reporting Statement (GUM 7.2.2)
             % Extract the optimal parameter value from the fit (the minimum of the curve)
             nominal_value = x0_fit;
-                        
+
             % Optional: You can evaluate the curve for plotting just like before
             parabool = curve(parvec); % Though it's now a 'linexbool' rather than a parabola!
 
@@ -710,14 +689,14 @@ for n = 3:numel(names)
 
                 f = gcf;
                 drawnow;
-                name1 = [num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_1.png'];
+                name1 = ['par',num2str(ipar),'_',num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_1.png'];
                 fullPath = fullfile(chiplotfolder, name1);
                 exportgraphics(f, fullPath);
                 close(f)
 
                 figure(Visible="off");
                 plot(parvec,chitestvec,'o',parvec,parabool);
-                xlabel('Test Thermal Conductivity')
+                xlabel('Test '+parlabel(ipar))
                 ylabel('Chi-squared Value')
                 chisave=[parvec,chitestvec,parabool];
                 title([run_name,' par(',int2str(ipar),'): ',num2str(fitresult(ipar)),') file: ',fn]);
@@ -725,7 +704,7 @@ for n = 3:numel(names)
 
                 f = gcf;
                 drawnow;
-                name1 = [num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_2.png'];
+                name1 = ['par',num2str(ipar),'_',num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_2.png'];
                 fullPath = fullfile(chiplotfolder, name1);
                 exportgraphics(f, fullPath);
                 close(f)
@@ -739,12 +718,12 @@ for n = 3:numel(names)
 
                 f = gcf;
                 drawnow;
-                name1 = [num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_3.png'];
+                name1 = ['par',num2str(ipar),'_',num2str(aveTemp),'°C_',num2str(Voltage),'V_Chi2_plot_3.png'];
                 fullPath = fullfile(chiplotfolder, name1);
                 exportgraphics(f, fullPath);
                 close(f)
             end
-
+            end
         end
         if run == 1
             iterations = iterations + 1;

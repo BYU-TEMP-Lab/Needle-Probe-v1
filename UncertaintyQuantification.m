@@ -105,6 +105,9 @@ for m = 1:numel(temps)
 end
 Total_Uncertainty_Results.Properties.VariableNames = {'Temperature','Uncertainty'};
 
+final_results = [Average_Results Total_Uncertainty_Results(:, 'Uncertainty')];
+writetable(final_results, 'Final_Results.txt', Delimiter='\t')
+
 figure;
 errorbar(Average_Results{:,"Temperature"},Average_Results{:,"Average_K_Sample"},Total_Uncertainty_Results{:,"Uncertainty"})
 xlim([Average_Results{1,"Temperature"}-50,Average_Results{end,"Temperature"}+50]);

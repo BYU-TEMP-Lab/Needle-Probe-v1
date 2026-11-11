@@ -194,6 +194,7 @@ f = f((original_start_index):end);
         decay_point = par_vector(31); % Power time
         RthShthSamp = par_vector(32);
         RthSampCruc = par_vector(33);
+        emiss_furnace = par_vector(34);
         
         % --- Constants & Initial Conditions ---
         area_convection = 2*pi*rcrucible*L;   % outer crucible surface area [m^2]
@@ -255,11 +256,19 @@ f = f((original_start_index):end);
         C5 = 2.*pi.*kcrucible.*L.*q51.*q52.*((besseli(1,q52).*besselk(1,q51))-(besseli(1,q51).*besselk(1,q52)));
         D5 = q51.*((besseli(0,q52).*besselk(1,q51))+(besseli(1,q51).*besselk(0,q52)));
 
-        % Convection Boundary
-        B_convection = h_convec * area_convection;
+        % % Convection Boundary
+        % B_convection = h_convec * area_convection;
+        % 
+        % M_conv = [1, 1/B_convection;
+        %     0, 1];
 
-        M_conv = [1, 1/B_convection;
-            0, 1];
+        % Convection + Radiation Boundary
+        % emiss_furnace = 0.5; % Test value
+        R_rad = T0*(Boltzmann*exp(1) + (1/emissivity2) + (1/emiss_furnace) -1);
+        R_conv = 1/(h_convec * area_convection);
+        R_comb = (R_rad * R_conv)/(R_rad + R_conv);
+        M_ext = [ 1, R_comb;
+                 0, 1];
         
         % --- System Matrix Multiplication & Solving ---
         
@@ -297,7 +306,7 @@ f = f((original_start_index):end);
                   C5(i),  D5(i)];
             
             % Built-in Matrix Multiplication
-            M_sys = M_wire * M_ins * M_in_sh * M_sh * M_Sh_Sa * M_samp * M_Sa_Cr * M_cruc * M_conv;
+            M_sys = M_wire * M_ins * M_in_sh * M_sh * M_Sh_Sa * M_samp * M_Sa_Cr * M_cruc * M_ext;
             
             A_sys = M_sys(1,1);
             B_sys = M_sys(1,2);

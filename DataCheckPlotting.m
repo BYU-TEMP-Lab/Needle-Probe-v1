@@ -39,7 +39,7 @@ for k = 1:length(files)
     
     % Plot Voltage (Right)
     yyaxis(ax1, 'right'); 
-    plot(ax1, data.Time, data.Voltage);
+    % plot(ax1, data.Time, data.Voltage);
 
     % --- DYNAMIC VOLTAGE LIMITS ---
     minVolt = min(data.Voltage);
@@ -50,7 +50,7 @@ for k = 1:length(files)
     % Set up the Data Overlay Axes (ax2)
     ax2 = axes('Position', ax1.Position);
     hold(ax2, 'on'); 
-    scatter(ax2, data.Time, data.Current, 5, '.r');
+    % scatter(ax2, data.Time, data.Current, 5, '.r');
 
     % --- DYNAMIC CURRENT LIMITS ---
     minCurr = min(data.Current);

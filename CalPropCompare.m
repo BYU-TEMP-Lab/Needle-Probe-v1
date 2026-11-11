@@ -52,6 +52,11 @@ while ~feof(fid)
         elseif contains(prop_str, 'Alpha__Crucible'); idx = 11;
         elseif contains(prop_str, 'Emissivity__Probe'); idx = 12;
         elseif contains(prop_str, 'Emissivity__Crucible'); idx = 13;
+        elseif contains(prop_str, 'Rwires'); idx = 19;
+        elseif contains(prop_str, 'Rsheath'); idx = 20;
+        elseif contains(prop_str, 'Rsheath_Inner'); idx = 21;
+        elseif contains(prop_str, 'Rsample'); idx = 22;
+        elseif contains(prop_str, 'Rcrucible'); idx = 23;
         elseif contains(prop_str, 'Rth__Sheath_Sample'); idx = 32;
         elseif contains(prop_str, 'Rth__Sample_Crucible'); idx = 33;
         end
